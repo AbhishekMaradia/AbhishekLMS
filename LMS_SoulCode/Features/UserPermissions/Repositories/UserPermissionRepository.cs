@@ -300,7 +300,6 @@ namespace LMS_SoulCode.Features.UserPermissions.Repositories
             {
                 searchTerm = searchTerm.ToLower();
                 query = query.Where(ur =>
-                    ur.User.UserName.ToLower().Contains(searchTerm) ||
                     ur.User.Email.ToLower().Contains(searchTerm) ||
                     ur.Role.Name.ToLower().Contains(searchTerm) ||
                     ur.Role.Code.ToLower().Contains(searchTerm)
@@ -318,7 +317,6 @@ namespace LMS_SoulCode.Features.UserPermissions.Repositories
                     RoleCode = ur.Role.Code,
                     IsActive = ur.IsActive,
                     RoleIsActive = ur.Role.IsActive,
-                    UserName = ur.User.UserName,
                     UserEmail = ur.User.Email
                 });
 

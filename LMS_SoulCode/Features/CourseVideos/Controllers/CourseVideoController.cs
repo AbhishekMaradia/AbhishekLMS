@@ -110,12 +110,12 @@ namespace LMS_SoulCode.Features.CourseVideos.Controllers
                     return;
                 }
 
-                string encryptedBase64 = await System.IO.File.ReadAllTextAsync(fullPath, cancellationToken);
+                var stream = _cryptoService.GetDecryptStream(fullPath);
                 
                 Response.ContentType = "video/mp4";
                 
                 // Decrypt and stream directly to the response
-                await _cryptoService.DecryptToStreamAsync(encryptedBase64, Response.Body, cancellationToken);
+                await stream.CopyToAsync(Response.Body, cancellationToken);
             }
             catch
             {

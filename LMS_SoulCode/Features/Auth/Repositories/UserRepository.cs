@@ -17,25 +17,25 @@ namespace LMS_SoulCode.Features.Auth.Repositories
             _mapper = mapper;
         }
 
-        public async Task<User?> GetByUsernameOrEmailAsync(string identifier, CancellationToken cancellationToken = default)
+        public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
         => await _context.Users
                 .AsNoTracking()
                 .Include(u => u.Organization) // Include Org info
                 .Where(u => !u.IsDeleted)
-                .FirstOrDefaultAsync(u => u.Email == identifier || u.UserName == identifier || u.Mobile == identifier, cancellationToken);
+                .FirstOrDefaultAsync(u => u.Email == email || u.Mobile == email, cancellationToken);
         
 
         
         public async Task<bool> IsEmailTakenAsync(string email, int? tenantId = null, CancellationToken cancellationToken = default)
         => await _context.Users
-            .IgnoreQueryFilters() // Global check
+            .IgnoreQueryFilters()
             .AsNoTracking()
             .AnyAsync(u => u.Email == email && !u.IsDeleted, cancellationToken);
 
 
         public async Task<bool> IsMobileTakenAsync(string mobile, int? tenantId = null, CancellationToken cancellationToken = default)
         => await _context.Users
-            .IgnoreQueryFilters() // Global check
+            .IgnoreQueryFilters()
             .AsNoTracking()
             .AnyAsync(u => u.Mobile == mobile && !u.IsDeleted, cancellationToken);
 
@@ -45,14 +45,12 @@ namespace LMS_SoulCode.Features.Auth.Repositories
                 pageSize,
                 filter: u => (!tenantId.HasValue || u.TenantId == tenantId.Value) &&
                             (string.IsNullOrWhiteSpace(searchTerm) || 
-                             u.UserName.ToLower().Contains(searchTerm.ToLower()) ||
                              u.Email.ToLower().Contains(searchTerm.ToLower()) ||
                              (u.FirstName + " " + u.LastName).ToLower().Contains(searchTerm.ToLower()) ||
                              u.Mobile.Contains(searchTerm)),
                 projection: q => q.AsNoTracking().OrderByDescending(u => u.Id).Select(u => new UserDto
                 {
                     Id = u.Id,
-                    UserName = u.UserName,
                     FirstName = u.FirstName,
                     LastName = u.LastName,
                     Mobile = u.Mobile,
@@ -73,7 +71,7 @@ namespace LMS_SoulCode.Features.Auth.Repositories
 
         public async Task<string?> GenerateResetTokenAsync(string email, CancellationToken cancellationToken = default)
         {
-            var user = await GetByUsernameOrEmailAsync(email, cancellationToken);
+            var user = await GetByEmailAsync(email, cancellationToken);
             if (user == null) return null;
 
             var token = Guid.NewGuid().ToString();
@@ -94,7 +92,7 @@ namespace LMS_SoulCode.Features.Auth.Repositories
 
         public async Task UpdatePasswordAsync(string email, string newPassword, CancellationToken cancellationToken = default)
         {
-            var user = await GetByUsernameOrEmailAsync(email, cancellationToken);
+            var user = await GetByEmailAsync(email, cancellationToken);
             if (user == null) return;
 
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
@@ -107,7 +105,7 @@ namespace LMS_SoulCode.Features.Auth.Repositories
 
         public async Task<string?> GenerateRefreshTokenAsync(string email, CancellationToken cancellationToken = default)
         {
-            var user = await GetByUsernameOrEmailAsync(email, cancellationToken);
+            var user = await GetByEmailAsync(email, cancellationToken);
             if (user == null) return null;
 
             var token = Guid.NewGuid().ToString();
@@ -128,7 +126,7 @@ namespace LMS_SoulCode.Features.Auth.Repositories
 
         public async Task UpdateRefreshTokenAsync(string email, string newRefreshToken, CancellationToken cancellationToken = default)
         {
-            var user = await GetByUsernameOrEmailAsync(email, cancellationToken);
+            var user = await GetByEmailAsync(email, cancellationToken);
             if (user == null) return;
 
             user.RefreshToken = newRefreshToken;
@@ -165,7 +163,6 @@ namespace LMS_SoulCode.Features.Auth.Repositories
                 .Select(u => new UserDto
                 {
                     Id = u.Id,
-                    UserName = u.UserName,
                     FirstName = u.FirstName,
                     LastName = u.LastName,
                     Mobile = u.Mobile,
@@ -237,6 +234,15 @@ namespace LMS_SoulCode.Features.Auth.Repositories
             await _context.SaveChangesAsync(cancellationToken);
 
             return true;
+        }
+
+        public async Task<User?> GetAdminUserByTenantIdAsync(int tenantId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Users
+                .AsNoTracking()
+                .Where(u => u.TenantId == tenantId && !u.IsDeleted)
+                .OrderBy(u => u.CreatedAt)
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
         public async Task SaveAsync(CancellationToken cancellationToken = default)

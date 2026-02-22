@@ -8,7 +8,6 @@ namespace LMS_SoulCode.Features.Reports.Mappings
         public ReportsProfile()
         {
             CreateMap<LMS_SoulCode.Features.SubscribedCourse.Models.UserCourse, ReportListDto>()
-                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName))
                 .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.User.Email))
                 .ForMember(dest => dest.CourseTitle, opt => opt.MapFrom(src => src.Course.Title))
                 .ForMember(dest => dest.CourseInstructor, opt => opt.MapFrom(src => src.Course.Instructor))

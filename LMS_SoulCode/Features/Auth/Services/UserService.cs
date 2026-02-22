@@ -71,6 +71,9 @@ namespace LMS_SoulCode.Features.Auth.Services
             if (await _userRepo.IsEmailTakenAsync(request.Email, tenantId, cancellationToken))
                 return ApiResponse<List<UserDto>>.Fail(Messages.AlreadyExists, StatusCodes.BadRequest);
 
+            if (await _userRepo.IsMobileTakenAsync(request.Mobile, tenantId, cancellationToken))
+                return ApiResponse<List<UserDto>>.Fail(Messages.MobileExists, StatusCodes.BadRequest);
+
             var user = _mapper.Map<User>(request);
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
             user.TenantId = tenantId;

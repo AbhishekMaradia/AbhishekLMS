@@ -10,7 +10,6 @@ namespace LMS_SoulCode.Features.Organizations.DTOs
         IFormFile? Logo,
         
         // Admin User Details
-        string UserName,
         string FirstName,
         string LastName,
         string Email,

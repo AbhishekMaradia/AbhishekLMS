@@ -15,7 +15,6 @@ namespace LMS_SoulCode.Features.Certificates.Mappings
             // Certificate to CertificateListDto mapping (for paginated lists)
             CreateMap<Certificate, CertificateListDto>()
                 .ForMember(d => d.FileUrl, o => o.MapFrom(s => s.FilePath))
-                .ForMember(d => d.UserName, o => o.Ignore()) // Will be populated from joined data
                 .ForMember(d => d.UserEmail, o => o.Ignore()) // Will be populated from joined data
                 .ForMember(d => d.CourseTitle, o => o.Ignore()); // Will be populated from joined data
 

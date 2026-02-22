@@ -122,56 +122,42 @@ namespace LMS_SoulCode.Features.CourseVideos.Services
         // Progress tracking methods
         public async Task<ApiResponse<List<string>>> UpdateProgressAsync(int userId, int videoId, double watchedPercentage, bool isCompleted, int? tenantId, CancellationToken cancellationToken = default)
         {
-            try
-            {
-                // Validate video exists and belongs to tenant
-                var video = await _videoRepo.GetByIdAsync(videoId, tenantId, cancellationToken);
-                if (video == null)
-                    return ApiResponse<List<string>>.Fail(Messages.NotFound, StatusCodes.NotFound);
+            // Validate video exists and belongs to tenant
+            var video = await _videoRepo.GetByIdAsync(videoId, tenantId, cancellationToken);
+            if (video == null)
+                return ApiResponse<List<string>>.Fail(Messages.NotFound, StatusCodes.NotFound);
 
-                var progress = new UserVideoProgress
-                {
-                    UserId = userId,
-                    VideoId = videoId,
-                    WatchedPercentage = Math.Max(0, Math.Min(100, watchedPercentage)), // Ensure 0-100 range
-                    IsCompleted = isCompleted || watchedPercentage >= 95, // Auto-complete at 95%
-                    LastWatchedAt = DateTime.UtcNow,
-                    TenantId = tenantId
-                };
-
-                await _videoRepo.UpdateProgressAsync(progress, cancellationToken);
-                return ApiResponse<List<string>>.Success(new List<string>(), "Progress updated successfully");
-            }
-            catch (Exception ex)
+            var progress = new UserVideoProgress
             {
-                return ApiResponse<List<string>>.Fail($"Error updating progress: {ex.Message}", StatusCodes.ServerError);
-            }
+                UserId = userId,
+                VideoId = videoId,
+                WatchedPercentage = Math.Max(0, Math.Min(100, watchedPercentage)), // Ensure 0-100 range
+                IsCompleted = isCompleted || watchedPercentage >= 95, // Auto-complete at 95%
+                LastWatchedAt = DateTime.UtcNow,
+                TenantId = tenantId
+            };
+
+            await _videoRepo.UpdateProgressAsync(progress, cancellationToken);
+            return ApiResponse<List<string>>.Success(new List<string>(), "Progress updated successfully");
         }
 
         public async Task<ApiResponse<List<UserVideoProgress>>> GetProgressAsync(int userId, int videoId, int? tenantId, CancellationToken cancellationToken = default)
         {
-            try
+            var progress = await _videoRepo.GetProgressAsync(userId, videoId, tenantId, cancellationToken);
+            if (progress == null)
             {
-                var progress = await _videoRepo.GetProgressAsync(userId, videoId, tenantId, cancellationToken);
-                if (progress == null)
+                // Return default progress if not found
+                progress = new UserVideoProgress
                 {
-                    // Return default progress if not found
-                    progress = new UserVideoProgress
-                    {
-                        UserId = userId,
-                        VideoId = videoId,
-                        WatchedPercentage = 0,
-                        IsCompleted = false,
-                        LastWatchedAt = DateTime.UtcNow,
-                        TenantId = tenantId
-                    };
-                }
-                return ApiResponse<List<UserVideoProgress>>.Success(new List<UserVideoProgress> { progress }, Messages.Success);
+                    UserId = userId,
+                    VideoId = videoId,
+                    WatchedPercentage = 0,
+                    IsCompleted = false,
+                    LastWatchedAt = DateTime.UtcNow,
+                    TenantId = tenantId
+                };
             }
-            catch (Exception ex)
-            {
-                return ApiResponse<List<UserVideoProgress>>.Fail($"Error getting progress: {ex.Message}", StatusCodes.ServerError);
-            }
+            return ApiResponse<List<UserVideoProgress>>.Success(new List<UserVideoProgress> { progress }, Messages.Success);
         }
     }
 }

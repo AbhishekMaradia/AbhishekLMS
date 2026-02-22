@@ -28,6 +28,13 @@ namespace LMS_SoulCode.Features.Auth.Mappings
             // UpdateUserRequest to User mapping (for partial updates)
             CreateMap<UpdateUserRequest, User>()
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+
+            // UpdateOrganizationRequest to User mapping
+            CreateMap<LMS_SoulCode.Features.Organizations.DTOs.UpdateOrganizationRequest, User>()
+                .ForMember(d => d.PasswordHash, o => o.Ignore())
+                .ForMember(d => d.Id, o => o.Ignore())
+                .ForMember(d => d.TenantId, o => o.Ignore())
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
         }
     }
 }

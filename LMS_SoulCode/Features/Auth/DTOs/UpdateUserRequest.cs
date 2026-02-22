@@ -2,7 +2,6 @@ namespace LMS_SoulCode.Features.Auth.DTOs
 {
     public class UpdateUserRequest
     {
-        public string? UserName { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Mobile { get; set; }

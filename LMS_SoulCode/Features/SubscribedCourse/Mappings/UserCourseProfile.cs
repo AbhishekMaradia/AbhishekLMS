@@ -10,7 +10,6 @@ namespace LMS_SoulCode.Features.SubscribedCourse.Mappings
         {
             // UserCourse to UserCourseListDto mapping
             CreateMap<UserCourse, UserCourseListDto>()
-                .ForMember(d => d.UserName, o => o.Ignore()) // Will be populated from joined data
                 .ForMember(d => d.UserEmail, o => o.Ignore()) // Will be populated from joined data
                 .ForMember(d => d.CourseTitle, o => o.Ignore()) // Will be populated from joined data
                 .ForMember(d => d.CategoryName, o => o.Ignore()); // Will be populated from joined data

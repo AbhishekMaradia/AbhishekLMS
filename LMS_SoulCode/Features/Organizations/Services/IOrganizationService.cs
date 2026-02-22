@@ -1,12 +1,12 @@
-using LMS_SoulCode.Features.Common;
 using LMS_SoulCode.Features.Organizations.DTOs;
+using LMS_SoulCode.Features.Auth.DTOs;
 
 namespace LMS_SoulCode.Features.Organizations.Services
 {
     public interface IOrganizationService
     {
         Task<ApiResponse<List<string>>> RegisterOrganizationAsync(OrgRegisterRequest request, CancellationToken cancellationToken = default);
-        Task<ApiResponse<List<LMS_SoulCode.Features.Auth.DTOs.LoginResponse>>> OrgLoginAsync(OrgLoginRequest request, CancellationToken cancellationToken = default);
+        Task<ApiResponse<List<LoginResponse>>> OrgLoginAsync(LoginRequest request, CancellationToken cancellationToken = default);
         
         // CRUD for SuperAdmin
         Task<PagedApiResponse<OrganizationDto>> GetAllOrganizationsAsync(OrganizationListRequest request, CancellationToken cancellationToken);
@@ -15,6 +15,6 @@ namespace LMS_SoulCode.Features.Organizations.Services
         Task<ApiResponse<List<string>>> DeleteOrganizationAsync(int id, CancellationToken cancellationToken = default);
 
         // For Organization Admin
-        Task<ApiResponse<List<OrganizationDto>>> UpdateOrganizationProfileAsync(int id, UpdateOrganizationRequest request, int? tenantId, CancellationToken cancellationToken = default);
+        Task<ApiResponse<List<OrganizationDto>>> UpdateOrganizationProfileAsync(int id, UpdateOrganizationRequest request, int? tenantId, int? userId, CancellationToken cancellationToken = default);
     }
 }

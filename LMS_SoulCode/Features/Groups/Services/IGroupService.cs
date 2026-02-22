@@ -11,6 +11,8 @@ namespace LMS_SoulCode.Features.Groups.Services
         Task<ApiResponse<List<string>>> DeleteGroupAsync(int id, int? tenantId, CancellationToken cancellationToken = default);
         Task RemoveCourseFromAllGroupsAsync(int courseId, CancellationToken cancellationToken = default);
         Task<ApiResponse<List<GroupDto>>> UpdateGroupAsync(int id, UpdateGroupRequest request, int? tenantId, CancellationToken cancellationToken = default);
-        Task<ApiResponse<List<GroupCourseDto>>> GetGroupCoursesForEditAsync(int groupId, int? tenantId, CancellationToken cancellationToken = default);
+        Task<PagedApiResponse<GroupCourseDto>> GetGroupCoursesByGroupIdAsync(int groupId, GroupCourseListRequest request, int? tenantId, CancellationToken cancellationToken = default);
+        Task<ApiResponse<string>> BulkUpdateGroupCoursesAsync(BulkUpdateCoursesRequest request, int? tenantId, CancellationToken cancellationToken = default);
+        Task LinkCourseToAllGroupsAsync(int courseId, int? tenantId, CancellationToken cancellationToken = default);
     }
 }

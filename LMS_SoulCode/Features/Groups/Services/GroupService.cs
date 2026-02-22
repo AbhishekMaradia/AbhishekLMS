@@ -37,6 +37,21 @@ namespace LMS_SoulCode.Features.Groups.Services
             
             await _groupRepo.AddAsync(group, cancellationToken);
             
+            // --- IDEA 2: AUTO-LINK TO ALL ACTIVE COURSES ---
+            var allCourses = await _courseRepo.GetAllActiveCoursesAsync(tenantId, cancellationToken);
+            if (allCourses.Any())
+            {
+                var groupCourses = allCourses.Select(c => new GroupCourse
+                {
+                    GroupId = group.Id,
+                    CourseId = c.Id,
+                    TenantId = tenantId,
+                    IsEnable = false,
+                    CreatedAt = DateTime.UtcNow
+                }).ToList();
+                await _groupRepo.AddGroupCoursesAsync(groupCourses, cancellationToken);
+            }
+
             var dto = _mapper.Map<GroupDto>(group);
 
             return ApiResponse<List<GroupDto>>.Success(new List<GroupDto> { dto }, Messages.Created);
@@ -50,40 +65,13 @@ namespace LMS_SoulCode.Features.Groups.Services
 
         public async Task<ApiResponse<List<GroupDto>>> GetGroupByIdAsync(int id, int? tenantId, CancellationToken cancellationToken = default)
         {
-            // 1. Get Group details
             var group = await _groupRepo.GetByIdAsync(id, cancellationToken);
             if (group == null) return ApiResponse<List<GroupDto>>.Fail(Messages.NotFound, StatusCodes.NotFound);
 
             if (tenantId.HasValue && group.TenantId != tenantId.Value)
                  return ApiResponse<List<GroupDto>>.Fail(Messages.Forbidden, StatusCodes.Forbidden);
 
-            // 2. Get All Active Courses to show full list (Enabled + Disabled)
-            var allCourses = await _courseRepo.GetAllActiveCoursesAsync(tenantId, cancellationToken);
-            
-            var existingGroupCourses = group.GroupCourses ?? new List<GroupCourse>();
-            var existingMap = existingGroupCourses.ToDictionary(gc => gc.CourseId);
-
-            var mergedCourses = new List<GroupCourseDto>();
-            foreach (var course in allCourses)
-            {
-                var isAssigned = existingMap.TryGetValue(course.Id, out var gc);
-                
-                mergedCourses.Add(new GroupCourseDto
-                {
-                    Id = isAssigned ? gc!.Id : 0, 
-                    GroupId = id,
-                    CourseId = course.Id,
-                    CourseName = course.Title,
-                    IsEnable = isAssigned,
-                    CreatedAt = isAssigned ? gc!.CreatedAt : DateTime.MinValue,
-                    UpdatedAt = isAssigned ? gc!.UpdatedAt : DateTime.MinValue
-                });
-            }
-
-            // 3. Prepare DTO
             var dto = _mapper.Map<GroupDto>(group);
-            dto.GroupCourses = mergedCourses; // Override with full list
-
             return ApiResponse<List<GroupDto>>.Success(new List<GroupDto> { dto }, Messages.Success);
         }
 
@@ -95,13 +83,15 @@ namespace LMS_SoulCode.Features.Groups.Services
             if (tenantId.HasValue && group.TenantId != tenantId.Value)
                  return ApiResponse<List<string>>.Fail(Messages.Forbidden, StatusCodes.Forbidden);
 
+            // Also delete all course assignments for this group
+            if (group.GroupCourses != null && group.GroupCourses.Any())
+            {
+                await _groupRepo.DeleteGroupCoursesAsync(group.GroupCourses, cancellationToken);
+            }
+
             await _groupRepo.DeleteAsync(id, cancellationToken);
             return ApiResponse<List<string>>.Success(new List<string>(), Messages.Deleted);
         }
-
-
-
-
 
         public async Task RemoveCourseFromAllGroupsAsync(int courseId, CancellationToken cancellationToken = default)
         {
@@ -116,107 +106,100 @@ namespace LMS_SoulCode.Features.Groups.Services
             if (tenantId.HasValue && group.TenantId != tenantId.Value)
                   return ApiResponse<List<GroupDto>>.Fail(Messages.Forbidden, StatusCodes.Forbidden);
 
-            // Update Name
             if (!string.IsNullOrEmpty(request.GroupName))
             {
                 group.GroupName = request.GroupName;
             }
 
-            // Update Courses
-            if (request.Courses != null && request.Courses.Any())
-            {
-                // Ensure courses are loaded (GetByIdAsync override includes them)
-                var currentCourses = group.GroupCourses.ToList(); 
-                
-                var coursesToAdd = new List<GroupCourse>();
-                var coursesToRemove = new List<GroupCourse>();
-
-                foreach (var item in request.Courses)
-                {
-                    // Skip invalid course IDs (e.g. 0 default from Swagger/Frontend)
-                    if (item.CourseId <= 0) continue;
-
-                    var existingLink = currentCourses.FirstOrDefault(gc => gc.CourseId == item.CourseId);
-
-                    if (item.IsEnable)
-                    {
-                        if (existingLink == null)
-                        {
-                            coursesToAdd.Add(new GroupCourse
-                            {
-                                GroupId = group.Id,
-                                CourseId = item.CourseId,
-                                TenantId = group.TenantId,
-                                IsEnable = true,
-                                CreatedAt = DateTime.UtcNow
-                            });
-                        }
-                    }
-                    else
-                    {
-                        if (existingLink != null)
-                        {
-                             coursesToRemove.Add(existingLink);
-                        }
-                    }
-                }
-
-                if (coursesToAdd.Any())
-                {
-                    await _groupRepo.AddGroupCoursesAsync(coursesToAdd, cancellationToken);
-                }
-
-                if (coursesToRemove.Any())
-                {
-                    await _groupRepo.DeleteGroupCoursesAsync(coursesToRemove, cancellationToken);
-                }
-            }
+            // Courses are now handled exclusively by BulkUpdateGroupCoursesAsync for better clarity
             
             await _groupRepo.UpdateAsync(group, cancellationToken); 
 
-            // Return updated structure (Full list) via GetGroupById logic
-            // Use internal logic or call GetGroupByIdAsync if needed, but here we can just replicate or call it.
-            // Calling GetGroupByIdAsync directly:
-            var getResponse = await GetGroupByIdAsync(id, tenantId, cancellationToken);
-            var updatedDtoList = getResponse.Data;
-
-            return ApiResponse<List<GroupDto>>.Success(updatedDtoList, Messages.Updated);
+            var updatedDto = _mapper.Map<GroupDto>(group);
+            return ApiResponse<List<GroupDto>>.Success(new List<GroupDto> { updatedDto }, Messages.Updated);
         }
 
-        public async Task<ApiResponse<List<GroupCourseDto>>> GetGroupCoursesForEditAsync(int groupId, int? tenantId, CancellationToken cancellationToken = default)
+        public async Task<PagedApiResponse<GroupCourseDto>> GetGroupCoursesByGroupIdAsync(int groupId, GroupCourseListRequest request, int? tenantId, CancellationToken cancellationToken = default)
         {
-            // 1. Get All Active Courses
-            var allCourses = await _courseRepo.GetAllActiveCoursesAsync(tenantId, cancellationToken);
-
-            // 2. Get Group's Current Courses
             var group = await _groupRepo.GetByIdAsync(groupId, cancellationToken);
-            if (group == null) return ApiResponse<List<GroupCourseDto>>.Fail(Messages.NotFound, StatusCodes.NotFound);
+            if (group == null) return PagedApiResponse<GroupCourseDto>.Fail(Messages.NotFound, StatusCodes.NotFound);
 
             if (tenantId.HasValue && group.TenantId != tenantId.Value)
-                 return ApiResponse<List<GroupCourseDto>>.Fail(Messages.Forbidden, StatusCodes.Forbidden);
+                 return PagedApiResponse<GroupCourseDto>.Fail(Messages.Forbidden, StatusCodes.Forbidden);
 
-            var existingGroupCourses = group.GroupCourses ?? new List<GroupCourse>();
-            var existingMap = existingGroupCourses.ToDictionary(gc => gc.CourseId);
+            var (items, totalCount) = await _groupRepo.GetGroupCoursesPagedByGroupIdAsync(groupId, tenantId, request.SearchTerm, request.PageNumber, request.PageSize, cancellationToken);
+            var dtos = _mapper.Map<List<GroupCourseDto>>(items);
 
-            // 3. Merge
-            var result = new List<GroupCourseDto>();
-            foreach (var course in allCourses)
+            return PagedApiResponse<GroupCourseDto>.Success(dtos, request.PageNumber, request.PageSize, totalCount, Messages.Success);
+        }
+
+        public async Task LinkCourseToAllGroupsAsync(int courseId, int? tenantId, CancellationToken cancellationToken = default)
+        {
+            var allGroups = await _groupRepo.GetGroupsByTenantIdAsync(tenantId, cancellationToken);
+            if (allGroups.Any())
             {
-                var isAssigned = existingMap.TryGetValue(course.Id, out var gc);
-                
-                result.Add(new GroupCourseDto
+                var groupCourses = allGroups.Select(g => new GroupCourse
                 {
-                    Id = isAssigned ? gc!.Id : 0, // 0 if not assigned
-                    GroupId = groupId,
-                    CourseId = course.Id,
-                    CourseName = course.Title,
-                    IsEnable = isAssigned, // If it exists in DB, it's enabled (based on new logic)
-                    CreatedAt = isAssigned ? gc!.CreatedAt : DateTime.MinValue,
-                    UpdatedAt = isAssigned ? gc!.UpdatedAt : DateTime.MinValue
-                });
+                    GroupId = g.Id,
+                    CourseId = courseId,
+                    TenantId = tenantId,
+                    IsEnable = false,
+                    CreatedAt = DateTime.UtcNow
+                }).ToList();
+
+                await _groupRepo.AddGroupCoursesAsync(groupCourses, cancellationToken);
+            }
+        }
+
+        public async Task<ApiResponse<string>> BulkUpdateGroupCoursesAsync(BulkUpdateCoursesRequest request, int? tenantId, CancellationToken cancellationToken = default)
+        {
+            var group = await _groupRepo.GetByIdAsync(request.GroupId, cancellationToken);
+            if (group == null) return ApiResponse<string>.Fail(Messages.NotFound, StatusCodes.NotFound);
+
+            if (tenantId.HasValue && group.TenantId != tenantId.Value)
+                 return ApiResponse<string>.Fail(Messages.Forbidden, StatusCodes.Forbidden);
+
+            if (request.Courses == null || !request.Courses.Any())
+                return ApiResponse<string>.Fail("No courses provided for update.", StatusCodes.BadRequest);
+
+            var currentCourses = group.GroupCourses.ToList();
+            var coursesToAdd = new List<GroupCourse>();
+            var coursesToUpdate = new List<GroupCourse>();
+
+            foreach (var item in request.Courses)
+            {
+                if (item.CourseId <= 0) continue;
+
+                var existingLink = currentCourses.FirstOrDefault(gc => gc.CourseId == item.CourseId);
+
+                if (existingLink != null)
+                {
+                    // Update existing flag
+                    if (existingLink.IsEnable != item.IsEnable)
+                    {
+                        existingLink.IsEnable = item.IsEnable;
+                        existingLink.UpdatedAt = DateTime.UtcNow;
+                        coursesToUpdate.Add(existingLink);
+                    }
+                }
+                else if (item.IsEnable)
+                {
+                    // Add if missing (safety check for old data)
+                    coursesToAdd.Add(new GroupCourse
+                    {
+                        GroupId = group.Id,
+                        CourseId = item.CourseId,
+                        TenantId = group.TenantId,
+                        IsEnable = true,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                }
             }
 
-            return ApiResponse<List<GroupCourseDto>>.Success(result, Messages.Success);
+            if (coursesToAdd.Any()) await _groupRepo.AddGroupCoursesAsync(coursesToAdd, cancellationToken);
+            if (coursesToUpdate.Any()) await _groupRepo.UpdateGroupCoursesAsync(coursesToUpdate, cancellationToken);
+
+            return ApiResponse<string>.Success(string.Empty, "Courses updated successfully in bulk.");
         }
     }
 }

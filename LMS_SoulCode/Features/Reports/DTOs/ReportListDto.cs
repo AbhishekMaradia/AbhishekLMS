@@ -3,7 +3,6 @@ namespace LMS_SoulCode.Features.Reports.DTOs
     public class ReportListDto
     {
         public int UserId { get; set; }
-        public string UserName { get; set; } = string.Empty;
         public string UserEmail { get; set; } = string.Empty;
         public int CourseId { get; set; }
         public string CourseTitle { get; set; } = string.Empty;

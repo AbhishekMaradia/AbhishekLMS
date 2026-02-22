@@ -41,7 +41,7 @@ namespace LMS_SoulCode.Features.Auth.Services
 
         public async Task<ApiResponse<List<LoginResponse>>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
         {
-            var user = await _userRepo.GetByUsernameOrEmailAsync(request.Email, cancellationToken);
+            var user = await _userRepo.GetByEmailAsync(request.Email, cancellationToken);
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 return ApiResponse<List<LoginResponse>>.Fail(Messages.InvalidCredentials, StatusCodes.Unauthorized);
@@ -71,19 +71,10 @@ namespace LMS_SoulCode.Features.Auth.Services
 
         public async Task<ApiResponse<List<LoginResponse>>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
         {
-            if (await _userRepo.IsEmailTakenAsync(request.Email, null, cancellationToken))
-                return ApiResponse<List<LoginResponse>>.Fail(Messages.EmailExists, StatusCodes.BadRequest);
+            int? tenantId = request.TenantId;
 
-            if (await _userRepo.IsMobileTakenAsync(request.Mobile, null, cancellationToken))
-                return ApiResponse<List<LoginResponse>>.Fail(Messages.MobileExists, StatusCodes.BadRequest);
-
-            var user = _mapper.Map<User>(request);
-
-            if (request.TenantId.HasValue)
-            {
-                user.TenantId = request.TenantId.Value;
-            }
-            else if (!string.IsNullOrEmpty(request.OrganizationCode))
+            // Resolve TenantId from OrganizationCode if not provided directly
+            if (!tenantId.HasValue && !string.IsNullOrEmpty(request.OrganizationCode))
             {
                 var org = await _orgRepo.GetByCodeAsync(request.OrganizationCode, cancellationToken);
                 if (org == null)
@@ -92,9 +83,19 @@ namespace LMS_SoulCode.Features.Auth.Services
                 if (!org.IsActive)
                     return ApiResponse<List<LoginResponse>>.Fail(Messages.OrgInactive, StatusCodes.BadRequest);
 
-                user.TenantId = org.Id;
+                tenantId = org.Id;
             }
 
+
+            // check uniqueness within the tenant
+            if (await _userRepo.IsEmailTakenAsync(request.Email, tenantId, cancellationToken))
+                return ApiResponse<List<LoginResponse>>.Fail(Messages.EmailExists, StatusCodes.BadRequest);
+
+            if (await _userRepo.IsMobileTakenAsync(request.Mobile, tenantId, cancellationToken))
+                return ApiResponse<List<LoginResponse>>.Fail(Messages.MobileExists, StatusCodes.BadRequest);
+
+            var user = _mapper.Map<User>(request);
+            user.TenantId = tenantId;
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
             await _userRepo.AddAsync(user, cancellationToken);
@@ -118,7 +119,7 @@ namespace LMS_SoulCode.Features.Auth.Services
 
         public async Task<ApiResponse<List<ForgotPasswordResponse>>> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken cancellationToken = default)
         {
-            var user = await _userRepo.GetByUsernameOrEmailAsync(request.Email, cancellationToken);
+            var user = await _userRepo.GetByEmailAsync(request.Email, cancellationToken);
 
             if (user == null)
                 return ApiResponse<List<ForgotPasswordResponse>>.Fail(Messages.EmailNotFound, StatusCodes.NotFound);

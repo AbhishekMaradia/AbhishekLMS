@@ -63,7 +63,6 @@ namespace LMS_SoulCode.Features.Groups.Controllers
         [BackOfficePermission(ModuleCodes.GROUP, PermissionCodes.GROUP_EDIT)]
         public async Task<IActionResult> UpdateGroup([FromRoute] int groupId, [FromBody] UpdateGroupRequest request, CancellationToken cancellationToken)
         {
-            // Ensure Id from request body matches route if provided
             if (request.Id != 0 && request.Id != groupId)
             {
                 return BadRequest(ApiResponse<string>.Fail("Group ID mismatch", StatusCodes.BadRequest));
@@ -73,11 +72,19 @@ namespace LMS_SoulCode.Features.Groups.Controllers
             return StatusCode(response.Code, response);
         }
 
-        [HttpGet("courses-edit/{groupId}")]
-        [BackOfficePermission(ModuleCodes.GROUP, PermissionCodes.GROUP_EDIT)]
-        public async Task<IActionResult> GetGroupCoursesForEdit([FromRoute] int groupId, CancellationToken cancellationToken)
+        [HttpGet("group-courses/{groupId}")]
+        [BackOfficePermission(ModuleCodes.GROUP, PermissionCodes.GROUP_VIEW)]
+        public async Task<IActionResult> GetGroupCoursesByGroupId([FromRoute] int groupId, [FromQuery] GroupCourseListRequest request, CancellationToken cancellationToken)
         {
-            var response = await _groupService.GetGroupCoursesForEditAsync(groupId, CurrentTenantId, cancellationToken);
+            var response = await _groupService.GetGroupCoursesByGroupIdAsync(groupId, request, CurrentTenantId, cancellationToken);
+            return StatusCode(response.Code, response);
+        }
+
+        [HttpPut("bulk-update-courses")]
+        [BackOfficePermission(ModuleCodes.GROUP, PermissionCodes.GROUP_EDIT)]
+        public async Task<IActionResult> BulkUpdateCourses([FromBody] BulkUpdateCoursesRequest request, CancellationToken cancellationToken)
+        {
+            var response = await _groupService.BulkUpdateGroupCoursesAsync(request, CurrentTenantId, cancellationToken);
             return StatusCode(response.Code, response);
         }
     }

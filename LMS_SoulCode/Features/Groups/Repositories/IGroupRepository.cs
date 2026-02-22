@@ -11,10 +11,8 @@ namespace LMS_SoulCode.Features.Groups.Repositories
         
         // Group Courses
         Task AddGroupCoursesAsync(IEnumerable<GroupCourse> groupCourses, CancellationToken cancellationToken = default);
-        Task UpdateGroupCourseAsync(GroupCourse groupCourse, CancellationToken cancellationToken = default);
         Task UpdateGroupCoursesAsync(IEnumerable<GroupCourse> groupCourses, CancellationToken cancellationToken = default);
-        Task<GroupCourse?> GetGroupCourseByIdAsync(int id, CancellationToken cancellationToken = default);
-        Task<IEnumerable<GroupCourse>> GetGroupCoursesByGroupIdAsync(int groupId, CancellationToken cancellationToken = default);
+        Task<(IEnumerable<GroupCourse> Items, int TotalCount)> GetGroupCoursesPagedByGroupIdAsync(int groupId, int? tenantId, string? searchTerm, int pageNumber, int pageSize, CancellationToken cancellationToken = default);
         Task DeleteGroupCoursesByCourseIdAsync(int courseId, CancellationToken cancellationToken = default);
         Task DeleteGroupCoursesAsync(IEnumerable<GroupCourse> groupCourses, CancellationToken cancellationToken = default);
     }

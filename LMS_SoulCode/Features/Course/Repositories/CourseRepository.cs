@@ -26,29 +26,34 @@ namespace LMS_SoulCode.Features.Course.Repositories
                 cancellationToken: cancellationToken
             );
 
-        public async Task<(IEnumerable<CourseEntity> Items, int TotalCount)> GetCoursesByUserGroupAsync(int? groupId, string? searchTerm, int pageNumber, int pageSize, int? tenantId, CancellationToken cancellationToken)
+        public async Task<(IEnumerable<CourseEntity> Items, int TotalCount)> GetCoursesByUserGroupAsync(int? userId, int? groupId, string? searchTerm, int pageNumber, int pageSize, int? tenantId, CancellationToken cancellationToken)
         {
             var query = _context.Courses
                 .Include(c => c.Videos)
                 .AsNoTracking()
                 .Where(c => (!tenantId.HasValue || c.TenantId == tenantId) && c.IsActive);
 
-            // 1. If User has a Group -> Show Group Courses
-            if (groupId.HasValue)
+            // Access Logic: (Group Assignment) OR (Individual Subscription) OR (No Groups in Org)
+            
+            if (groupId.HasValue || userId.HasValue)
             {
-                query = query.Where(c => _context.GroupCourses
-                    .Any(gc => gc.GroupId == groupId.Value && 
-                               gc.CourseId == c.Id && 
-                               gc.IsEnable == true &&
-                               !gc.IsDeleted));
+                query = query.Where(c => 
+                    // 1. Check Group Access
+                    (groupId.HasValue && _context.GroupCourses
+                        .Any(gc => gc.GroupId == groupId.Value && 
+                                   gc.CourseId == c.Id && 
+                                   gc.IsEnable == true &&
+                                   !gc.IsDeleted)) ||
+                    // 2. Check Individual Subscription (UserCourse)
+                    (userId.HasValue && _context.Set<LMS_SoulCode.Features.SubscribedCourse.Models.UserCourse>()
+                        .Any(uc => uc.UserId == userId.Value && 
+                                   uc.CourseId == c.Id && 
+                                   !uc.IsDeleted))
+                );
             }
-            // 2. If User has NO Group -> Check Organization's Group Usage
             else
             {
-                // Check if this Organization has ANY groups created.
-                // If 0 Groups -> Assume "Non-Group Org" -> Show All Courses (Open Access)
-                // If >0 Groups -> Assume "Group-Based Org" -> Show No Courses (Strict Access)
-                
+                // Org-wide logic for users with no specific group/subscription
                 bool orgHasGroups = false;
                 if (tenantId.HasValue)
                 {
@@ -58,11 +63,11 @@ namespace LMS_SoulCode.Features.Course.Repositories
 
                 if (orgHasGroups)
                 {
-                    // Org uses groups, but user is not in one -> Access Denied (Empty List)
+                    // Organization uses groups for access, but this user is an outlier -> Show nothing
                     return (Enumerable.Empty<CourseEntity>(), 0);
                 }
                 
-                // Else (orgHasGroups == false) -> Fallthrough to return ALL active courses defined in initial `query`
+                // Else: Organization has NO groups -> Show everything (Open Catalog mode)
             }
 
             // Apply search filter if provided

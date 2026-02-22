@@ -36,6 +36,11 @@ namespace LMS_SoulCode.Features.Groups.DTOs
         public int? TenantId { get; set; }  // Optional - for SuperAdmin to specify org
     }
 
+    public class GroupCourseListRequest : BasePagedRequest
+    {
+        public string? SearchTerm { get; set; }
+    }
+
     public class GroupCourseUpdateItem
     {
         public int CourseId { get; set; }
@@ -46,6 +51,11 @@ namespace LMS_SoulCode.Features.Groups.DTOs
     {
         public int Id { get; set; }
         public string? GroupName { get; set; }
-        public List<GroupCourseUpdateItem>? Courses { get; set; } = new List<GroupCourseUpdateItem>();
+    }
+
+    public class BulkUpdateCoursesRequest
+    {
+        public int GroupId { get; set; }
+        public List<GroupCourseUpdateItem> Courses { get; set; } = new List<GroupCourseUpdateItem>();
     }
 }

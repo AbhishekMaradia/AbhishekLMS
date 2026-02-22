@@ -1,6 +1,5 @@
 ﻿using LMS_SoulCode.Features.Course.DTOs;
 using LMS_SoulCode.Features.Course.Services;
-//using LMS_SoulCode.Features.UserPermissions.PermissionHandler;
 using LMS_SoulCode.Features.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,53 +21,27 @@ namespace LMS_SoulCode.Features.Course.Controllers
             _env = env;
         }
 
-        [HttpGet("main-image/{id}")]
-
-        public async Task<IActionResult> GetMainImage(int id, CancellationToken cancellationToken)
-        {
-            try
-            {
-                var content = await _courseService.GetMainImageContentAsync(id, CurrentTenantId, cancellationToken);
-                if (content == null) return NotFound(ApiResponse<string>.Fail("Image not found", StatusCodes.NotFound));
-                return File(content.Value.Bytes, content.Value.ContentType);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse<string>.Fail(ex.Message, StatusCodes.BadRequest));
-            }
-        }
-
-        [HttpGet("thumbnail/{id}")]
-
-        public async Task<IActionResult> GetThumbnail(int id, CancellationToken cancellationToken)
-        {
-            try
-            {
-                var content = await _courseService.GetThumbnailContentAsync(id, CurrentTenantId, cancellationToken);
-                if (content == null) return NotFound(ApiResponse<string>.Fail("Thumbnail not found", StatusCodes.NotFound));
-                return File(content.Value.Bytes, content.Value.ContentType);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse<string>.Fail(ex.Message, StatusCodes.BadRequest));
-            }
-        }
-
         [HttpGet("list")]
         [BackOfficePermission(ModuleCodes.COURSE, PermissionCodes.COURSE_VIEW)]
         public async Task<IActionResult> GetCourseAll([FromQuery] CourseListRequest request, CancellationToken cancellationToken)
         {
-            // Auto-detect if user has GroupId - if yes, filter by group
             var groupIdClaim = User.FindFirst("GroupId")?.Value;
             
             if (!string.IsNullOrEmpty(groupIdClaim) && int.TryParse(groupIdClaim, out int groupId))
             {
-                // User has group - show only enabled courses for their group
-                var groupResponse = await _courseService.GetCoursesByUserGroupAsync(groupId, request, CurrentTenantId, cancellationToken);
+                var groupResponse = await _courseService.GetCoursesByUserGroupAsync(CurrentUserId, groupId, request, CurrentTenantId, cancellationToken);
                 return StatusCode(groupResponse.Code, groupResponse);
             }
             
-            // No group - show all courses (admin/superadmin behavior)
+            // For users with no group, check if they have individual subscriptions
+            if (CurrentUserId.HasValue)
+            {
+                var responseWithSubscriptions = await _courseService.GetCoursesByUserGroupAsync(CurrentUserId, null, request, CurrentTenantId, cancellationToken);
+                // Only return if it actually found something or if the Org has groups (strict mode)
+                // Actually, the Service logic now handles "No Group OR Subscribed"
+                return StatusCode(responseWithSubscriptions.Code, responseWithSubscriptions);
+            }
+
             var response = await _courseService.GetAllCourseAsync(request, CurrentTenantId, cancellationToken);
             return StatusCode(response.Code, response);
         }
@@ -132,14 +105,6 @@ namespace LMS_SoulCode.Features.Course.Controllers
 
             return StatusCode(response.Code, response);
         }
-
-        // aready in coursevideo
-        //[HttpGet("{courseId}/videos")]
-        //public async Task<IActionResult> GetVideos(int courseId)
-        //{
-        //    var response = await _courseService.GetCourseVideosAsync(courseId);
-        //    return StatusCode(response.Code, response);
-        //}
 
         [HttpPost("{courseId}/upload-document")]
         [BackOfficePermission(ModuleCodes.COURSE, PermissionCodes.COURSE_EDIT)]

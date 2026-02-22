@@ -38,7 +38,6 @@
 //        var claims = new List<Claim>
 //        {
 //            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-//            new Claim("username", user.UserName),
 //            new Claim(JwtRegisteredClaimNames.Email, user.Email),
 //            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
 //        };
@@ -121,7 +120,6 @@ public class JwtTokenService
         var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim("username", user.UserName),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };

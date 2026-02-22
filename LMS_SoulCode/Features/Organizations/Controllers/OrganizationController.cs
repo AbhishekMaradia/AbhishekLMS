@@ -1,6 +1,7 @@
 using LMS_SoulCode.Features.Common;
 using LMS_SoulCode.Features.Organizations.DTOs;
 using LMS_SoulCode.Features.Organizations.Services;
+using LMS_SoulCode.Features.Auth.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LMS_SoulCode.Features.Organizations.Controllers
@@ -24,7 +25,7 @@ namespace LMS_SoulCode.Features.Organizations.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] OrgLoginRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
         {
             var result = await _orgService.OrgLoginAsync(request, cancellationToken);
             return StatusCode(result.Code, result);
@@ -76,7 +77,7 @@ namespace LMS_SoulCode.Features.Organizations.Controllers
         {
             if (!CurrentTenantId.HasValue) return Unauthorized(ApiResponse<string>.Fail("Tenant not found in token", 401));
 
-            var result = await _orgService.UpdateOrganizationProfileAsync(CurrentTenantId.Value, request, CurrentTenantId, cancellationToken);
+            var result = await _orgService.UpdateOrganizationProfileAsync(CurrentTenantId.Value, request, CurrentTenantId, CurrentUserId, cancellationToken);
             return StatusCode(result.Code, result);
         }
     }

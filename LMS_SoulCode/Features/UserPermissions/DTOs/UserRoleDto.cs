@@ -8,7 +8,6 @@ namespace LMS_SoulCode.Features.UserPermissions.DTOs
         public string RoleCode { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public bool RoleIsActive { get; set; }
-        public string? UserName { get; set; }
         public string? UserEmail { get; set; }
     }
 }

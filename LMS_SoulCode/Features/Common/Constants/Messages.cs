@@ -8,7 +8,7 @@
         public const string Deleted = "Deleted successfully";
         public const string Uploaded = "File uploaded successfully";
 
-        public const string InvalidCredentials = "Invalid username or password";
+        public const string InvalidCredentials = "Invalid email or password";
         public const string AlreadyExists = "User already exists";
         public const string NotFound = "Not found";
         public const string Unauthorized = "Unauthorized";

@@ -9,7 +9,7 @@ namespace LMS_SoulCode.Features.Auth.Validators
         public LoginRequestValidator()
         {
             RuleFor(x => x.Email)
-                .NotEmpty().WithMessage("Email, Mobile or Username is required");
+                .NotEmpty().WithMessage("Email or Mobile is required");
 
             RuleFor(x => x.Password).NotEmpty().WithMessage("Password is required");
         }

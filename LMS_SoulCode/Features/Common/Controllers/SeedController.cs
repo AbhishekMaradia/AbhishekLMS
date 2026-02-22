@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LMS_SoulCode.Features.Common.Controllers
 {
+    /*
     [ApiController]
     [Route("api/[controller]")]
     public class SeedController : ControllerBase
@@ -21,4 +22,5 @@ namespace LMS_SoulCode.Features.Common.Controllers
             return Ok(ApiResponse<List<string>>.Success(new List<string> { "Database reset and seeded successfully. Super Admin: admin@lms.com / Admin@123" }, "Success"));
         }
     }
+    */
 }

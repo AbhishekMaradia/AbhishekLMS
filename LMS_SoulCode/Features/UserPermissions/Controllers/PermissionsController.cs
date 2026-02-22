@@ -13,12 +13,12 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
     public class PermissionsController : BaseApiController
     {
         private readonly PermissionService _permissionService;
-        private readonly DatabaseSeeder _databaseSeeder;
+        // private readonly DatabaseSeeder _databaseSeeder;
 
-        public PermissionsController(PermissionService permissionService, DatabaseSeeder databaseSeeder, ILogger<PermissionsController> logger) : base(logger)
+        public PermissionsController(PermissionService permissionService, /*DatabaseSeeder databaseSeeder,*/ ILogger<PermissionsController> logger) : base(logger)
         {
             _permissionService = permissionService;
-            _databaseSeeder = databaseSeeder;
+            // _databaseSeeder = databaseSeeder;
         }
 
         [HttpGet("list")]
@@ -29,6 +29,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
             return StatusCode(response.Code, response);
         }
 
+        /*
         [HttpPost("sync-org-admin")]
         [BackOfficePermission(ModuleCodes.PERMISSION, PermissionCodes.PERMISSION_EDIT)]
         public async Task<IActionResult> SyncOrgAdminPermissions()
@@ -42,5 +43,6 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
                 Data = new List<string> { "Sync Complete" }
             });
         }
+        */
     }
 }

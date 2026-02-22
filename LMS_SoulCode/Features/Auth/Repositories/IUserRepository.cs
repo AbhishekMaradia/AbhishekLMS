@@ -1,3 +1,4 @@
+
 using LMS_SoulCode.Features.Auth.DTOs;
 using LMS_SoulCode.Features.Auth.Models;
 using LMS_SoulCode.Features.Common.Repositories;
@@ -6,7 +7,7 @@ namespace LMS_SoulCode.Features.Auth.Repositories
 {
     public interface IUserRepository : IBaseRepository<User>
     {
-        Task<User?> GetByUsernameOrEmailAsync(string identifier, CancellationToken cancellationToken = default);
+        Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
         Task<bool> IsEmailTakenAsync(string email, int? tenantId = null, CancellationToken cancellationToken = default);
         Task<bool> IsMobileTakenAsync(string mobile, int? tenantId = null, CancellationToken cancellationToken = default);
         // Task AddAsync(User user); // Removed as it is in BaseRepository
@@ -23,6 +24,7 @@ namespace LMS_SoulCode.Features.Auth.Repositories
         Task<UserDto?> UpdateUserAsync(int id, UpdateUserRequest request, int? tenantId, CancellationToken cancellationToken = default);
         Task<bool> SoftDeleteUserAsync(int id, int? tenantId, CancellationToken cancellationToken = default);
         Task<bool> RestoreUserAsync(int id, int? tenantId, CancellationToken cancellationToken = default);
+        Task<User?> GetAdminUserByTenantIdAsync(int tenantId, CancellationToken cancellationToken = default);
         Task SaveAsync(CancellationToken cancellationToken = default);
     }
 }

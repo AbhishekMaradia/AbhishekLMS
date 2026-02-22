@@ -26,32 +26,35 @@ namespace LMS_SoulCode.Features.Groups.Repositories
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateGroupCourseAsync(GroupCourse groupCourse, CancellationToken cancellationToken = default)
-        {
-            _context.GroupCourses.Update(groupCourse);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-
         public async Task UpdateGroupCoursesAsync(IEnumerable<GroupCourse> groupCourses, CancellationToken cancellationToken = default)
         {
             _context.GroupCourses.UpdateRange(groupCourses);
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task<GroupCourse?> GetGroupCourseByIdAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<(IEnumerable<GroupCourse> Items, int TotalCount)> GetGroupCoursesPagedByGroupIdAsync(int groupId, int? tenantId, string? searchTerm, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
         {
-            return await _context.GroupCourses
+            var query = _context.GroupCourses
                 .Include(gc => gc.Course)
-                .Include(gc => gc.Group)
-                .FirstOrDefaultAsync(gc => gc.Id == id && !gc.IsDeleted, cancellationToken);
-        }
+                .Where(gc => gc.GroupId == groupId && 
+                             (!tenantId.HasValue || gc.TenantId == tenantId.Value) && 
+                             !gc.IsDeleted);
 
-        public async Task<IEnumerable<GroupCourse>> GetGroupCoursesByGroupIdAsync(int groupId, CancellationToken cancellationToken = default)
-        {
-             return await _context.GroupCourses
-                .Include(gc => gc.Course)
-                .Where(gc => gc.GroupId == groupId && !gc.IsDeleted)
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                searchTerm = searchTerm.ToLower();
+                query = query.Where(gc => gc.Course.Title.ToLower().Contains(searchTerm) || 
+                                         (gc.Course.Description != null && gc.Course.Description.ToLower().Contains(searchTerm)));
+            }
+
+            var totalCount = await query.CountAsync(cancellationToken);
+            var items = await query
+                .OrderByDescending(gc => gc.Id)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync(cancellationToken);
+
+            return (items, totalCount);
         }
 
         public override async Task<Group?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -88,14 +91,6 @@ namespace LMS_SoulCode.Features.Groups.Repositories
                      Id = g.Id,
                      GroupName = g.GroupName,
                      CreatedAt = g.CreatedAt
-                     //GroupCourses = g.GroupCourses.Where(gc => !gc.IsDeleted).Select(gc => new GroupCourseDto
-                     //{
-                     //    Id = gc.Id,
-                     //    GroupId = gc.GroupId,
-                     //    CourseId = gc.CourseId,
-                     //    CourseName = gc.Course.Title,
-                     //    IsEnable = gc.IsEnable
-                     //}).ToList()
                  });
 
             return await dtoQuery.ToPagedListAsync(pageNumber, pageSize, cancellationToken);
@@ -103,7 +98,12 @@ namespace LMS_SoulCode.Features.Groups.Repositories
 
         public async Task DeleteGroupCoursesAsync(IEnumerable<GroupCourse> groupCourses, CancellationToken cancellationToken = default)
         {
-            _context.GroupCourses.RemoveRange(groupCourses);
+            foreach (var gc in groupCourses)
+            {
+                gc.IsDeleted = true;
+                gc.DeletedAt = DateTime.UtcNow;
+                _context.GroupCourses.Update(gc);
+            }
             await _context.SaveChangesAsync(cancellationToken);
         }
 
@@ -116,7 +116,12 @@ namespace LMS_SoulCode.Features.Groups.Repositories
 
             if (groupCourses.Any())
             {
-                _context.GroupCourses.RemoveRange(groupCourses);
+                foreach (var gc in groupCourses)
+                {
+                    gc.IsDeleted = true;
+                    gc.DeletedAt = DateTime.UtcNow;
+                    _context.GroupCourses.Update(gc);
+                }
                 await _context.SaveChangesAsync(cancellationToken);
             }
         }

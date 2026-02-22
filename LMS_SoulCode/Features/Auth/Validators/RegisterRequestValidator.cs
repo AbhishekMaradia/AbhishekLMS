@@ -9,8 +9,6 @@ namespace LMS_SoulCode.Features.Auth.Validators
         {
             public RegisterRequestValidator()
             {
-                RuleFor(x => x.UserName).NotEmpty().WithMessage("Username is required");
-
                 RuleFor(x => x.FirstName).NotEmpty().WithMessage("First name is required");
 
                 RuleFor(x => x.LastName).NotEmpty().WithMessage("Last name is required");

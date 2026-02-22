@@ -1,49 +1,100 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using Microsoft.Extensions.Configuration;
 
 namespace LMS_SoulCode.Features.Security.Services
 {
     public class CryptographyService
     {
         private readonly byte[] _key;
+        private readonly IConfiguration _config;
 
         public CryptographyService(IConfiguration config)
         {
-            // Appsettings ya environment me key rakho (base64 me)
+            _config = config;
             var keyString = config["CryptoSettings:KeyBase64"];
             _key = Convert.FromBase64String(keyString ?? throw new Exception("Missing key"));
         }
 
-        // 🔸 String encrypt karne ke liye
-        public string Encrypt(string plainText)
+        // 🔸 Helper for Image Resizing (Standardized)
+        public async Task<byte[]> ProcessImageAsync(Stream stream, int maxSize, CancellationToken ct)
         {
-            var bytes = Encoding.UTF8.GetBytes(plainText);
-            return EncryptBytes(bytes);
+            stream.Position = 0;
+            using var image = await Image.LoadAsync(stream, ct);
+            
+            // Resize logic: only if original is larger than maxSize
+            if (image.Width > maxSize || image.Height > maxSize)
+            {
+                image.Mutate(x => x.Resize(new ResizeOptions { Size = new Size(maxSize, maxSize), Mode = ResizeMode.Max }));
+            }
+            
+            using var outMs = new MemoryStream();
+            await image.SaveAsJpegAsync(outMs, ct);
+            return outMs.ToArray();
         }
 
-        // 🔸 String decrypt karne ke liye
-        public string Decrypt(string encryptedText)
+        public async Task<(byte[] Main, byte[] Thumb)> ProcessImageWithThumbAsync(Stream stream, int thumbSize, CancellationToken ct)
         {
-            var bytes = DecryptBytes(encryptedText);
-            return Encoding.UTF8.GetString(bytes);
+            // For Main Image: Use int.MaxValue to keep original size
+            var main = await ProcessImageAsync(stream, int.MaxValue, ct);
+            
+            // For Thumbnail: Use the size passed by the caller
+            var thumb = await ProcessImageAsync(stream, thumbSize, ct);
+            
+            return (main, thumb);
         }
 
-        // 🔸 Dynamic object encrypt
-        public string EncryptDynamic(object data)
+        // 🔸 Binary Encryption (No Base64 - Saves 33% space)
+        public async Task EncryptLargeFileAsync(Stream inputStream, string outputPath, CancellationToken ct = default)
         {
-            string json = JsonSerializer.Serialize(data);
-            return Encrypt(json);
+            using var aes = Aes.Create();
+            aes.Key = _key;
+            aes.GenerateIV();
+
+            using var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None);
+            await fileStream.WriteAsync(aes.IV, 0, aes.IV.Length, ct);
+
+            using var encryptor = aes.CreateEncryptor();
+            using var cryptoStream = new CryptoStream(fileStream, encryptor, CryptoStreamMode.Write);
+            
+            await inputStream.CopyToAsync(cryptoStream, ct);
         }
 
-        // 🔸 Dynamic decrypt (return object)
-        public T DecryptDynamic<T>(string encryptedText)
+        public Stream GetDecryptStream(string inputPath)
         {
-            string json = Decrypt(encryptedText);
-            return JsonSerializer.Deserialize<T>(json)!;
+            var fileStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            
+            byte[] iv = new byte[16];
+            fileStream.Read(iv, 0, iv.Length);
+
+            var aes = Aes.Create();
+            aes.Key = _key;
+            aes.IV = iv;
+
+            var decryptor = aes.CreateDecryptor();
+            return new CryptoStream(fileStream, decryptor, CryptoStreamMode.Read);
         }
 
-        // Internal AES-GCM encrypt bytes
+        public async Task DecryptLargeFileToStreamAsync(string inputPath, Stream outputStream, CancellationToken ct = default)
+        {
+            using var fileStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            
+            byte[] iv = new byte[16];
+            await fileStream.ReadAsync(iv, 0, iv.Length, ct);
+
+            using var aes = Aes.Create();
+            aes.Key = _key;
+            aes.IV = iv;
+
+            using var decryptor = aes.CreateDecryptor();
+            using var cryptoStream = new CryptoStream(fileStream, decryptor, CryptoStreamMode.Read);
+
+            await cryptoStream.CopyToAsync(outputStream, ct);
+        }
+
         public string EncryptBytes(byte[] plainBytes)
         {
             byte[] iv = new byte[12];
@@ -80,24 +131,17 @@ namespace LMS_SoulCode.Features.Security.Services
             return plain;
         }
 
-        /// <summary>
-        /// Decrypts a large encrypted string (Base64) directly into a result stream.
-        /// This is still limited by the fact that AesGcm needs the full cipher block,
-        /// but it avoids keeping multiple copies of the huge byte arrays in memory.
-        /// </summary>
-        public async Task DecryptToStreamAsync(string encryptedBase64, Stream outputStream, CancellationToken ct = default)
+        public string EncryptDynamic<T>(T data)
         {
-            // Convert Base64 to Stream to process without loading whole string as bytes if possible
-            // But Convert.FromBase64String already creates a byte array.
-            // Best we can do with current AesGcm block storage is to decrypt and write in chunks to output
-            byte[] plainBytes = DecryptBytes(encryptedBase64);
-            
-            const int bufferSize = 81920; // 80KB chunks
-            for (int i = 0; i < plainBytes.Length; i += bufferSize)
-            {
-                int count = Math.Min(bufferSize, plainBytes.Length - i);
-                await outputStream.WriteAsync(plainBytes, i, count, ct);
-            }
+            var json = JsonSerializer.Serialize(data);
+            return EncryptBytes(Encoding.UTF8.GetBytes(json));
+        }
+
+        public T? DecryptDynamic<T>(string encrypted)
+        {
+            var bytes = DecryptBytes(encrypted);
+            var json = Encoding.UTF8.GetString(bytes);
+            return JsonSerializer.Deserialize<T>(json);
         }
     }
 }

@@ -96,7 +96,6 @@ namespace LMS_SoulCode.Features.Reports.Services
             {
                 var searchTerm = request.SearchTerm.ToLower();
                 query = query.Where(x => 
-                    x.User.UserName.ToLower().Contains(searchTerm) ||
                     x.User.Email.ToLower().Contains(searchTerm) ||
                     x.Course.Title.ToLower().Contains(searchTerm) ||
                     x.Course.Instructor.ToLower().Contains(searchTerm)

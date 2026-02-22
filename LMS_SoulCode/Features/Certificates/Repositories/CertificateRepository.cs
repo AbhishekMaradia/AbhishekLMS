@@ -94,7 +94,6 @@ namespace LMS_SoulCode.Features.Certificates.Repositories
                 searchTerm = searchTerm.ToLower();
                 query = query.Where(x => 
                     x.c.CertificateCode.ToLower().Contains(searchTerm) ||
-                    x.u.UserName.ToLower().Contains(searchTerm) ||
                     x.u.Email.ToLower().Contains(searchTerm) ||
                     x.course.Title.ToLower().Contains(searchTerm)
                 );
@@ -107,7 +106,6 @@ namespace LMS_SoulCode.Features.Certificates.Repositories
                     Id = x.c.Id,
                     CertificateCode = x.c.CertificateCode,
                     UserId = x.c.UserId,
-                    UserName = x.u.UserName,
                     UserEmail = x.u.Email,
                     CourseId = x.c.CourseId,
                     CourseTitle = x.course.Title,

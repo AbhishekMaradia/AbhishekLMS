@@ -16,7 +16,6 @@ namespace LMS_SoulCode.Features.CourseVideos.Mappings
             CreateMap<UserVideoProgress, UserVideoProgressDto>()
                 .ForMember(d => d.VideoTitle, o => o.MapFrom(s => s.Video != null ? s.Video.Title : string.Empty));
 
-            CreateMap<CourseVideo, CourseVideoResponse>();
             CreateMap<CourseDocument, CourseDocumentResponse>();
         }
     }

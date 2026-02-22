@@ -90,14 +90,12 @@ namespace LMS_SoulCode.Features.SubscribedCourse.Repositories
                              (!subscribedFrom.HasValue || uc.CreatedAt >= subscribedFrom.Value) &&
                              (!subscribedTo.HasValue || uc.CreatedAt <= subscribedTo.Value) &&
                              (string.IsNullOrWhiteSpace(searchTerm) || 
-                              uc.User.UserName.ToLower().Contains(searchTerm.ToLower()) ||
                               uc.User.Email.ToLower().Contains(searchTerm.ToLower()) ||
                               uc.Course.Title.ToLower().Contains(searchTerm.ToLower()) ||
                               uc.Course.Instructor.ToLower().Contains(searchTerm.ToLower())),
                 projection: q => q.AsNoTracking().OrderByDescending(uc => uc.CreatedAt).Select(uc => new UserCourseListDto
                 {
                     UserId = uc.UserId,
-                    UserName = uc.User.UserName,
                     UserEmail = uc.User.Email,
                     CourseId = uc.CourseId,
                     CourseTitle = uc.Course.Title,

@@ -15,6 +15,7 @@ using AutoMapper;
 using StatusCodes = LMS_SoulCode.Features.Common.StatusCodes;
 using LMS_SoulCode.Features.UserPermissions.Services;
 using LMS_SoulCode.Features.Auth.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS_SoulCode.Features.Organizations.Services
 {
@@ -30,6 +31,7 @@ namespace LMS_SoulCode.Features.Organizations.Services
         private readonly LmsDbContext _context;
         private readonly IMapper _mapper;
         private readonly IUserPermissionService _permissionService;
+        private readonly IConfiguration _config;
 
         public OrganizationService(
             IOrganizationRepository orgRepo,
@@ -41,7 +43,8 @@ namespace LMS_SoulCode.Features.Organizations.Services
             IWebHostEnvironment env,
             LmsDbContext context,
             IMapper mapper,
-            IUserPermissionService permissionService)
+            IUserPermissionService permissionService,
+            IConfiguration config)
         {
             _orgRepo = orgRepo;
             _userRepo = userRepo;
@@ -53,11 +56,11 @@ namespace LMS_SoulCode.Features.Organizations.Services
             _context = context;
             _mapper = mapper;
             _permissionService = permissionService;
+            _config = config;
         }
 
         public async Task<ApiResponse<List<string>>> RegisterOrganizationAsync(OrgRegisterRequest request, CancellationToken cancellationToken = default)
         {
-            // 1. Validation
             if (await _orgRepo.ExistsAsync(request.OrgCode, cancellationToken))
                 return ApiResponse<List<string>>.Fail(Messages.OrgAlreadyExists, StatusCodes.BadRequest);
 
@@ -72,129 +75,92 @@ namespace LMS_SoulCode.Features.Organizations.Services
             return await strategy.ExecuteAsync(async () =>
             {
                 using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-                try
+                var org = _mapper.Map<Organization>(request);
+                
+                if (request.Logo != null && request.Logo.Length > 0)
                 {
-                    // 2. Create Organization
-                    var org = _mapper.Map<Organization>(request);
-                    
-                    if (request.Logo != null && request.Logo.Length > 0)
-                    {
-                        org.LogoUrl = await SaveLogoAsync(request.Logo, cancellationToken);
-                    }
-
-                    await _orgRepo.AddAsync(org, cancellationToken);
-
-                    // 3. Create Admin User
-                    var user = _mapper.Map<User>(request);
-                    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-                    user.TenantId = org.Id;
-
-                    await _userRepo.AddAsync(user, cancellationToken);
-
-                    // 4. Assign Role
-                    var adminRole = await _roleRepo.GetByCodeAsync("ORGANIZATION_ADMIN", cancellationToken);
-                    if (adminRole == null)
-                    {
-                        await transaction.RollbackAsync(cancellationToken);
-                        return ApiResponse<List<string>>.Fail("Default ORGANIZATION_ADMIN role not found.", StatusCodes.ServerError);
-                    }
-
-                    var userRole = new UserRole
-                    {
-                        UserId = user.Id,
-                        RoleId = adminRole.Id,
-                        IsActive = true,
-                        CreatedAt = DateTime.UtcNow
-                    };
-
-                    await _userRoleRepo.AddAsync(userRole, cancellationToken);
-
-                    // 5. Setup default roles and permissions for organization
-                    // You can inject IOrganizationOnboardingService and call:
-                    // await _onboardingService.SetupDefaultRolesAndPermissionsAsync(org.Id, cancellationToken);
-
-                    await transaction.CommitAsync(cancellationToken);
-                    return ApiResponse<List<string>>.Success(new List<string>(), Messages.Created);
+                    var (logoPath, thumbPath) = await SaveLogosAsync(request.Logo, cancellationToken);
+                    org.LogoUrl = logoPath;
+                    org.LogoThumbUrl = thumbPath;
                 }
-                catch (Exception ex)
+
+                await _orgRepo.AddAsync(org, cancellationToken);
+
+                var user = _mapper.Map<User>(request);
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+                user.TenantId = org.Id;
+
+                await _userRepo.AddAsync(user, cancellationToken);
+
+                var adminRole = await _roleRepo.GetByCodeAsync("ORGANIZATION_ADMIN", cancellationToken);
+                if (adminRole == null) throw new Exception("Default ORGANIZATION_ADMIN role not found.");
+
+                var userRole = new UserRole
                 {
-                    await transaction.RollbackAsync(cancellationToken);
-                    return ApiResponse<List<string>>.Fail(Messages.Error, StatusCodes.ServerError);
-                }
+                    UserId = user.Id,
+                    RoleId = adminRole.Id,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                await _userRoleRepo.AddAsync(userRole, cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+                return ApiResponse<List<string>>.Success(new List<string>(), Messages.Created);
             });
         }
 
-        private async Task<string> SaveLogoAsync(IFormFile file, CancellationToken cancellationToken)
+        private async Task<(string LogoUrl, string LogoThumbUrl)> SaveLogosAsync(IFormFile file, CancellationToken cancellationToken)
         {
             var ext = Path.GetExtension(file.FileName).ToLower();
-            var folderName = "OrgLogos";
-            var rootPath = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
-            var folderPath = Path.Combine(rootPath, "uploads", folderName);
+            var mainFolderPath = _config["AppSettings:OrgLogosMainPath"] ?? "wwwroot/uploads/OrgLogos/main";
+            var thumbFolderPath = _config["AppSettings:OrgLogosThumbPath"] ?? "wwwroot/uploads/OrgLogos/thumb";
 
-            if (!Directory.Exists(folderPath))
-                Directory.CreateDirectory(folderPath);
+            if (!Directory.Exists(mainFolderPath)) Directory.CreateDirectory(mainFolderPath);
+            if (!Directory.Exists(thumbFolderPath)) Directory.CreateDirectory(thumbFolderPath);
 
             using var ms = new MemoryStream();
             await file.CopyToAsync(ms, cancellationToken);
-            var fileBytes = ms.ToArray();
+            
+            var thumbSize = int.Parse(_config["AppSettings:OrgLogoThumbSize"] ?? "150");
+    var (mainBytes, thumbBytes) = await _cryptoService.ProcessImageWithThumbAsync(ms, thumbSize, cancellationToken);
 
-            string encryptedBase64 = _cryptoService.EncryptBytes(fileBytes);
-            
+
             string fileName = $"{Guid.NewGuid()}{ext}.enc";
-            var filePath = Path.Combine(folderPath, fileName);
+
+            await _cryptoService.EncryptLargeFileAsync(new MemoryStream(mainBytes), Path.Combine(mainFolderPath, fileName), cancellationToken);
+            await _cryptoService.EncryptLargeFileAsync(new MemoryStream(thumbBytes), Path.Combine(thumbFolderPath, fileName), cancellationToken);
             
-            await File.WriteAllTextAsync(filePath, encryptedBase64, cancellationToken);
-            
-            return $"/uploads/{folderName}/{fileName}";
+            return (
+                Path.Combine(mainFolderPath, fileName).Replace("\\", "/"),
+                Path.Combine(thumbFolderPath, fileName).Replace("\\", "/")
+            );
         }
 
-        //public async Task<ApiResponse<LMS_SoulCode.Features.Auth.DTOs.LoginResponse>> OrgLoginAsync(OrgLoginRequest request, CancellationToken cancellationToken = default)
-        //{
-        //    // 1. Find User by Email (Identifier)
-        //    var user = await _userRepo.GetByUsernameOrEmailAsync(request.Email, cancellationToken);
-        //    if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-        //        return ApiResponse<LMS_SoulCode.Features.Auth.DTOs.LoginResponse>.Fail(Messages.InvalidCredentials, StatusCodes.Unauthorized);
-
-        //    // 2. Validate Organization
-        //    if (user.Organization != null && !user.Organization.IsActive)
-        //         return ApiResponse<LMS_SoulCode.Features.Auth.DTOs.LoginResponse>.Fail(Messages.OrgInactive, StatusCodes.Unauthorized);
-
-        //    var orgName = user.Organization?.Name ?? "Unknown";
-
-        //    // 3. Generate Token
-        //    var (token, expires) = await _jwtService.CreateTokenAsync(user);
-
-        //    var userDto = _mapper.Map<LMS_SoulCode.Features.Auth.DTOs.UserDto>(user);
-
-        //    // Fetch and Encrypt Permissions
-        //    string? encryptedPermissions = null;
-        //    var permissionsResult = await _permissionService.GetUserPermissionsAsync(user.Id, user.TenantId, cancellationToken);
-        //    if (permissionsResult.IsSuccess && permissionsResult.Result != null)
-        //    {
-        //        encryptedPermissions = _cryptoService.EncryptDynamic(permissionsResult.Result);
-        //    }
-
-        //    var response = new LMS_SoulCode.Features.Auth.DTOs.LoginResponse(token, expires, userDto, encryptedPermissions);
-
-        //    return ApiResponse<LMS_SoulCode.Features.Auth.DTOs.LoginResponse>.Success(response, Messages.LoginSuccess);
-        //}
-
-        public async Task<ApiResponse<List<LoginResponse>>> OrgLoginAsync(OrgLoginRequest request, CancellationToken cancellationToken = default)
+        private void FormatOrgUrls(OrganizationDto dto, Organization? org)
         {
-            var user = await _userRepo.GetByUsernameOrEmailAsync(request.Email, cancellationToken);
+            if (org == null) return;
+            var gateway = _config["AppSettings:CourseVideoUrl"] ?? "/api/Crypto/get?path=";
+
+            if (!string.IsNullOrEmpty(org.LogoUrl))
+                dto.LogoUrl = $"{gateway}{Uri.EscapeDataString(org.LogoUrl)}";
+            
+            if (!string.IsNullOrEmpty(org.LogoThumbUrl))
+                dto.LogoThumbUrl = $"{gateway}{Uri.EscapeDataString(org.LogoThumbUrl)}";
+        }
+
+        public async Task<ApiResponse<List<LoginResponse>>> OrgLoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
+        {
+            var user = await _userRepo.GetByEmailAsync(request.Email, cancellationToken);
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 return ApiResponse<List<LoginResponse>>.Fail(Messages.InvalidCredentials, StatusCodes.Unauthorized);
 
-            // Check if organization is active
             if (user.Organization != null && !user.Organization.IsActive && !user.Organization.IsDeleted)
                 return ApiResponse<List<LoginResponse>>.Fail(Messages.OrgInactive, StatusCodes.Unauthorized);
 
             var (token, expires) = await _jwtService.CreateTokenAsync(user, cancellationToken);
-
             var userDto = _mapper.Map<UserDto>(user);
 
-            // Fetch and Encrypt Permissions
             string? encryptedPermissions = null;
             var permissionsResult = await _permissionService.GetUserPermissionsAsync(user.Id, user.TenantId, cancellationToken);
             if (permissionsResult.IsSuccess && permissionsResult.Data != null)
@@ -203,15 +169,19 @@ namespace LMS_SoulCode.Features.Organizations.Services
             }
 
             var dto = new LoginResponse(token, expires, userDto, encryptedPermissions);
-
             return ApiResponse<List<LoginResponse>>.Success(new List<LoginResponse> { dto }, Messages.LoginSuccess);
         }
 
         public async Task<PagedApiResponse<OrganizationDto>> GetAllOrganizationsAsync(OrganizationListRequest request, CancellationToken cancellationToken)
         {
-            var (orgs, totalCount) = await _orgRepo.GetOrganizationsAsync(request.SearchTerm, request.PageNumber, request.PageSize, request.IsActive, cancellationToken);
+            bool? isActiveFilter = request.IsActive ?? true;
+            var (orgs, totalCount) = await _orgRepo.GetOrganizationsAsync(request.SearchTerm, request.PageNumber, request.PageSize, isActiveFilter, cancellationToken);
             
-            var dtos = _mapper.Map<IEnumerable<OrganizationDto>>(orgs);
+            var dtos = _mapper.Map<IEnumerable<OrganizationDto>>(orgs).ToList();
+            foreach (var dto in dtos)
+            {
+                FormatOrgUrls(dto, orgs.FirstOrDefault(o => o.Id == dto.Id));
+            }
 
             return PagedApiResponse<OrganizationDto>.Success(dtos, request.PageNumber, request.PageSize, totalCount, Messages.Success);
         }
@@ -225,6 +195,7 @@ namespace LMS_SoulCode.Features.Organizations.Services
             if (org == null) return ApiResponse<List<OrganizationDto>>.Fail(Messages.NotFound, StatusCodes.NotFound);
 
             var dto = _mapper.Map<OrganizationDto>(org);
+            FormatOrgUrls(dto, org);
 
             return ApiResponse<List<OrganizationDto>>.Success(new List<OrganizationDto> { dto }, Messages.Success);
         }
@@ -237,17 +208,105 @@ namespace LMS_SoulCode.Features.Organizations.Services
             var org = await _orgRepo.GetByIdAsync(id, cancellationToken);
             if (org == null) return ApiResponse<List<OrganizationDto>>.Fail(Messages.NotFound, StatusCodes.NotFound);
 
-            _mapper.Map(request, org);
-
-            if (request.Logo != null && request.Logo.Length > 0)
+            var adminUser = await _userRepo.GetAdminUserByTenantIdAsync(id, cancellationToken);
+            
+            if (adminUser != null)
             {
-                org.LogoUrl = await SaveLogoAsync(request.Logo, cancellationToken);
+                if (!string.IsNullOrEmpty(request.Email) && request.Email != adminUser.Email)
+                {
+                    if (await _userRepo.IsEmailTakenAsync(request.Email, null, cancellationToken))
+                        return ApiResponse<List<OrganizationDto>>.Fail(Messages.EmailExists, StatusCodes.BadRequest);
+                }
+
+                if (!string.IsNullOrEmpty(request.Mobile) && request.Mobile != adminUser.Mobile)
+                {
+                    if (await _userRepo.IsMobileTakenAsync(request.Mobile, null, cancellationToken))
+                        return ApiResponse<List<OrganizationDto>>.Fail(Messages.MobileExists, StatusCodes.BadRequest);
+                }
             }
 
-            await _orgRepo.UpdateAsync(org, cancellationToken); // BaseRepository handles Update
+            var strategy = _context.Database.CreateExecutionStrategy();
 
-            var dto = _mapper.Map<OrganizationDto>(org);
-            return ApiResponse<List<OrganizationDto>>.Success(new List<OrganizationDto> { dto }, Messages.Updated);
+            return await strategy.ExecuteAsync(async () =>
+            {
+                using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+                _mapper.Map(request, org);
+                if (request.Logo != null && request.Logo.Length > 0)
+                {
+                    var (logoPath, thumbPath) = await SaveLogosAsync(request.Logo, cancellationToken);
+                    org.LogoUrl = logoPath;
+                    org.LogoThumbUrl = thumbPath;
+                }
+                await _orgRepo.UpdateAsync(org, cancellationToken);
+
+                if (adminUser != null)
+                {
+                    _mapper.Map(request, adminUser);
+                    if (!string.IsNullOrEmpty(request.Password))
+                    {
+                        adminUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+                    }
+                    await _userRepo.UpdateAsync(adminUser, cancellationToken);
+                }
+
+                await transaction.CommitAsync(cancellationToken);
+                var dto = _mapper.Map<OrganizationDto>(org);
+                FormatOrgUrls(dto, org);
+                return ApiResponse<List<OrganizationDto>>.Success(new List<OrganizationDto> { dto }, Messages.Updated);
+            });
+        }
+
+        public async Task<ApiResponse<List<OrganizationDto>>> UpdateOrganizationProfileAsync(int id, UpdateOrganizationRequest request, int? tenantId, int? userId, CancellationToken cancellationToken = default)
+        {
+            if (tenantId.HasValue && id != tenantId.Value)
+                return ApiResponse<List<OrganizationDto>>.Fail(Messages.Forbidden, StatusCodes.Forbidden);
+
+            if (!userId.HasValue) return ApiResponse<List<OrganizationDto>>.Fail(Messages.Unauthorized, StatusCodes.Unauthorized);
+
+            var org = await _orgRepo.GetByIdAsync(id, cancellationToken);
+            if (org == null) return ApiResponse<List<OrganizationDto>>.Fail(Messages.NotFound, StatusCodes.NotFound);
+
+            var user = await _userRepo.GetByIdAsync(userId.Value, cancellationToken);
+            if (user == null) return ApiResponse<List<OrganizationDto>>.Fail(Messages.UserNotFound, StatusCodes.NotFound);
+
+            if (!string.IsNullOrEmpty(request.Email) && request.Email != user.Email)
+            {
+                if (await _userRepo.IsEmailTakenAsync(request.Email, null, cancellationToken))
+                    return ApiResponse<List<OrganizationDto>>.Fail(Messages.EmailExists, StatusCodes.BadRequest);
+            }
+
+            if (!string.IsNullOrEmpty(request.Mobile) && request.Mobile != user.Mobile)
+            {
+                if (await _userRepo.IsMobileTakenAsync(request.Mobile, null, cancellationToken))
+                    return ApiResponse<List<OrganizationDto>>.Fail(Messages.MobileExists, StatusCodes.BadRequest);
+            }
+
+            var strategy = _context.Database.CreateExecutionStrategy();
+
+            return await strategy.ExecuteAsync(async () =>
+            {
+                using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+                _mapper.Map(request, org);
+                if (request.Logo != null && request.Logo.Length > 0)
+                {
+                    var (logoPath, thumbPath) = await SaveLogosAsync(request.Logo, cancellationToken);
+                    org.LogoUrl = logoPath;
+                    org.LogoThumbUrl = thumbPath;
+                }
+                await _orgRepo.UpdateAsync(org, cancellationToken);
+
+                _mapper.Map(request, user);
+                if (!string.IsNullOrEmpty(request.Password))
+                {
+                    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+                }
+                await _userRepo.UpdateAsync(user, cancellationToken);
+
+                await transaction.CommitAsync(cancellationToken);
+                var dto = _mapper.Map<OrganizationDto>(org);
+                FormatOrgUrls(dto, org);
+                return ApiResponse<List<OrganizationDto>>.Success(new List<OrganizationDto> { dto }, Messages.Updated);
+            });
         }
 
         public async Task<ApiResponse<List<string>>> DeleteOrganizationAsync(int id, CancellationToken cancellationToken = default)
@@ -255,36 +314,26 @@ namespace LMS_SoulCode.Features.Organizations.Services
             var org = await _orgRepo.GetByIdAsync(id, cancellationToken);
             if (org == null) return ApiResponse<List<string>>.Fail(Messages.NotFound, StatusCodes.NotFound);
 
-            await _orgRepo.DeleteAsync(id, cancellationToken); // Soft delete via BaseRepository
-            // Optionally deletes valid users? - Left for future consideration
+            var strategy = _context.Database.CreateExecutionStrategy();
 
-            return ApiResponse<List<string>>.Success(new List<string>(), Messages.Deleted);
-        }
-
-        public async Task<ApiResponse<List<OrganizationDto>>> UpdateOrganizationProfileAsync(int id, UpdateOrganizationRequest request, int? tenantId, CancellationToken cancellationToken = default)
-        {
-             if (tenantId.HasValue && id != tenantId.Value)
-                 return ApiResponse<List<OrganizationDto>>.Fail(Messages.Forbidden, StatusCodes.Forbidden);
-
-            // Similar to Update, but restrict fields if needed (e.g., prevent deactivating self)
-            // For now, reuse same logic but ensure OrgAdmin can only update own ID (controller check)
-            
-            var org = await _orgRepo.GetByIdAsync(id, cancellationToken);
-            if (org == null) return ApiResponse<List<OrganizationDto>>.Fail(Messages.NotFound, StatusCodes.NotFound);
-
-            _mapper.Map(request, org);
-            // Ensure IsActive or OrgCode aren't accidentally updated if Profile update should be restricted
-            // (The Map handles this if the DTO fields are null, and Mapper Profile has conditions)
-
-            if (request.Logo != null && request.Logo.Length > 0)
+            return await strategy.ExecuteAsync(async () =>
             {
-                org.LogoUrl = await SaveLogoAsync(request.Logo, cancellationToken);
-            }
+                using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+                await _orgRepo.DeleteAsync(id, cancellationToken);
 
-            await _orgRepo.UpdateAsync(org, cancellationToken);
+                var groups = await _context.Groups.Where(g => g.TenantId == id && !g.IsDeleted).ToListAsync(cancellationToken);
+                foreach (var group in groups) { group.IsDeleted = true; group.DeletedAt = DateTime.UtcNow; _context.Groups.Update(group); }
 
-            var dto = _mapper.Map<OrganizationDto>(org);
-            return ApiResponse<List<OrganizationDto>>.Success(new List<OrganizationDto> { dto }, Messages.Updated);
+                var users = await _context.Users.Where(u => u.TenantId == id && !u.IsDeleted).ToListAsync(cancellationToken);
+                foreach (var user in users) { user.IsDeleted = true; user.DeletedAt = DateTime.UtcNow; _context.Users.Update(user); }
+
+                var courses = await _context.Courses.Where(c => c.TenantId == id && !c.IsDeleted).ToListAsync(cancellationToken);
+                foreach (var course in courses) { course.IsDeleted = true; course.DeletedAt = DateTime.UtcNow; _context.Courses.Update(course); }
+
+                await _context.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+                return ApiResponse<List<string>>.Success(new List<string>(), Messages.Deleted);
+            });
         }
     }
 }

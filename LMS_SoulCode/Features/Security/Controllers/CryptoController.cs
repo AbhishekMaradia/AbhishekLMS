@@ -2,8 +2,6 @@
 using LMS_SoulCode.Features.Security.Services;
 using LMS_SoulCode.Features.Common;
 using Microsoft.AspNetCore.Authorization;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
 using StatusCodes = LMS_SoulCode.Features.Common.StatusCodes;
 
 namespace LMS_SoulCode.Features.Security.Controllers
@@ -14,26 +12,13 @@ namespace LMS_SoulCode.Features.Security.Controllers
     public class CryptoController : BaseApiController
     {
         private readonly CryptographyService _crypto;
+        private readonly IConfiguration _config;
 
-        public CryptoController(CryptographyService crypto, ILogger<CryptoController> logger) : base(logger)
+        public CryptoController(CryptographyService crypto, IConfiguration config, ILogger<CryptoController> logger) : base(logger)
         {
             _crypto = crypto;
+            _config = config;
         }
-
-        //[HttpPost("encrypt")]
-        //public IActionResult Encrypt([FromBody] object data)
-        //{
-        //    string encrypted = _crypto.EncryptDynamic(data);
-        //    return Ok(encrypted);
-        //}
-
-        //[HttpPost("decrypt")]
-        //public IActionResult Decrypt([FromBody] string encrypted)
-        //{
-        //    // Dynamic object me convert karega
-        //    var obj = _crypto.Decrypt(encrypted);
-        //    return Ok(obj);
-        //}
 
         [HttpPost("upload-file")]
         [BackOfficePermission(ModuleCodes.FILE_MANAGEMENT, PermissionCodes.FILE_UPLOAD)]
@@ -41,209 +26,149 @@ namespace LMS_SoulCode.Features.Security.Controllers
         {
             if (file == null || file.Length == 0)
             {
-                var errorResponse = ApiResponse<List<string>>.Fail("No file selected.", StatusCodes.BadRequest);
-                return StatusCode(errorResponse.Code, errorResponse);
+                var error = ApiResponse<List<string>>.Fail("No file selected.", StatusCodes.BadRequest);
+                return StatusCode(error.Code, error);
             }
 
-            // 🔹 1. Read file into byte array
-            using var ms = new MemoryStream();
-            await file.CopyToAsync(ms, cancellationToken);
-            var fileBytes = ms.ToArray();
-            // 🔹 2. Encrypt file content
-            string encryptedData = _crypto.EncryptBytes(fileBytes);
-            // 🔹 3. Identify folder based on file extension
-            string ext = Path.GetExtension(file.FileName).ToLower();
-            string folderName = ext switch
+            try
             {
-                ".jpg" or ".jpeg" or ".png" or ".gif" => "images",
-                ".mp4" or ".avi" or ".mov" => "videos",
-                ".pdf" => "pdfs",
-                ".doc" or ".docx" => "documents",
-                ".xls" or ".xlsx" => "excels",
-                _ => "others"
-            };
+                string ext = Path.GetExtension(file.FileName).ToLower();
+                string folderPath = GetPathByExt(ext);
 
-            // 🔹 4. Create folder if not exists
-            string folderPath = Path.Combine("wwwroot/uploads", folderName);
-            if (!Directory.Exists(folderPath))
-                Directory.CreateDirectory(folderPath);
+                if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
 
-            // 🔹 5. Save encrypted file with .enc extension
-            string savePath = Path.Combine(folderPath, file.FileName + ".enc");
-            await System.IO.File.WriteAllTextAsync(savePath, encryptedData, cancellationToken);
+                using var ms = new MemoryStream();
+                await file.CopyToAsync(ms, cancellationToken);
+                
+                string savePath = Path.Combine(folderPath, file.FileName + ".enc");
 
-            var response = ApiResponse<List<object>>.Success(new List<object> { new
+                if (IsImage(ext))
+                {
+                    using var processedMs = new MemoryStream(await _crypto.ProcessImageAsync(ms, 1200, cancellationToken));
+                    await _crypto.EncryptLargeFileAsync(processedMs, savePath, cancellationToken);
+                }
+                else
+                {
+                    ms.Position = 0;
+                    await _crypto.EncryptLargeFileAsync(ms, savePath, cancellationToken);
+                }
+
+                var response = ApiResponse<List<object>>.Success(new List<object> { new { path = savePath.Replace("\\", "/") } }, Messages.Uploaded);
+                return StatusCode(response.Code, response);
+            }
+            catch (Exception ex)
             {
-                message = "File encrypted and saved successfully.",
-                folder = folderName,
-                path = savePath.Replace("\\", "/")
-            } }, "Success");
-
-            return StatusCode(response.Code, response);
+                var error = ApiResponse<List<string>>.Fail(ex.Message, StatusCodes.ServerError);
+                return StatusCode(error.Code, error);
+            }
         }
 
         [HttpPost("upload-secure-with-thumb")]
         [BackOfficePermission(ModuleCodes.FILE_MANAGEMENT, PermissionCodes.FILE_UPLOAD)]
-        public async Task<IActionResult> UploadSecureWithThumb(IFormFile file, string folderName = "images", CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UploadSecureWithThumb(IFormFile file, CancellationToken cancellationToken = default)
         {
             if (file == null || file.Length == 0)
             {
-                var errorResponse = ApiResponse<List<string>>.Fail("No file selected.", StatusCodes.BadRequest);
-                return StatusCode(errorResponse.Code, errorResponse);
+                var error = ApiResponse<List<string>>.Fail("No file selected.", StatusCodes.BadRequest);
+                return StatusCode(error.Code, error);
             }
 
-            string ext = Path.GetExtension(file.FileName).ToLower();
-            if (!IsImage(ext))
-            {
-                var errorResponse = ApiResponse<List<string>>.Fail("Only image files are supported for this endpoint.", StatusCodes.BadRequest);
-                return StatusCode(errorResponse.Code, errorResponse);
-            }
-
-            // 🔹 1. Read original file into bytes
-            using var ms = new MemoryStream();
-            await file.CopyToAsync(ms, cancellationToken);
-            var originalBytes = ms.ToArray();
-
-            // 🔹 2. Encrypt original
-            string encryptedOriginal = _crypto.EncryptBytes(originalBytes);
-
-            // 🔹 3. Generate Thumbnail using ImageSharp
-            ms.Position = 0;
-            using var image = await Image.LoadAsync(ms, cancellationToken);
-            
-            // Resize image (maintain aspect ratio)
-            image.Mutate(x => x.Resize(new ResizeOptions
-            {
-                Size = new Size(300, 0), // Width 300, Height auto
-                Mode = ResizeMode.Max
-            }));
-
-            using var thumbMs = new MemoryStream();
-            await image.SaveAsJpegAsync(thumbMs, cancellationToken); // Save as Jpeg for thumb
-            var thumbBytes = thumbMs.ToArray();
-
-            // 🔹 4. Encrypt Thumbnail
-            string encryptedThumb = _crypto.EncryptBytes(thumbBytes);
-
-            // 🔹 5. Save both as .enc files
-            string folderPath = Path.Combine("wwwroot/uploads", folderName);
-            if (!Directory.Exists(folderPath))
-                Directory.CreateDirectory(folderPath);
-
-            string fileGuid = Guid.NewGuid().ToString();
-            string mainSavePath = Path.Combine(folderPath, $"{fileGuid}_main{ext}.enc");
-            string thumbSavePath = Path.Combine(folderPath, $"{fileGuid}_thumb{ext}.enc");
-
-            await System.IO.File.WriteAllTextAsync(mainSavePath, encryptedOriginal, cancellationToken);
-            await System.IO.File.WriteAllTextAsync(thumbSavePath, encryptedThumb, cancellationToken);
-
-            var response = ApiResponse<List<object>>.Success(new List<object> { new
-            {
-                message = "Main and Thumbnail images encrypted and saved successfully.",
-                mainPath = mainSavePath.Replace("\\", "/"),
-                thumbPath = thumbSavePath.Replace("\\", "/")
-            } }, "Success");
-
-            return StatusCode(response.Code, response);
-        }
-
-        private bool IsImage(string ext)
-        {
-            return ext switch
-            {
-                ".jpg" or ".jpeg" or ".png" or ".gif" or ".bmp" or ".webp" => true,
-                _ => false
-            };
-        }
-
-
-        [HttpGet("download/{fileName}")]
-        [BackOfficePermission(ModuleCodes.FILE_MANAGEMENT, PermissionCodes.FILE_DOWNLOAD)]
-        public async Task<IActionResult> DownloadDecryptedFile(string fileName, CancellationToken cancellationToken)
-        {
             try
             {
-                // 🔹 Detect folder based on file extension
-                string ext = Path.GetExtension(fileName).ToLower();
-                string folderName = ext switch
+                string ext = Path.GetExtension(file.FileName).ToLower();
+                if (!IsImage(ext)) 
                 {
-                    ".jpg" or ".jpeg" or ".png" or ".gif" => "images",
-                    ".mp4" or ".avi" or ".mov" => "videos",
-                    ".pdf" => "pdfs",
-                    ".doc" or ".docx" => "documents",
-                    ".xls" or ".xlsx" => "excels",
-                    _ => "others"
-                };
-
-                var encryptedPath = Path.Combine("wwwroot/uploads", folderName, fileName + ".enc");
-                if (!System.IO.File.Exists(encryptedPath))
-                {
-                    var errorResponse = ApiResponse<List<string>>.Fail($"Encrypted file not found at path: {encryptedPath}", StatusCodes.NotFound);
-                    return StatusCode(errorResponse.Code, errorResponse);
+                    var error = ApiResponse<List<string>>.Fail("Only image files are supported.", StatusCodes.BadRequest);
+                    return StatusCode(error.Code, error);
                 }
 
-                string encryptedData = await System.IO.File.ReadAllTextAsync(encryptedPath, cancellationToken);
+                string folderPath = _config["AppSettings:OrgLogosPath"] ?? "wwwroot/uploads/OrgLogos";
+                if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
 
-                byte[] decryptedBytes = _crypto.DecryptBytes(encryptedData);
+                using var ms = new MemoryStream();
+                await file.CopyToAsync(ms, cancellationToken);
 
-                string contentType = ext switch
-                {
-                    ".jpg" or ".jpeg" => "image/jpeg",
-                    ".png" => "image/png",
-                    ".mp4" => "video/mp4",
-                    ".pdf" => "application/pdf",
-                    ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    ".doc" => "application/msword",
-                    ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    ".xls" => "application/vnd.ms-excel",
-                    _ => "application/octet-stream"
-                };
+                var thumbSize = int.Parse(_config["AppSettings:OrgLogoThumbSize"] ?? "150");
+                var (mainBytes, thumbBytes) = await _crypto.ProcessImageWithThumbAsync(ms, thumbSize, cancellationToken);
 
-                return File(decryptedBytes, contentType, fileName);
+                string fileGuid = Guid.NewGuid().ToString();
+                string mainFileName = $"{fileGuid}_main{ext}.enc";
+                string thumbFileName = $"{fileGuid}_thumb{ext}.enc";
+
+                string mainPath = Path.Combine(folderPath, mainFileName);
+                string thumbPath = Path.Combine(folderPath, thumbFileName);
+
+                await _crypto.EncryptLargeFileAsync(new MemoryStream(mainBytes), mainPath, cancellationToken);
+                await _crypto.EncryptLargeFileAsync(new MemoryStream(thumbBytes), thumbPath, cancellationToken);
+
+                var response = ApiResponse<List<object>>.Success(new List<object> { new 
+                { 
+                    mainPath = mainPath.Replace("\\", "/"), 
+                    thumbPath = thumbPath.Replace("\\", "/") 
+                } }, Messages.Uploaded);
+
+                return StatusCode(response.Code, response);
             }
             catch (Exception ex)
             {
-                var errorResponse = ApiResponse<List<string>>.Fail($"Error while decrypting and downloading file: {ex.Message}", StatusCodes.BadRequest);
-                return StatusCode(errorResponse.Code, errorResponse);
+                var error = ApiResponse<List<string>>.Fail(ex.Message, StatusCodes.ServerError);
+                return StatusCode(error.Code, error);
             }
         }
 
-
-        [HttpGet("stream/{fileName}")]
-        [BackOfficePermission(ModuleCodes.FILE_MANAGEMENT, PermissionCodes.FILE_DOWNLOAD)]
-        public async Task<IActionResult> StreamDecryptedVideo(string fileName, CancellationToken cancellationToken)
+        [HttpGet("get")]
+        [AllowAnonymous]
+        public IActionResult GetMedia([FromQuery] string path)
         {
-            string ext = Path.GetExtension(fileName).ToLower();
-
-            if (ext != ".mp4")
+            try
             {
-                var errorResponse = ApiResponse<List<string>>.Fail("Only mp4 streaming supported.", StatusCodes.BadRequest);
-                return StatusCode(errorResponse.Code, errorResponse);
+                if (string.IsNullOrEmpty(path)) return BadRequest("Path is required.");
+
+                var normalizedPath = path.Replace("/", "\\").TrimStart('\\');
+                var fullPath = Path.Combine(Directory.GetCurrentDirectory(), normalizedPath);
+
+                if (!System.IO.File.Exists(fullPath)) return NotFound("File not found.");
+
+                string cleanPath = path.Replace(".enc", "");
+                string ext = Path.GetExtension(cleanPath).ToLower();
+                
+                var stream = _crypto.GetDecryptStream(fullPath);
+
+                if (ext == ".mp4" || ext == ".webm" || ext == ".mkv")
+                {
+                    return new FileStreamResult(stream, "video/mp4") { EnableRangeProcessing = true };
+                }
+
+                return File(stream, GetContentType(ext));
             }
-
-            string encryptedPath = Path.Combine("wwwroot/uploads/videos", fileName + ".enc");
-
-            if (!System.IO.File.Exists(encryptedPath))
+            catch (Exception ex)
             {
-                var errorResponse = ApiResponse<List<string>>.Fail($"Encrypted file not found: {encryptedPath}", StatusCodes.NotFound);
-                return StatusCode(errorResponse.Code, errorResponse);
+                return BadRequest(ex.Message);
             }
-
-            // Read encrypted file
-            string encryptedData = await System.IO.File.ReadAllTextAsync(encryptedPath, cancellationToken);
-            byte[] decryptedBytes = _crypto.DecryptBytes(encryptedData);
-
-            // Convert decrypted bytes to memory stream
-            var stream = new MemoryStream(decryptedBytes);
-
-            return new FileStreamResult(stream, "video/mp4")
-            {
-                EnableRangeProcessing = true
-            };
         }
 
+        private string GetPathByExt(string ext) => ext switch
+        {
+            ".mp4" or ".avi" or ".mkv" => _config["AppSettings:VideosPath"] ?? "wwwroot/uploads/videos",
+            ".pdf" or ".doc" or ".docx" => _config["AppSettings:DocsPath"] ?? "wwwroot/uploads/documents",
+            _ => _config["AppSettings:OrgLogosPath"] ?? "wwwroot/uploads/OrgLogos"
+        };
 
+        private bool IsImage(string ext) => ext switch
+        {
+            ".jpg" or ".jpeg" or ".png" or ".gif" or ".bmp" or ".webp" => true,
+            _ => false
+        };
 
-
+        private string GetContentType(string ext) => ext switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".gif" => "image/gif",
+            ".webp" => "image/webp",
+            ".pdf" => "application/pdf",
+            ".mp4" => "video/mp4",
+            _ => "application/octet-stream"
+        };
     }
 }

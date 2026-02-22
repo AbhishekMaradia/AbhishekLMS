@@ -142,7 +142,7 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 
-builder.Services.AddScoped<DatabaseSeeder>(); // Register Seeder
+// builder.Services.AddScoped<DatabaseSeeder>(); // Register Seeder
 
 builder.Services.AddCors(options =>
 {
@@ -197,11 +197,11 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Seed Database
-using (var scope = app.Services.CreateScope())
-{
-    var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
-    await seeder.SeedAsync();
-}
+// // Seed Database
+// using (var scope = app.Services.CreateScope())
+// {
+//     var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+//     await seeder.SeedAsync();
+// }
 
 app.Run();
