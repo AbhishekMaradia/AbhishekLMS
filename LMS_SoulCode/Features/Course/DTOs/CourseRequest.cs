@@ -15,6 +15,7 @@ namespace LMS_SoulCode.Features.Course.DTOs
         public int Lectures { get; set; }
         public string? Materials { get; set; }
         public string? Tags { get; set; }
+        public bool IsActive { get; set; } = true;
         public int? TenantId { get; set; }
     }
 }

@@ -64,26 +64,26 @@ namespace LMS_SoulCode.Data
             // ---------------------------------------------------------
             
             // 1. Entities with Multi-Tenancy AND Soft-Delete (BaseTenantEntity)
-            modelBuilder.Entity<User>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId) && !e.IsDeleted);
-            modelBuilder.Entity<Category>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId) && !e.IsDeleted);
-            modelBuilder.Entity<Course>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId) && !e.IsDeleted);
-            modelBuilder.Entity<CourseVideo>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId) && !e.IsDeleted);
-            modelBuilder.Entity<CourseDocument>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId) && !e.IsDeleted);
-            modelBuilder.Entity<UserVideoProgress>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId) && !e.IsDeleted);
-            modelBuilder.Entity<UserCourse>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId) && !e.IsDeleted);
-            modelBuilder.Entity<Certificate>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId) && !e.IsDeleted);
-            modelBuilder.Entity<CertificateTemplate>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId) && !e.IsDeleted);
+            modelBuilder.Entity<User>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0) && !e.IsDeleted);
+            modelBuilder.Entity<Category>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0) && !e.IsDeleted);
+            modelBuilder.Entity<Course>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0) && !e.IsDeleted);
+            modelBuilder.Entity<CourseVideo>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0) && !e.IsDeleted);
+            modelBuilder.Entity<CourseDocument>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0) && !e.IsDeleted);
+            modelBuilder.Entity<UserVideoProgress>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0) && !e.IsDeleted);
+            modelBuilder.Entity<UserCourse>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0) && !e.IsDeleted);
+            modelBuilder.Entity<Certificate>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0) && !e.IsDeleted);
+            modelBuilder.Entity<CertificateTemplate>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0) && !e.IsDeleted);
             
             // Permission System (BaseTenantEntity)
-            modelBuilder.Entity<Role>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId) && !e.IsDeleted);
-            modelBuilder.Entity<Module>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId) && !e.IsDeleted);
-            modelBuilder.Entity<Permission>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId) && !e.IsDeleted);
-            modelBuilder.Entity<UserRole>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId) && !e.IsDeleted);
-            modelBuilder.Entity<RoleModule>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId) && !e.IsDeleted);
-            modelBuilder.Entity<RoleModulePermission>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId) && !e.IsDeleted);
-            modelBuilder.Entity<ModulePermission>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId) && !e.IsDeleted);
-            modelBuilder.Entity<Group>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId) && !e.IsDeleted);
-            modelBuilder.Entity<GroupCourse>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId) && !e.IsDeleted);
+            modelBuilder.Entity<Role>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0) && !e.IsDeleted);
+            modelBuilder.Entity<Module>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0) && !e.IsDeleted);
+            modelBuilder.Entity<Permission>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0) && !e.IsDeleted);
+            modelBuilder.Entity<UserRole>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0) && !e.IsDeleted);
+            modelBuilder.Entity<RoleModule>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0) && !e.IsDeleted);
+            modelBuilder.Entity<RoleModulePermission>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0) && !e.IsDeleted);
+            modelBuilder.Entity<ModulePermission>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0) && !e.IsDeleted);
+            modelBuilder.Entity<Group>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0) && !e.IsDeleted);
+            modelBuilder.Entity<GroupCourse>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0) && !e.IsDeleted);
 
             // 2. Entities with ONLY Soft-Delete (Has IsDeleted but NO TenantId)
             modelBuilder.Entity<Organization>().HasQueryFilter(e => !e.IsDeleted);

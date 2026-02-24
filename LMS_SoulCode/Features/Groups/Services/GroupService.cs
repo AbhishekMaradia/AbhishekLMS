@@ -37,21 +37,6 @@ namespace LMS_SoulCode.Features.Groups.Services
             
             await _groupRepo.AddAsync(group, cancellationToken);
             
-            // --- IDEA 2: AUTO-LINK TO ALL ACTIVE COURSES ---
-            var allCourses = await _courseRepo.GetAllActiveCoursesAsync(tenantId, cancellationToken);
-            if (allCourses.Any())
-            {
-                var groupCourses = allCourses.Select(c => new GroupCourse
-                {
-                    GroupId = group.Id,
-                    CourseId = c.Id,
-                    TenantId = tenantId,
-                    IsEnable = false,
-                    CreatedAt = DateTime.UtcNow
-                }).ToList();
-                await _groupRepo.AddGroupCoursesAsync(groupCourses, cancellationToken);
-            }
-
             var dto = _mapper.Map<GroupDto>(group);
 
             return ApiResponse<List<GroupDto>>.Success(new List<GroupDto> { dto }, Messages.Created);
@@ -71,8 +56,23 @@ namespace LMS_SoulCode.Features.Groups.Services
             if (tenantId.HasValue && group.TenantId != tenantId.Value)
                  return ApiResponse<List<GroupDto>>.Fail(Messages.Forbidden, StatusCodes.Forbidden);
 
+            // Sync courses before returning
+            await SyncCoursesAsync(group, cancellationToken);
+
             var dto = _mapper.Map<GroupDto>(group);
             return ApiResponse<List<GroupDto>>.Success(new List<GroupDto> { dto }, Messages.Success);
+        }
+
+        private async Task SyncCoursesAsync(Group group, CancellationToken ct)
+        {
+            var courses = await _courseRepo.GetAllActiveCoursesAsync(group.TenantId, ct);
+            var newLinks = courses.Where(c => group.GroupCourses.All(gc => gc.CourseId != c.Id))
+                .Select(c => new GroupCourse { GroupId = group.Id, CourseId = c.Id, TenantId = group.TenantId, Course = c })
+                .ToList();
+
+            if (newLinks.Count == 0) return;
+            await _groupRepo.AddGroupCoursesAsync(newLinks, ct);
+            newLinks.ForEach(group.GroupCourses.Add);
         }
 
         public async Task<ApiResponse<List<string>>> DeleteGroupAsync(int id, int? tenantId, CancellationToken cancellationToken = default)
@@ -127,29 +127,16 @@ namespace LMS_SoulCode.Features.Groups.Services
             if (tenantId.HasValue && group.TenantId != tenantId.Value)
                  return PagedApiResponse<GroupCourseDto>.Fail(Messages.Forbidden, StatusCodes.Forbidden);
 
+            // Sync courses before returning
+            await SyncCoursesAsync(group, cancellationToken);
+
             var (items, totalCount) = await _groupRepo.GetGroupCoursesPagedByGroupIdAsync(groupId, tenantId, request.SearchTerm, request.PageNumber, request.PageSize, cancellationToken);
             var dtos = _mapper.Map<List<GroupCourseDto>>(items);
 
             return PagedApiResponse<GroupCourseDto>.Success(dtos, request.PageNumber, request.PageSize, totalCount, Messages.Success);
         }
 
-        public async Task LinkCourseToAllGroupsAsync(int courseId, int? tenantId, CancellationToken cancellationToken = default)
-        {
-            var allGroups = await _groupRepo.GetGroupsByTenantIdAsync(tenantId, cancellationToken);
-            if (allGroups.Any())
-            {
-                var groupCourses = allGroups.Select(g => new GroupCourse
-                {
-                    GroupId = g.Id,
-                    CourseId = courseId,
-                    TenantId = tenantId,
-                    IsEnable = false,
-                    CreatedAt = DateTime.UtcNow
-                }).ToList();
 
-                await _groupRepo.AddGroupCoursesAsync(groupCourses, cancellationToken);
-            }
-        }
 
         public async Task<ApiResponse<string>> BulkUpdateGroupCoursesAsync(BulkUpdateCoursesRequest request, int? tenantId, CancellationToken cancellationToken = default)
         {

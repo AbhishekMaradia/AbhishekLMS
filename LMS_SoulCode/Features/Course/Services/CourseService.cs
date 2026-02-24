@@ -138,7 +138,7 @@ namespace LMS_SoulCode.Features.Course.Services
             await _courseRepo.AddAsync(course, cancellationToken);
             
             // --- IDEA 2: AUTO-LINK TO GROUPS (Internal Call) ---
-            await _groupService.LinkCourseToAllGroupsAsync(course.Id, tenantId, cancellationToken);
+            // Courses will be linked lazily when GetGroupById is called
             
             var courseResponse = _mapper.Map<CourseResponse>(course);
             FormatCourseUrls(courseResponse, course);

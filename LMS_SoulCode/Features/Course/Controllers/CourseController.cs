@@ -25,23 +25,6 @@ namespace LMS_SoulCode.Features.Course.Controllers
         [BackOfficePermission(ModuleCodes.COURSE, PermissionCodes.COURSE_VIEW)]
         public async Task<IActionResult> GetCourseAll([FromQuery] CourseListRequest request, CancellationToken cancellationToken)
         {
-            var groupIdClaim = User.FindFirst("GroupId")?.Value;
-            
-            if (!string.IsNullOrEmpty(groupIdClaim) && int.TryParse(groupIdClaim, out int groupId))
-            {
-                var groupResponse = await _courseService.GetCoursesByUserGroupAsync(CurrentUserId, groupId, request, CurrentTenantId, cancellationToken);
-                return StatusCode(groupResponse.Code, groupResponse);
-            }
-            
-            // For users with no group, check if they have individual subscriptions
-            if (CurrentUserId.HasValue)
-            {
-                var responseWithSubscriptions = await _courseService.GetCoursesByUserGroupAsync(CurrentUserId, null, request, CurrentTenantId, cancellationToken);
-                // Only return if it actually found something or if the Org has groups (strict mode)
-                // Actually, the Service logic now handles "No Group OR Subscribed"
-                return StatusCode(responseWithSubscriptions.Code, responseWithSubscriptions);
-            }
-
             var response = await _courseService.GetAllCourseAsync(request, CurrentTenantId, cancellationToken);
             return StatusCode(response.Code, response);
         }
@@ -64,9 +47,9 @@ namespace LMS_SoulCode.Features.Course.Controllers
 
         [HttpPost("create")]
         [BackOfficePermission(ModuleCodes.COURSE, PermissionCodes.COURSE_ADD)]
-        [Consumes("multipart/form-data")]
         public async Task<IActionResult> Create([FromForm] CourseRequest request, CancellationToken cancellationToken)
         {
+            if (request == null) return BadRequest(ApiResponse<string>.Fail("Request body is missing.", StatusCodes.BadRequest));
             var targetTenantId = CurrentTenantId ?? request.TenantId;
             var response = await _courseService.AddAsync(request, targetTenantId, cancellationToken);
             return StatusCode(response.Code, response);
@@ -74,7 +57,6 @@ namespace LMS_SoulCode.Features.Course.Controllers
 
         [HttpPut("update/{id}")]
         [BackOfficePermission(ModuleCodes.COURSE, PermissionCodes.COURSE_EDIT)]
-        [Consumes("multipart/form-data")]
         public async Task<IActionResult> Update(int id, [FromForm] UpdateCourseRequest request, CancellationToken cancellationToken)
         {
             var response = await _courseService.UpdateAsync(id, request, CurrentTenantId, cancellationToken);
@@ -90,7 +72,6 @@ namespace LMS_SoulCode.Features.Course.Controllers
         }
 
         [HttpPost("{courseId}/upload-video")]
-        [Consumes("multipart/form-data")]
         [BackOfficePermission(ModuleCodes.VIDEO, PermissionCodes.VIDEO_ADD)]
         public async Task<IActionResult> UploadVideo(int courseId, [FromForm] IFormFile file, [FromForm] string title, [FromForm] string description, CancellationToken cancellationToken)
         {

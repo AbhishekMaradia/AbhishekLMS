@@ -15,7 +15,7 @@ namespace LMS_SoulCode.Features.Course.Mappings
                 .ForMember(d => d.Rating, o => o.MapFrom(_ => 0.0))
                 .ForMember(d => d.CreatedAt, o => o.MapFrom(_ => DateTime.UtcNow))
                 .ForMember(d => d.UpdatedAt, o => o.MapFrom(_ => DateTime.UtcNow))
-                .ForMember(d => d.IsActive, o => o.MapFrom(_ => true))
+                .ForMember(d => d.IsActive, o => o.MapFrom(s => s.IsActive))
                 .ForMember(d => d.Videos, o => o.Ignore());
 
             // UpdateCourseRequest to Course mapping (for partial updates)
