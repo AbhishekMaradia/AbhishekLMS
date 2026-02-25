@@ -19,7 +19,7 @@ namespace LMS_SoulCode.Features.Reports.Controllers
         }
 
         [HttpGet("course/{userId}/{courseId}")]
-        [BackOfficePermission(ModuleCodes.REPORT, PermissionCodes.REPORT_VIEW)]
+        [BackOfficePermission(ModuleCodes.REPORT, PermissionCodes.REPORT_VIEW, PermissionCodes.REPORT_GENERATE)]
         public async Task<IActionResult> GetReport(int userId, int courseId, CancellationToken cancellationToken)
         {
             var response = await _report.GetUserCourseReport(userId, courseId, CurrentTenantId, cancellationToken);

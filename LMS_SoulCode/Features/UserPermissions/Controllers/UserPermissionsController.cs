@@ -35,7 +35,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
         }
 
         [HttpGet("role-module/{roleId:int}/{moduleId:int}/permissions")]
-        [BackOfficePermission(ModuleCodes.USER_PERMISSION, PermissionCodes.USER_PERMISSION_VIEW)]
+        [BackOfficePermission(ModuleCodes.USER_PERMISSION, PermissionCodes.USER_PERMISSION_VIEW, PermissionCodes.USER_PERMISSION_ASSIGN)]
         public async Task<IActionResult> GetRoleModulePermissions(int roleId, int moduleId, CancellationToken cancellationToken)
         {
             var response = await _userPermissionService.GetRoleModulePermissionsAsync(roleId, moduleId, CurrentTenantId, cancellationToken);
@@ -43,7 +43,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
         }
 
         [HttpGet("user/{userId:int}")]
-        [BackOfficePermission(ModuleCodes.USER_PERMISSION, PermissionCodes.USER_PERMISSION_VIEW)]
+        [BackOfficePermission(ModuleCodes.USER_PERMISSION, PermissionCodes.USER_PERMISSION_VIEW, PermissionCodes.USER_PERMISSION_ASSIGN)]
         public async Task<IActionResult> GetUserPermissions(int userId, CancellationToken cancellationToken)
         {
             var response = await _userPermissionService.GetUserPermissionsAsync(userId, CurrentTenantId, cancellationToken);
@@ -51,7 +51,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
         }
 
         [HttpGet("user/{userId:int}/check/{moduleCode}/{permissionCode}")]
-        [BackOfficePermission(ModuleCodes.USER_PERMISSION, PermissionCodes.USER_PERMISSION_VIEW)]
+        [BackOfficePermission(ModuleCodes.USER_PERMISSION, PermissionCodes.USER_PERMISSION_VIEW, PermissionCodes.USER_PERMISSION_ASSIGN)]
         public async Task<IActionResult> CheckUserPermission(int userId, string moduleCode, string permissionCode, CancellationToken cancellationToken)
         {
             var response = await _userPermissionService.CheckUserPermissionAsync(userId, moduleCode, permissionCode, CurrentTenantId, cancellationToken);
@@ -75,7 +75,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
         }
 
         [HttpGet("user/{userId:int}/roles")]
-        [BackOfficePermission(ModuleCodes.USER_PERMISSION, PermissionCodes.USER_PERMISSION_VIEW)]
+        [BackOfficePermission(ModuleCodes.USER_PERMISSION, PermissionCodes.USER_PERMISSION_VIEW, PermissionCodes.ROLE_ASSIGN)]
         public async Task<IActionResult> GetUserRoles(int userId, CancellationToken cancellationToken)
         {
             var response = await _userPermissionService.GetUserRolesWithStatusAsync(userId, CurrentTenantId, cancellationToken);

@@ -26,7 +26,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
         }
 
         [HttpGet("role/{roleId}")]
-        [BackOfficePermission(ModuleCodes.ROLE_MODULE, PermissionCodes.ROLE_MODULE_VIEW)]
+        [BackOfficePermission(ModuleCodes.ROLE_MODULE, PermissionCodes.ROLE_MODULE_VIEW, PermissionCodes.ROLE_MODULE_EDIT)]
         public async Task<IActionResult> GetByRole(int roleId, CancellationToken cancellationToken)
         {
             var response = await _roleModuleService.GetRoleModulesByRoleAsync(roleId, CurrentTenantId, cancellationToken);

@@ -47,7 +47,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
         */
 
         [HttpGet("{moduleId}/permissions")]
-        [BackOfficePermission(ModuleCodes.MODULE, PermissionCodes.MODULE_VIEW)]
+        [BackOfficePermission(ModuleCodes.MODULE, PermissionCodes.MODULE_VIEW, PermissionCodes.MODULE_EDIT)]
         public async Task<IActionResult> GetModulePermissions(int moduleId, CancellationToken cancellationToken)
         {
             var response = await _moduleService.GetModulePermissionsAsync(moduleId, cancellationToken);

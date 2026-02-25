@@ -136,7 +136,7 @@ namespace LMS_SoulCode.Features.CourseVideos.Controllers
         }
 
         [HttpGet("progress/{videoId}")]
-        [BackOfficePermission(ModuleCodes.VIDEO, PermissionCodes.VIDEO_VIEW)]
+        [BackOfficePermission(ModuleCodes.VIDEO, PermissionCodes.VIDEO_VIEW, PermissionCodes.VIDEO_EDIT)]
         public async Task<IActionResult> GetProgress(int videoId, CancellationToken cancellationToken)
         {
             if (!CurrentUserId.HasValue)

@@ -25,7 +25,7 @@ namespace LMS_SoulCode.Features.Certificates.Controllers
         }
 
         [HttpGet("{id}/download")]
-        [BackOfficePermission(ModuleCodes.CERTIFICATE, PermissionCodes.CERTIFICATE_VIEW)]
+        [BackOfficePermission(ModuleCodes.CERTIFICATE, PermissionCodes.CERTIFICATE_VIEW, PermissionCodes.CERTIFICATE_EDIT)]
         public async Task<IActionResult> Download(int id, CancellationToken cancellationToken)
         {
             var fileResult = await _certificateService.GetPdfAsync(id, CurrentTenantId, cancellationToken);
@@ -42,7 +42,7 @@ namespace LMS_SoulCode.Features.Certificates.Controllers
         }
 
         [HttpGet("Certificate/{userId}")]
-        [BackOfficePermission(ModuleCodes.CERTIFICATE, PermissionCodes.CERTIFICATE_VIEW)]
+        [BackOfficePermission(ModuleCodes.CERTIFICATE, PermissionCodes.CERTIFICATE_VIEW, PermissionCodes.CERTIFICATE_EDIT)]
         public async Task<IActionResult> GetByUserId(int userId, CancellationToken cancellationToken)
         {
             var response = await _certificateService.GetCertificatesByUserAsync(userId, CurrentTenantId, cancellationToken);

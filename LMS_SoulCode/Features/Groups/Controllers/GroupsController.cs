@@ -44,7 +44,7 @@ namespace LMS_SoulCode.Features.Groups.Controllers
         }
 
         [HttpGet("{groupId}")]
-        [BackOfficePermission(ModuleCodes.GROUP, PermissionCodes.GROUP_VIEW)]
+        [BackOfficePermission(ModuleCodes.GROUP, PermissionCodes.GROUP_VIEW, PermissionCodes.GROUP_EDIT)]
         public async Task<IActionResult> GetGroupById([FromRoute] int groupId, CancellationToken cancellationToken)
         {
             var response = await _groupService.GetGroupByIdAsync(groupId, CurrentTenantId, cancellationToken);
@@ -73,7 +73,7 @@ namespace LMS_SoulCode.Features.Groups.Controllers
         }
 
         [HttpGet("group-courses/{groupId}")]
-        [BackOfficePermission(ModuleCodes.GROUP, PermissionCodes.GROUP_VIEW)]
+        [BackOfficePermission(ModuleCodes.GROUP, PermissionCodes.GROUP_VIEW, PermissionCodes.GROUP_EDIT)]
         public async Task<IActionResult> GetGroupCoursesByGroupId([FromRoute] int groupId, [FromQuery] GroupCourseListRequest request, CancellationToken cancellationToken)
         {
             var response = await _groupService.GetGroupCoursesByGroupIdAsync(groupId, request, CurrentTenantId, cancellationToken);

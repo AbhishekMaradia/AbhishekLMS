@@ -30,7 +30,7 @@ namespace LMS_SoulCode.Features.Course.Controllers
         }
 
         [HttpGet("{id}")]
-        [BackOfficePermission(ModuleCodes.COURSE, PermissionCodes.COURSE_VIEW)]
+        [BackOfficePermission(ModuleCodes.COURSE, PermissionCodes.COURSE_VIEW, PermissionCodes.COURSE_EDIT)]
         public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
         {
             var response = await _courseService.GetByIdAsync(id, CurrentTenantId, cancellationToken);
@@ -98,7 +98,7 @@ namespace LMS_SoulCode.Features.Course.Controllers
         }
 
         [HttpGet("{courseId}/documents")]
-        [BackOfficePermission(ModuleCodes.COURSE, PermissionCodes.COURSE_VIEW)]
+        [BackOfficePermission(ModuleCodes.COURSE, PermissionCodes.COURSE_VIEW, PermissionCodes.COURSE_EDIT)]
         public async Task<IActionResult> GetDocuments(int courseId, CancellationToken cancellationToken)
         {
             var response = await _courseService.GetCourseDocumentsAsync(courseId, CurrentTenantId, cancellationToken);

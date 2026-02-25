@@ -25,7 +25,7 @@ namespace LMS_SoulCode.Features.Course.Controllers
         }
 
         [HttpGet("{id}")]
-        [BackOfficePermission(ModuleCodes.CATEGORY, PermissionCodes.CATEGORY_VIEW)]
+        [BackOfficePermission(ModuleCodes.CATEGORY, PermissionCodes.CATEGORY_VIEW, PermissionCodes.CATEGORY_EDIT)]
         public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
         {
             var response = await _categoryService.GetByIdAsync(id, CurrentTenantId, cancellationToken);

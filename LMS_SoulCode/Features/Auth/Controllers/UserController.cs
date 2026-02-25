@@ -37,7 +37,7 @@ namespace LMS_SoulCode.Features.Auth.Controllers
         }
 
         [HttpGet("{id:int}")]
-        [BackOfficePermission(ModuleCodes.USER, PermissionCodes.USER_VIEW)]
+        [BackOfficePermission(ModuleCodes.USER, PermissionCodes.USER_VIEW, PermissionCodes.USER_EDIT)]
         public async Task<IActionResult> GetUserById(int id, CancellationToken cancellationToken)
         {
             var response = await _userService.GetUserByIdAsync(id, CurrentTenantId, cancellationToken);

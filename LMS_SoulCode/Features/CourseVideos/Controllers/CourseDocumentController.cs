@@ -18,7 +18,7 @@ namespace LMS_SoulCode.Features.CourseVideos.Controllers
         }
 
         [HttpGet("course/{courseId}")]
-        [BackOfficePermission(ModuleCodes.COURSE, PermissionCodes.COURSE_VIEW)]
+        [BackOfficePermission(ModuleCodes.COURSE, PermissionCodes.COURSE_VIEW, PermissionCodes.COURSE_EDIT)]
         public async Task<IActionResult> GetByCourse(int courseId, CancellationToken cancellationToken)
         {
             int? tenantId = null;

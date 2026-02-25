@@ -48,7 +48,7 @@ namespace LMS_SoulCode.Features.Organizations.Controllers
         }
 
         [HttpGet("{id}")]
-        [BackOfficePermission(ModuleCodes.ORGANIZATION, PermissionCodes.ORGANIZATION_VIEW)]
+        [BackOfficePermission(ModuleCodes.ORGANIZATION, PermissionCodes.ORGANIZATION_VIEW, PermissionCodes.ORGANIZATION_EDIT)]
         public async Task<IActionResult> GetOrgById(int id, CancellationToken cancellationToken)
         {
             var result = await _orgService.GetOrganizationByIdAsync(id, CurrentTenantId, cancellationToken);

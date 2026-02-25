@@ -29,7 +29,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
 
         // GET: api/module-permissions/{id}
         [HttpGet("{id:int}")]
-        [BackOfficePermission(ModuleCodes.USER_PERMISSION, PermissionCodes.USER_PERMISSION_VIEW)]
+        [BackOfficePermission(ModuleCodes.USER_PERMISSION, PermissionCodes.USER_PERMISSION_VIEW, PermissionCodes.USER_PERMISSION_ASSIGN)]
         public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
         {
             var response = await _modulePermissionService.GetByIdAsync(id, cancellationToken);
