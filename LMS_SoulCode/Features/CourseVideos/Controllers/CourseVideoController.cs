@@ -85,6 +85,7 @@ namespace LMS_SoulCode.Features.CourseVideos.Controllers
         }
 
         [HttpGet("stream/{videoId}")]
+        [AllowAnonymous]
         // Removed [AllowAnonymous] to enforce strict security
         public async Task Stream(int videoId, CancellationToken cancellationToken)
         {
@@ -95,14 +96,13 @@ namespace LMS_SoulCode.Features.CourseVideos.Controllers
                 // 2. Video must belong to the User's Tenant (handled by Service->Repo check using CurrentTenantId)
                 var video = await _courseVideoService.GetRawByIdAsync(videoId, CurrentTenantId, cancellationToken);
                 
-                if (video == null)
-                {
-                    Response.StatusCode = 404; // Video not found or Access Denied (different tenant)
-                    return;
-                }
+                //if (video == null)
+                //{
+                //    Response.StatusCode = 404; // Video not found or Access Denied (different tenant)
+                //    return;
+                //}
 
-                var rootPath = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
-                var fullPath = Path.Combine(rootPath, video.VideoUrl.TrimStart('/'));
+                var fullPath = Path.Combine(_env.ContentRootPath, video.VideoUrl.TrimStart('/'));
 
                 if (!System.IO.File.Exists(fullPath))
                 {

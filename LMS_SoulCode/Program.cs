@@ -44,24 +44,25 @@ builder.Services.AddControllers(options =>
 // Configure file upload limits for large video files
 builder.Services.Configure<IISServerOptions>(options =>
 {
-    options.MaxRequestBodySize = 500_000_000; // 500 MB
+    options.MaxRequestBodySize = 1_610_612_736; // 1.5 GB
 });
 
 builder.Services.Configure<FormOptions>(options =>
 {
     options.ValueLengthLimit = int.MaxValue;
-    options.MultipartBodyLengthLimit = 500_000_000; // 500 MB
+    options.MultipartBodyLengthLimit = 1_610_612_736; // 1.5 GB
     options.MultipartHeadersLengthLimit = int.MaxValue;
 });
 
 // Add request timeout and performance optimizations
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
-    options.Limits.MaxRequestBodySize = 500_000_000; // 500 MB
-    options.Limits.MaxConcurrentConnections = 100; // Limit concurrent connections
+    options.Limits.MaxRequestBodySize = 1_610_612_736; // 1.5 GB
+    options.Limits.MinRequestBodyDataRate = null; // Disable min data rate to prevent timeouts on slow uploads
+    options.Limits.MaxConcurrentConnections = 100;
     options.Limits.MaxConcurrentUpgradedConnections = 100;
-    options.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(30);
-    options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(2);
+    options.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(120);
+    options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(10);
 });
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
@@ -180,6 +181,7 @@ if (app.Environment.IsDevelopment())
 
 
 app.UseStaticFiles();
+app.UseDefaultFiles();
 
 // Use different CORS policy based on environment
 if (app.Environment.IsDevelopment())
@@ -197,6 +199,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Attach Frontend: Map all non-API routes to index.html
+app.MapFallbackToFile("index.html");
 
 // // Seed Database
 // using (var scope = app.Services.CreateScope())

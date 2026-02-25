@@ -72,6 +72,8 @@ namespace LMS_SoulCode.Features.Course.Controllers
         }
 
         [HttpPost("{courseId}/upload-video")]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(MultipartBodyLengthLimit = 1_610_612_736, ValueLengthLimit = int.MaxValue)]
         [BackOfficePermission(ModuleCodes.VIDEO, PermissionCodes.VIDEO_ADD)]
         public async Task<IActionResult> UploadVideo(int courseId, [FromForm] IFormFile file, [FromForm] string title, [FromForm] string description, CancellationToken cancellationToken)
         {
