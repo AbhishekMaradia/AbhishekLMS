@@ -10,7 +10,7 @@ using Serilog;
 using Microsoft.AspNetCore.Authorization;
 using QuestPDF.Infrastructure;
 using LMS_SoulCode.Features.UserPermissions.Mappings;
-using LMS_SoulCode.Features.Common;
+using LMS_SoulCode.Features.Common.Utilities;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Http.Features;
 
@@ -36,6 +36,7 @@ builder.Services.AddControllers(options =>
 })
 .AddJsonOptions(options =>
 {
+    options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
     options.JsonSerializerOptions.MaxDepth = 32; // Reduce from 64 to 32
@@ -143,7 +144,7 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 
-// builder.Services.AddScoped<DatabaseSeeder>(); // Register Seeder
+builder.Services.AddScoped<DatabaseSeeder>(); // Register Seeder
 
 builder.Services.AddCors(options =>
 {
@@ -168,6 +169,20 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
+
+// Support token in query string for video streaming and downloads
+app.Use(async (context, next) =>
+{
+    if (context.Request.Query.ContainsKey("access_token"))
+    {
+        var token = context.Request.Query["access_token"];
+        if (!string.IsNullOrEmpty(token))
+        {
+            context.Request.Headers.Authorization = $"Bearer {token}";
+        }
+    }
+    await next();
+});
 
 if (app.Environment.IsDevelopment())
 {
