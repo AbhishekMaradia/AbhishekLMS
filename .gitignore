@@ -1,0 +1,15 @@
+bin/ 
+obj/ 
+.vs/ 
+node_modules/ 
+dist/ 
+build/ 
+*.log 
+.env 
+appsettings.Development.json 
+bin/Debug/ 
+bin/Release/ 
+publish/ 
+wwwroot/uploads/ 
+Logs/
+LMS_FRONT/
