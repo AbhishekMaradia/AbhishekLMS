@@ -31,7 +31,8 @@ namespace LMS_SoulCode.Features.Organizations.Mappings
                 .ForMember(d => d.Code, o => o.MapFrom(s => s.OrgCode))
                 .ForMember(d => d.PrimaryColor, o => o.MapFrom(s => s.PrimaryColor))
                 .ForMember(d => d.SecondaryColor, o => o.MapFrom(s => s.SecondaryColor))
-                .ForMember(d => d.IsActive, o => o.MapFrom(s => s.IsActive))
+                .ForMember(d => d.IsActive, o => o.Condition(s => s.IsActive.HasValue))
+                .ForMember(d => d.IsActive, o => o.MapFrom(s => s.IsActive!.Value))
                 .ForMember(d => d.UpdatedAt, o => o.MapFrom(_ => DateTime.UtcNow))
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null)); // Simpler null check
         }
