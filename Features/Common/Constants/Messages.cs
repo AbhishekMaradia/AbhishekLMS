@@ -51,7 +51,7 @@ namespace LMS_SoulCode.Features.Common
         public const string DeleteBlockedOrgCategories = "Cannot delete organization because it has active categories. Please remove categories first.";
         public const string DeleteBlockedGroup = "Cannot delete this group because there are users currently assigned to it.";
         public const string DeleteBlockedRole = "Cannot delete this role because there are users currently assigned to it.";
-        public const string DeleteBlockedCourseGroups = "Cannot delete this course because it is assigned to groups. Please remove from groups first.";
+        public const string DeleteBlockedCourseGroups = "This course is assigned to one or more groups. Please remove it from all groups before making this change.";
         public const string DeleteBlockedCourseUsers = "Cannot delete this course because students are already enrolled.";
         public const string UpdateBlockedMove = "Cannot change organization because this entity has active dependencies.";
         public const string DeleteBlockedUserAdmin = "Cannot delete this user because they are the Organization Admin. Please assign another admin first.";

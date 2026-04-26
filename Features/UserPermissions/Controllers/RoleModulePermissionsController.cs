@@ -27,7 +27,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
         }
 
         [HttpGet("{id:int}")]
-        [BackOfficePermission(ModuleCodes.ROLE_MODULE, PermissionCodes.ROLE_MODULE_PERMISSION_VIEW, PermissionCodes.ROLE_MODULE_PERMISSION_ASSIGN)]
+        [BackOfficePermission(ModuleCodes.ROLE_MODULE, PermissionCodes.ROLE_MODULE_PERMISSION_VIEW, PermissionCodes.ROLE_MODULE_PERMISSION_ADD)]
         public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
         {
             var response = await _roleModulePermissionService.GetByIdAsync(id, CurrentTenantId, cancellationToken);
@@ -35,7 +35,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        [BackOfficePermission(ModuleCodes.ROLE_MODULE, PermissionCodes.ROLE_MODULE_PERMISSION_ASSIGN)]
+        [BackOfficePermission(ModuleCodes.ROLE_MODULE, PermissionCodes.ROLE_MODULE_PERMISSION_ADD)]
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
             var response = await _roleModulePermissionService.DeleteAsync(id, CurrentTenantId, cancellationToken);

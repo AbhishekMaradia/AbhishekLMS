@@ -25,25 +25,25 @@ namespace LMS_SoulCode.Features.Common
         // --- LEVEL 2: SCHEMA MAPPINGS (What Perms belong to what Module) ---
         
         public const string MODULE_PERMISSION_VIEW = "MODULE_PERMISSION_VIEW";
-        public const string MODULE_PERMISSION_ASSIGN = "MODULE_PERMISSION_ASSIGN";
+        public const string MODULE_PERMISSION_ADD = "MODULE_PERMISSION_ADD";
         public const string MODULE_PERMISSION_DELETE = "MODULE_PERMISSION_DELETE";
 
         // --- LEVEL 3: ROLE ALLOTMENTS & MATRIX (Who gets what Module/Perm) ---
         
         // Role-Module
         public const string ROLE_MODULE_VIEW = "ROLE_MODULE_VIEW";
-        public const string ROLE_MODULE_ASSIGN = "ROLE_MODULE_ASSIGN";
+        public const string ROLE_MODULE_ADD = "ROLE_MODULE_ADD";
         public const string ROLE_MODULE_DELETE = "ROLE_MODULE_DELETE";
 
         // Role-Module-Permission Matrix
         public const string ROLE_MODULE_PERMISSION_VIEW = "ROLE_MODULE_PERMISSION_VIEW";
-        public const string ROLE_MODULE_PERMISSION_ASSIGN = "ROLE_MODULE_PERMISSION_ASSIGN";
+        public const string ROLE_MODULE_PERMISSION_ADD = "ROLE_MODULE_PERMISSION_ADD";
         public const string ROLE_MODULE_PERMISSION_DELETE = "ROLE_MODULE_PERMISSION_DELETE";
 
         // --- LEVEL 4: USER ROLE ASSIGNMENTS ---
         
         public const string USER_ROLE_VIEW = "USER_ROLE_VIEW";
-        public const string USER_ROLE_ASSIGN = "USER_ROLE_ASSIGN";
+        public const string USER_ROLE_ADD = "USER_ROLE_ADD";
         public const string USER_ROLE_DELETE = "USER_ROLE_DELETE";
 
         // --- OTHER APPLICATION MODULES ---
@@ -83,6 +83,8 @@ namespace LMS_SoulCode.Features.Common
         public const string GROUP_ADD = "GROUP_ADD";
         public const string GROUP_EDIT = "GROUP_EDIT";
         public const string GROUP_DELETE = "GROUP_DELETE";
+        public const string GROUP_USER_EDIT = "GROUP_USER_EDIT";
+        public const string GROUP_COURSE_EDIT = "GROUP_COURSE_EDIT";
 
         // Certificate
         public const string CERTIFICATE_VIEW = "CERTIFICATE_VIEW";

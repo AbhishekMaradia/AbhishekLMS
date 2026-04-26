@@ -73,7 +73,7 @@ namespace LMS_SoulCode.Features.Groups.Controllers
         }
 
         [HttpGet("group-courses/{groupId}")]
-        [BackOfficePermission(ModuleCodes.GROUP, PermissionCodes.GROUP_VIEW, PermissionCodes.GROUP_EDIT)]
+        [BackOfficePermission(ModuleCodes.GROUP, PermissionCodes.GROUP_VIEW, PermissionCodes.GROUP_COURSE_EDIT)]
         public async Task<IActionResult> GetGroupCoursesByGroupId([FromRoute] int groupId, [FromQuery] GroupCourseListRequest request, CancellationToken cancellationToken)
         {
             var response = await _groupService.GetGroupCoursesByGroupIdAsync(groupId, request, CurrentTenantId, cancellationToken);
@@ -81,7 +81,7 @@ namespace LMS_SoulCode.Features.Groups.Controllers
         }
 
         [HttpPut("bulk-update-courses")]
-        [BackOfficePermission(ModuleCodes.GROUP, PermissionCodes.GROUP_EDIT)]
+        [BackOfficePermission(ModuleCodes.GROUP, PermissionCodes.GROUP_COURSE_EDIT)]
         public async Task<IActionResult> BulkUpdateCourses([FromBody] BulkUpdateCoursesRequest request, CancellationToken cancellationToken)
         {
             var response = await _groupService.BulkUpdateGroupCoursesAsync(request, CurrentTenantId, cancellationToken);
@@ -89,7 +89,7 @@ namespace LMS_SoulCode.Features.Groups.Controllers
         }
 
         [HttpGet("group-users/{groupId}")]
-        [BackOfficePermission(ModuleCodes.GROUP, PermissionCodes.GROUP_VIEW, PermissionCodes.GROUP_EDIT)]
+        [BackOfficePermission(ModuleCodes.GROUP, PermissionCodes.GROUP_VIEW, PermissionCodes.GROUP_USER_EDIT)]
         public async Task<IActionResult> GetGroupUsers([FromRoute] int groupId, CancellationToken cancellationToken)
         {
             var response = await _groupService.GetGroupUsersAsync(groupId, CurrentTenantId, cancellationToken);
@@ -97,7 +97,7 @@ namespace LMS_SoulCode.Features.Groups.Controllers
         }
 
         [HttpPut("assign-users")]
-        [BackOfficePermission(ModuleCodes.GROUP, PermissionCodes.GROUP_EDIT)]
+        [BackOfficePermission(ModuleCodes.GROUP, PermissionCodes.GROUP_USER_EDIT)]
         public async Task<IActionResult> BulkAssignUsers([FromBody] BulkAssignUsersRequest request, CancellationToken cancellationToken)
         {
             var response = await _groupService.BulkAssignUsersAsync(request, CurrentTenantId, cancellationToken);

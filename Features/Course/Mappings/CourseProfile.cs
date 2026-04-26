@@ -25,7 +25,8 @@ namespace LMS_SoulCode.Features.Course.Mappings
                 .ForMember(d => d.Rating, o => o.Ignore())
                 .ForMember(d => d.CreatedAt, o => o.Ignore())
                 .ForMember(d => d.UpdatedAt, o => o.MapFrom(_ => DateTime.UtcNow))
-                .ForMember(d => d.Videos, o => o.Ignore());
+                .ForMember(d => d.Videos, o => o.Ignore())
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             // Course to CourseResponse mapping (base mapping without VideoUrls)
             CreateMap<CourseEntity, CourseResponse>()

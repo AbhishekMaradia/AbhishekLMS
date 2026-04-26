@@ -34,7 +34,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
         }
 
         [HttpPost("create")]
-        [BackOfficePermission(ModuleCodes.ROLE_MODULE, PermissionCodes.ROLE_MODULE_ASSIGN)]
+        [BackOfficePermission(ModuleCodes.ROLE_MODULE, PermissionCodes.ROLE_MODULE_ADD)]
         public async Task<IActionResult> Create([FromBody] CreateRoleModuleDto dto, CancellationToken cancellationToken)
         {
             var response = await _roleModuleService.CreateRoleModuleAsync(dto, CurrentTenantId, cancellationToken);

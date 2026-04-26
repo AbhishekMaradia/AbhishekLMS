@@ -37,6 +37,7 @@ namespace LMS_SoulCode.Features.Course.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IGroupRepository _groupRepo;
         private readonly IUserCourseRepository _userCourseRepo;
+        private readonly ILogger<CourseService> _logger;
 
         public CourseService(
             ICourseRepository courseRepository, 
@@ -48,7 +49,8 @@ namespace LMS_SoulCode.Features.Course.Services
             IConfiguration config, 
             IHttpContextAccessor httpContextAccessor,
             IGroupRepository groupRepo,
-            IUserCourseRepository userCourseRepo)
+            IUserCourseRepository userCourseRepo,
+            ILogger<CourseService> logger)
         {
             _courseRepo = courseRepository;
             _categoryRepo = categoryRepo;
@@ -60,6 +62,7 @@ namespace LMS_SoulCode.Features.Course.Services
             _httpContextAccessor = httpContextAccessor;
             _groupRepo = groupRepo;
             _userCourseRepo = userCourseRepo;
+            _logger = logger;
         }
 
         private string GetBaseUrl()
@@ -191,42 +194,30 @@ namespace LMS_SoulCode.Features.Course.Services
             var course = await _courseRepo.GetByIdForAdminAsync(id, tenantId, cancellationToken);
             if (course == null) return ApiResponse<List<CourseResponse>>.Fail(Messages.NotFound, StatusCodes.NotFound);
 
-            if (request.CategoryId > 0) 
+            // Category Validation & Retention
+            if (request.CategoryId <= 0)
             {
-                 var category = await _categoryRepo.GetByIdAsync(request.CategoryId, cancellationToken);
-                 if (category == null) return ApiResponse<List<CourseResponse>>.Fail("Invalid Category ID.", StatusCodes.BadRequest);
+                // If CategoryId is not provided (0), retain the current category
+                request.CategoryId = course.CategoryId;
+            }
+            else 
+            {
+                // Validate that the new CategoryId exists
+                var category = await _categoryRepo.GetByIdAsync(request.CategoryId, cancellationToken);
+                if (category == null) 
+                    return ApiResponse<List<CourseResponse>>.Fail("Invalid Category ID.", StatusCodes.BadRequest);
             }
 
-            // Security Check
-            if (tenantId.HasValue)
+            // Security Check: Ensure Org Admin doesn't access other tenants' courses
+            if (tenantId.HasValue && course.TenantId != tenantId.Value)
             {
-                // Org Admin can only update their own courses (TenantId = 0 means Global)
-                if (course.TenantId != tenantId.Value)
-                    return ApiResponse<List<CourseResponse>>.Fail(Messages.Forbidden, StatusCodes.Forbidden);
-                
-                // Keep the old TenantId safe
-                request.TenantId = course.TenantId;
+                return ApiResponse<List<CourseResponse>>.Fail(Messages.Forbidden, StatusCodes.Forbidden);
             }
-            else
-            {
-                // SuperAdmin can change the organization to global
-                var newTenantId = request.TenantId ?? 0;
-                if (course.TenantId != newTenantId)
-                {
-                    // Strict Validation using Repositories
-                    if (await _courseRepo.AnyInGroupAsync(id, cancellationToken))
-                    {
-                        return ApiResponse<List<CourseResponse>>.Fail(Messages.DeleteBlockedCourseGroups, StatusCodes.BadRequest);
-                    }
 
-                    if (await _courseRepo.AnyEnrolledAsync(id, cancellationToken))
-                    {
-                        return ApiResponse<List<CourseResponse>>.Fail(Messages.UpdateBlockedMove, StatusCodes.BadRequest);
-                    }
+            // Organization Lock: We do not allow changing the organization after a course is created.
+            // This simplifies the logic and prevents data inconsistency across groups.
+            request.TenantId = course.TenantId; 
 
-                    course.TenantId = newTenantId;
-                }
-            }
 
             _mapper.Map(request, course);
 
@@ -276,13 +267,14 @@ namespace LMS_SoulCode.Features.Course.Services
             var course = await _courseRepo.GetByIdForAdminAsync(id, tenantId, cancellationToken);
             if (course == null) return ApiResponse<List<string>>.Fail(Messages.NotFound, StatusCodes.NotFound);
 
-            // Auto-remove from all groups before deletion
-            await _groupService.RemoveCourseFromAllGroupsAsync(id, cancellationToken);
-
+            // 1. Enrollment Check: Cannot delete course if students are already enrolled
             if (await _courseRepo.AnyEnrolledAsync(id, cancellationToken))
             {
                 return ApiResponse<List<string>>.Fail(Messages.DeleteBlockedCourseUsers, StatusCodes.BadRequest);
             }
+
+            // 2. Cascade Unassign: Auto-remove from all groups before deletion
+            await _groupService.RemoveCourseFromAllGroupsAsync(id, cancellationToken);
 
             await _courseRepo.DeleteAsync(id, cancellationToken);
             return ApiResponse<List<string>>.Success(new List<string>(), Messages.Deleted);

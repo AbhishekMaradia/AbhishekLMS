@@ -19,7 +19,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
         }
 
         [HttpPost("assign-role")]
-        [BackOfficePermission(ModuleCodes.USER_ROLE, PermissionCodes.USER_ROLE_ASSIGN)]
+        [BackOfficePermission(ModuleCodes.USER_ROLE, PermissionCodes.USER_ROLE_ADD)]
         public async Task<IActionResult> AssignRoleToUser([FromBody] AssignRoleDto dto, CancellationToken cancellationToken)
         {
             var response = await _userPermissionService.AssignRoleToUserAsync(dto, CurrentTenantId, cancellationToken);
@@ -27,7 +27,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
         }
 
         [HttpPost("assign-permissions")]
-        [BackOfficePermission(ModuleCodes.ROLE_MODULE, PermissionCodes.ROLE_MODULE_PERMISSION_ASSIGN)]
+        [BackOfficePermission(ModuleCodes.ROLE_MODULE, PermissionCodes.ROLE_MODULE_PERMISSION_ADD)]
         public async Task<IActionResult> AssignPermissionsToRoleModule([FromBody] AssignPermissionDto dto, CancellationToken cancellationToken)
         {
             var response = await _userPermissionService.AssignPermissionsAsync(dto, CurrentTenantId, cancellationToken);
@@ -35,7 +35,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
         }
 
         [HttpGet("role-module/{roleId:int}/{moduleId:int}/permissions")]
-        [BackOfficePermission(ModuleCodes.ROLE_MODULE, PermissionCodes.ROLE_MODULE_PERMISSION_VIEW, PermissionCodes.ROLE_MODULE_PERMISSION_ASSIGN)]
+        [BackOfficePermission(ModuleCodes.ROLE_MODULE, PermissionCodes.ROLE_MODULE_PERMISSION_VIEW, PermissionCodes.ROLE_MODULE_PERMISSION_ADD)]
         public async Task<IActionResult> GetRoleModulePermissions(int roleId, int moduleId, [FromQuery] int? tenantId, CancellationToken cancellationToken)
         {
             var targetTenantId = CurrentTenantId ?? tenantId;
@@ -52,7 +52,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
         //}
 
         [HttpGet("user/{userId:int}/check/{moduleCode}/{permissionCode}")]
-        [BackOfficePermission(ModuleCodes.ROLE_MODULE, PermissionCodes.ROLE_MODULE_PERMISSION_VIEW, PermissionCodes.ROLE_MODULE_PERMISSION_ASSIGN)]
+        [BackOfficePermission(ModuleCodes.ROLE_MODULE, PermissionCodes.ROLE_MODULE_PERMISSION_VIEW, PermissionCodes.ROLE_MODULE_PERMISSION_ADD)]
         public async Task<IActionResult> CheckUserPermission(int userId, string moduleCode, string permissionCode, CancellationToken cancellationToken)
         {
             var response = await _userPermissionService.CheckUserPermissionAsync(userId, moduleCode, permissionCode, CurrentTenantId, cancellationToken);
@@ -68,7 +68,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
         }
 
         [HttpPut("user/{userId:int}/role/{roleId:int}")]
-        [BackOfficePermission(ModuleCodes.USER_ROLE, PermissionCodes.USER_ROLE_ASSIGN)]
+        [BackOfficePermission(ModuleCodes.USER_ROLE, PermissionCodes.USER_ROLE_ADD)]
         public async Task<IActionResult> UpdateUserRole(int userId, int roleId, [FromBody] UpdateUserRoleDto dto, CancellationToken cancellationToken)
         {
             var response = await _userPermissionService.UpdateUserRoleStatusAsync(userId, roleId, dto.IsActive, CurrentTenantId, cancellationToken);
@@ -76,7 +76,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
         }
 
         [HttpGet("user/{userId:int}/roles")]
-        [BackOfficePermission(ModuleCodes.USER_ROLE, PermissionCodes.USER_ROLE_VIEW, PermissionCodes.USER_ROLE_ASSIGN)]
+        [BackOfficePermission(ModuleCodes.USER_ROLE, PermissionCodes.USER_ROLE_VIEW, PermissionCodes.USER_ROLE_ADD)]
         public async Task<IActionResult> GetUserRoles(int userId, CancellationToken cancellationToken)
         {
             var response = await _userPermissionService.GetUserRolesWithStatusAsync(userId, CurrentTenantId, cancellationToken);

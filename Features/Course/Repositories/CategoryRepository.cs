@@ -16,7 +16,7 @@ namespace LMS_SoulCode.Features.Course.Repositories
             return await GetPagedAsync<CategoryResponse>(
                 pageNumber,
                 pageSize,
-                filter: c => (tenantId == null || tenantId == 0 || c.TenantId == tenantId) &&
+                filter: c => (tenantId == null || tenantId == 0 || c.TenantId == tenantId || c.TenantId == 0 || c.TenantId == null) &&
                             !c.IsDeleted &&
                             (string.IsNullOrWhiteSpace(searchTerm) || c.CategoryName.ToLower().Contains(searchTerm.ToLower())),
                 projection: q => q.AsNoTracking().OrderBy(c => c.CategoryName).Select(c => new CategoryResponse
