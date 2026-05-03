@@ -238,7 +238,10 @@ namespace LMS_SoulCode.Features.Organizations.Services
             var org = await _orgRepo.GetByIdAsync(id, cancellationToken);
             if (org == null) return ApiResponse<List<OrganizationDto>>.Fail(Messages.NotFound, StatusCodes.NotFound);
 
+            var currentStatus = org.IsActive;
             _mapper.Map(request, org);
+            if (!request.IsActive.HasValue) org.IsActive = currentStatus;
+
             if (request.Logo != null && request.Logo.Length > 0)
             {
                 var (logoPath, thumbPath) = await SaveLogosAsync(request.Logo, cancellationToken);
@@ -273,7 +276,10 @@ namespace LMS_SoulCode.Features.Organizations.Services
             var org = await _orgRepo.GetByIdAsync(id, cancellationToken);
             if (org == null) return ApiResponse<List<OrganizationDto>>.Fail(Messages.NotFound, StatusCodes.NotFound);
 
+            var currentStatus = org.IsActive;
             _mapper.Map(request, org);
+            if (!request.IsActive.HasValue) org.IsActive = currentStatus;
+
             if (request.Logo != null && request.Logo.Length > 0)
             {
                 var (logoPath, thumbPath) = await SaveLogosAsync(request.Logo, cancellationToken);

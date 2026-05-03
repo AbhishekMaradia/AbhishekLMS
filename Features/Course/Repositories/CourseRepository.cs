@@ -186,6 +186,6 @@ namespace LMS_SoulCode.Features.Course.Repositories
         => await _context.GroupCourses.AnyAsync(gc => gc.CourseId == courseId && !gc.IsDeleted, cancellationToken);
 
         public async Task<bool> AnyEnrolledAsync(int courseId, CancellationToken cancellationToken = default)
-        => await _context.Set<LMS_SoulCode.Features.SubscribedCourse.Models.UserCourse>().AnyAsync(uc => uc.CourseId == courseId && !uc.IsDeleted, cancellationToken);
+        => await _context.Set<LMS_SoulCode.Features.SubscribedCourse.Models.UserCourse>().AnyAsync(uc => uc.CourseId == courseId && !uc.IsDeleted && uc.IsActive, cancellationToken);
     }
 }

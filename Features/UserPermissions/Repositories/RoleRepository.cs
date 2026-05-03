@@ -24,7 +24,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Repositories
 
             if (tenantId.HasValue && tenantId.Value != 0)
             {
-                query = query.Where(r => r.TenantId == tenantId.Value || r.TenantId == 0 || r.TenantId == null);
+                query = query.Where(r => r.TenantId == tenantId.Value);
             }
 
             if (isActive.HasValue)

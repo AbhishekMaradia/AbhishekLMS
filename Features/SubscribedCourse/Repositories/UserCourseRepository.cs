@@ -16,6 +16,7 @@ namespace LMS_SoulCode.Features.SubscribedCourse.Repositories
             return await _dbSet
                 .Include(uc => uc.Course)
                 .Include(uc => uc.User)
+                .IgnoreQueryFilters() // Ignore query filters to find soft-deleted records as well
                 .Where(x => x.UserId == userId && x.CourseId == courseId && x.Course.IsActive && (!tenantId.HasValue || x.TenantId == tenantId.Value))
                 .FirstOrDefaultAsync(cancellationToken);
         }
@@ -38,6 +39,8 @@ namespace LMS_SoulCode.Features.SubscribedCourse.Repositories
             else
             {
                 existing.IsActive = true;
+                existing.IsDeleted = false;
+                existing.DeletedAt = null;
                 existing.CreatedAt = DateTime.UtcNow; // Using CreatedAt as per new IAuditEntity standard
                 await UpdateAsync(existing, cancellationToken);
             }
@@ -49,6 +52,7 @@ namespace LMS_SoulCode.Features.SubscribedCourse.Repositories
             if (existing != null)
             {
                 existing.IsActive = false;
+                existing.IsDeleted = true;
                 await UpdateAsync(existing, cancellationToken);
             }
         }
