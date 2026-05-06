@@ -1,0 +1,6 @@
+@import '../../styles/table.css';
+
+/* Add component specific overrides if needed */
+.lms-table-wrapper {
+    position: relative;
+}

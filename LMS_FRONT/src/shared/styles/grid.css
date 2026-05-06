@@ -1,0 +1,185 @@
+/* --- LMS PREMIUM GRID DESIGN SYSTEM --- */
+
+.lms-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 24px;
+    margin-top: 24px;
+    padding-bottom: 40px;
+}
+
+.lms-grid-card {
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    border-radius: 32px;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(118, 49, 33, 0.03);
+}
+
+.lms-grid-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--color-primary);
+    box-shadow: 0 20px 40px rgba(118, 49, 33, 0.1);
+}
+
+/* Consistently themed banners */
+.lms-grid-banner {
+    height: 130px;
+    background: var(--color-bg);
+    background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-primary-soft) 100%);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lms-grid-banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.9;
+    transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lms-grid-card:hover .lms-grid-banner-img {
+    transform: scale(1.08);
+}
+
+.lms-grid-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 0%, rgba(var(--color-primary-rgb), 0.05) 100%);
+    z-index: 1;
+}
+
+.lms-grid-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+}
+
+.lms-grid-body {
+    padding: 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: var(--color-bg-alt);
+}
+
+.lms-grid-title {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    color: var(--color-primary);
+    margin: 0;
+}
+
+.lms-grid-description {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.lms-grid-footer {
+    padding: 20px 24px;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(var(--color-primary-rgb), 0.03);
+}
+
+.lms-grid-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Specific Utilities for Grid Cards */
+.lms-grid-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--color-text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.lms-status-icon-bg {
+    background: var(--color-glass-bright);
+    backdrop-filter: blur(4px);
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    box-shadow: 0 8px 16px rgba(118, 49, 33, 0.05);
+    border: 1px solid var(--color-border);
+    z-index: 2;
+}
+
+/* Responsiveness */
+@media (max-width: 1200px) {
+    .lms-grid-container {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .lms-grid-container {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding-bottom: 24px;
+    }
+
+    .lms-grid-card {
+        border-radius: 24px;
+    }
+}
+
+/* Empty State Modernization */
+.lms-grid-empty {
+    padding: 120px 20px;
+    text-align: center;
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.lms-grid-card.skeleton {
+    animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    pointer-events: none;
+    border-color: rgba(var(--color-primary-rgb), 0.1);
+    box-shadow: none;
+}
+
+.lms-grid-card.skeleton .lms-grid-banner,
+.lms-grid-card.skeleton .lms-grid-body div {
+    background: rgba(var(--color-primary-rgb), 0.05) !important;
+}

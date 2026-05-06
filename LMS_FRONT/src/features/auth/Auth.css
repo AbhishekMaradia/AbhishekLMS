@@ -1,0 +1,407 @@
+/* --- LMS SIMPLE MINIMAL AUTH DESIGN --- */
+
+.lms-auth-centered-root {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg);
+    padding: 20px;
+}
+
+.lms-auth-simple-card {
+    width: 100%;
+    max-width: 380px;
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 32px 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.lms-auth-brand-minimal {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.lms-auth-brand-minimal h1 {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--color-primary);
+    margin: 0;
+}
+
+.lms-auth-brand-minimal p {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    margin-top: 4px;
+}
+
+.lms-auth-simple-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.lms-auth-simple-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.lms-auth-simple-field label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-text-dim);
+    text-transform: uppercase;
+}
+
+.lms-auth-simple-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    color: var(--color-text);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.lms-auth-simple-input:focus {
+    border-color: var(--color-primary);
+}
+
+.lms-auth-simple-btn {
+    width: 100%;
+    height: 44px;
+    background: var(--color-primary);
+    color: var(--color-btn-text);
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-top: 8px;
+}
+
+.lms-auth-simple-btn:hover {
+    opacity: 0.9;
+}
+
+.lms-auth-simple-footer {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border);
+    text-align: center;
+}
+
+.lms-auth-simple-footer-btn {
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.lms-auth-simple-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+}
+
+/* Dark mode fine tuning */
+[data-theme='dark'] .lms-auth-simple-card {
+    background: var(--color-bg-alt);
+    border-color: var(--color-border);
+}
+
+[data-theme='dark'] .lms-auth-simple-input {
+    background: var(--color-bg);
+}
+
+/* --- LMS PREMIUM AUTH DESIGN (LOGIN PAGE) --- */
+
+.lms-login-root {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    position: relative;
+    overflow: hidden;
+    padding: 24px;
+}
+
+.lms-login-card-container {
+    width: 100%;
+    max-width: 1000px;
+    height: 640px;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(40px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 40px;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+}
+
+.lms-login-branding-panel {
+    flex: 1;
+    background: #111;
+    position: relative;
+    overflow: hidden;
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: #fff;
+    min-width: 450px;
+}
+
+.lms-login-hex-bg {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.1) 1px, transparent 0);
+    background-size: 30px 30px;
+    opacity: 0.3;
+}
+
+.lms-login-brand-header {
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 2;
+}
+
+.lms-login-brand-icon-wrap {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.lms-login-brand-icon {
+    color: #fff;
+}
+
+.lms-login-brand-name {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.lms-login-brand-title {
+    font-size: 56px;
+    font-weight: 950;
+    line-height: 1;
+    letter-spacing: -2px;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 2;
+    font-family: 'Arima', cursive;
+}
+
+.lms-login-brand-highlight {
+    opacity: 0.4;
+}
+
+.lms-login-brand-desc {
+    font-size: 16px;
+    line-height: 1.6;
+    max-width: 340px;
+    opacity: 0.8;
+    font-weight: 500;
+    position: relative;
+    z-index: 2;
+}
+
+.lms-login-form-panel {
+    width: 420px;
+    background: transparent;
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.lms-login-form-title {
+    font-size: 32px;
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.lms-login-form-subtitle {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 40px;
+    font-weight: 600;
+}
+
+.lms-login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.lms-login-input-wrap {
+    position: relative;
+}
+
+.lms-login-input-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.lms-login-auth-input {
+    width: 100%;
+    height: 56px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 0 24px 0 54px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.lms-login-auth-input:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.2);
+}
+
+.lms-login-pass-toggle {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.lms-login-pass-toggle:hover {
+    color: #fff;
+}
+
+.lms-login-forgot-wrap {
+    text-align: right;
+    margin-top: -8px;
+}
+
+.lms-login-forgot-link {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-primary);
+    text-decoration: none;
+    opacity: 0.8;
+}
+
+.lms-login-forgot-link:hover {
+    opacity: 1;
+}
+
+.lms-login-submit-btn {
+    height: 56px;
+    width: 100%;
+    margin-top: 10px;
+    justify-content: center;
+}
+
+.lms-login-signup-wrap {
+    margin-top: 32px;
+    text-align: center;
+}
+
+.lms-login-signup-text {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 600;
+}
+
+.lms-login-signup-link {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 800;
+}
+
+/* RESPONSIVENESS */
+@media (max-width: 1024px) {
+    .lms-login-card-container {
+        max-width: 900px;
+        height: auto;
+    }
+
+    .lms-login-branding-panel {
+        min-width: 400px;
+        padding: 40px;
+    }
+
+    .lms-login-brand-title {
+        font-size: 44px;
+    }
+}
+
+@media (max-width: 900px) {
+    .lms-login-branding-panel {
+        display: none;
+    }
+
+    .lms-login-card-container {
+        max-width: 450px;
+        border-radius: 32px;
+    }
+
+    .lms-login-form-panel {
+        width: 100%;
+        padding: 48px 32px;
+    }
+}
+
+@media (max-width: 480px) {
+    .lms-login-root {
+        padding: 16px;
+    }
+
+    .lms-login-card-container {
+        border-radius: 24px;
+    }
+
+    .lms-login-form-panel {
+        padding: 40px 24px;
+    }
+
+    .lms-login-form-title {
+        font-size: 24px;
+    }
+
+    .lms-login-form-subtitle {
+        margin-bottom: 32px;
+    }
+}

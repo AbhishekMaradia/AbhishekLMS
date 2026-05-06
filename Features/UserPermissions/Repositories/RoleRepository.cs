@@ -20,7 +20,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Repositories
 
         public async Task<(IEnumerable<GetRoleDto> Items, int TotalCount)> GetRolesAsync(string? searchTerm, int pageNumber, int pageSize, bool? isActive, int? tenantId, CancellationToken cancellationToken)
         {
-            var query = _context.Roles.IgnoreQueryFilters().Where(r => !r.IsDeleted);
+            var query = _context.Roles.IgnoreQueryFilters().Where(r => !r.IsDeleted && r.Code != "SUPER_ADMIN");
 
             if (tenantId.HasValue && tenantId.Value != 0)
             {

@@ -1,0 +1,235 @@
+/* --- LMS STANDARDIZED TABLE DESIGN --- */
+
+.lms-table-wrapper {
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-top: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transit);
+    position: relative;
+}
+
+.lms-table-wrapper:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-border-bright);
+}
+
+.lms-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+}
+
+.lms-table-main {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 800px;
+}
+
+.lms-table-main th {
+    background: var(--color-glass-bright);
+    padding: 12px 20px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--color-text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    border-bottom: 1.5px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    white-space: nowrap;
+}
+
+.lms-table-main th:first-child,
+.lms-table-main td:first-child {
+    padding-left: 20px;
+}
+
+.lms-table-main th:last-child,
+.lms-table-main td:last-child {
+    padding-right: 20px;
+}
+
+
+.lms-table-main td {
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text);
+
+    vertical-align: middle;
+    transition: all var(--transit);
+}
+
+.lms-table-main tr:hover td {
+    background: rgba(var(--color-primary-rgb), 0.04);
+}
+
+
+.lms-table-main tr:last-child td {
+    border-bottom: none;
+}
+
+/* Specific Cell Layouts */
+.lms-cell-id {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--color-primary);
+    font-size: 12px;
+    font-weight: 700;
+    background: var(--color-primary-soft);
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.lms-cell-bold {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+
+.lms-cell-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+/* Status Badges within Tables */
+.lms-table-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Responsive Column Hiding */
+@media (max-width: 1200px) {
+    .lms-hide-large {
+        display: none !important;
+    }
+}
+
+@media (max-width: 1024px) {
+    .lms-hide-tablet {
+        display: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .lms-hide-mobile {
+        display: inline-flex !important;
+        align-items: center;
+        margin-right: 8px;
+        opacity: 0.8;
+    }
+
+    .lms-table-main {
+        min-width: 100% !important;
+    }
+
+    .lms-table-main td,
+    .lms-table-main th {
+        padding: 12px 10px;
+        font-size: 13px;
+    }
+    
+    .lms-table-main th:first-child,
+    .lms-table-main td:first-child {
+        padding-left: 12px;
+    }
+
+    .lms-table-main th:last-child,
+    .lms-table-main td:last-child {
+        padding-right: 12px;
+    }
+}
+
+/* Modern Mobile Transformation: Card View */
+@media (max-width: 600px) {
+    .lms-table-wrapper {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        margin-top: 12px;
+    }
+
+    .lms-table-main, 
+    .lms-table-main thead, 
+    .lms-table-main tbody, 
+    .lms-table-main th, 
+    .lms-table-main td, 
+    .lms-table-main tr {
+        display: block;
+        width: 100% !important;
+    }
+
+    .lms-table-main thead {
+        display: none; 
+    }
+
+    .lms-table-main tr {
+        background: var(--color-bg-alt);
+        border: 1px solid var(--color-border);
+        border-radius: 12px;
+        margin-bottom: 10px;
+        padding: 8px 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+
+    .lms-table-main td {
+        padding: 2px 4px !important;
+        border: none !important;
+        text-align: left !important;
+        font-size: 11px !important;
+        line-height: 1.4;
+    }
+
+    .lms-table-main td:last-child {
+        border-top: 1px solid var(--color-border);
+        margin-top: 6px;
+        padding-top: 8px !important;
+    }
+
+    .lms-cell-actions {
+        justify-content: flex-end;
+        gap: 6px;
+    }
+
+    .lms-tag {
+        font-size: 9px !important;
+        padding: 2px 6px !important;
+    }
+}
+
+/* Empty State (Unified) */
+.lms-table-empty {
+    padding: 80px 24px !important;
+    border-radius: 16px;
+    color: var(--color-text-muted);
+    font-weight: 600;
+    font-size: 14px !important;
+    text-align: center !important;
+    vertical-align: middle;
+    height: 300px;
+}
+
+@media (max-width: 600px) {
+    .lms-table-empty {
+        padding: 40px 20px !important;
+        height: 200px !important;
+    }
+    
+    .lms-table-main tr:has(> .lms-table-empty) {
+        border: 1px dashed var(--color-border);
+        background: transparent;
+        box-shadow: none;
+    }
+}

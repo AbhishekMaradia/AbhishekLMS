@@ -12,5 +12,4 @@ bin/Release/
 publish/ 
 wwwroot/uploads/ 
 Logs/
-LMS_FRONT/
 wwwroot/certificates/

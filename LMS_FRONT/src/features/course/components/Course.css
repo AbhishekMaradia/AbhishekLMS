@@ -1,0 +1,515 @@
+.lms-cl-td-middle {
+    vertical-align: middle !important;
+}
+
+.lms-cl-cell-bold-text {
+    font-size: 15px !important;
+}
+
+.lms-cl-tag-bold {
+    font-weight: 600 !important;
+}
+
+.lms-cl-actions-left {
+    justify-content: flex-start !important;
+}
+
+.lms-cl-icon-scaled {
+    transform: scale(1.1) !important;
+}
+
+.lms-cl-grid-footer {
+    margin-top: auto !important;
+    background: transparent !important;
+    border-top: 1px solid rgba(166, 124, 82, 0.1) !important;
+    padding: 16px 0 0 0 !important;
+}
+
+.lms-cl-footer-title {
+    color: var(--color-primary) !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
+}
+
+.lms-cl-footer-sub {
+    font-size: 9px !important;
+    margin-top: 2px !important;
+}
+
+.lms-courselist-flex-row {
+    align-items: center;
+    gap: 12px;
+}
+
+.lms-courselist-thumb {
+    width: 44px;
+    height: 44px;
+    cursor: zoom-in;
+    border-radius: 12px;
+    object-fit: cover;
+}
+
+.lms-courselist-icon-placeholder {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+}
+
+.lms-courselist-price {
+    color: var(--color-success);
+}
+
+.lms-courselist-btn-studio {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.lms-courselist-icon-bg {
+    transform: scale(1.1) !important;
+}
+
+.lms-courselist-meta-dot {
+    opacity: 0.3;
+}
+
+.lms-courselist-grid-footer {
+    margin-top: auto !important;
+    background: transparent !important;
+    border-top: 1px solid rgba(166, 124, 82, 0.1) !important;
+    padding: 16px 0 0 0 !important;
+}
+
+.lms-courselist-studio-btn {
+    height: 44px !important;
+    border-radius: 22px !important;
+}
+
+.lms-courselist-price-grid {
+    color: var(--color-primary) !important;
+    font-size: 20px !important;
+    line-height: 1 !important;
+}
+
+.lms-courselist-price-sub {
+    font-size: 9px !important;
+    margin-top: 2px !important;
+}
+
+.lms-c-modal-studio-loader {
+    height: 300px;
+}
+
+.lms-c-modal-spinner {
+    width: 48px !important;
+    height: 48px !important;
+}
+
+.lms-c-modal-spinner-text {
+    margin-top: 16px;
+}
+
+.lms-c-modal-media-scroll {
+    max-height: 72vh;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.lms-c-modal-view-toggle-wrap {
+    background: #fdf0e1 !important;
+    padding: 6px !important;
+    border-radius: 24px !important;
+}
+
+.lms-c-modal-view-btn {
+    height: 48px !important;
+    font-size: 11px !important;
+}
+
+.lms-c-modal-btn-content {
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.lms-c-modal-root {
+    margin-top: 8px;
+}
+
+.lms-c-modal-header-row {
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.lms-c-modal-header-title {
+    margin: 0 !important;
+    font-size: 13px !important;
+    font-weight: 950 !important;
+    letter-spacing: 1px !important;
+    color: var(--color-accent-r) !important;
+}
+
+.lms-c-modal-header-actions {
+    gap: 6px;
+}
+
+.lms-c-modal-icon-btn {
+    width: 30px !important;
+    height: 30px !important;
+}
+
+.lms-c-modal-summary-pill {
+    height: 52px !important;
+    border-radius: 14px !important;
+    font-size: 13px !important;
+    font-weight: 950 !important;
+}
+
+.lms-c-modal-summary-content {
+    align-items: center;
+    gap: 10px;
+}
+
+.lms-c-modal-panel-padded {
+    margin-top: 16px !important;
+    padding: 24px !important;
+}
+
+.lms-c-modal-form-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 16px !important;
+}
+
+.lms-c-modal-form-label {
+    color: #763121 !important;
+    font-size: 10px !important;
+}
+
+.lms-c-modal-form-actions {
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.lms-c-modal-cancel-btn {
+    height: 58px !important;
+    border-radius: 18px !important;
+    border: 1px solid var(--color-border-bright) !important;
+    background: var(--color-bg) !important;
+    color: var(--color-primary) !important;
+    font-weight: 800 !important;
+}
+
+.lms-c-modal-file-panel {
+    padding: 4px 16px !important;
+}
+
+.lms-c-modal-file-input {
+    border: none !important;
+}
+
+.lms-c-modal-submit-btn {
+    margin-top: 8px !important;
+}
+
+.lms-c-modal-empty-state {
+    padding: 64px !important;
+}
+
+.lms-c-modal-td-num {
+    width: 1px !important;
+    white-space: nowrap !important;
+}
+
+.lms-c-modal-td-num-content {
+    align-items: center;
+    gap: 16px;
+    padding-right: 20px;
+}
+
+.lms-c-modal-num-text {
+    font-weight: 950 !important;
+    width: 20px !important;
+}
+
+.lms-c-modal-thumb-wrap {
+    position: relative;
+    width: 60px;
+    height: 40px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.lms-c-modal-thumb-img {
+    object-fit: cover !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.lms-c-modal-thumb-icon {
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.lms-c-modal-td-text {
+    width: 1px !important;
+    white-space: nowrap !important;
+    padding-right: 40px !important;
+}
+
+.lms-c-modal-td-title {
+    margin: 0 !important;
+    font-size: 14px !important;
+}
+
+.lms-c-modal-td-sub {
+    font-size: 11px !important;
+    margin-top: 2px !important;
+}
+
+.lms-c-modal-td-actions {
+    white-space: nowrap !important;
+    width: 1px !important;
+}
+
+.lms-c-modal-grid-media {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+    gap: 16px !important;
+}
+
+.lms-c-modal-grid-doc {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+    gap: 16px !important;
+}
+
+.lms-c-modal-card-vid {
+    background: rgba(255, 255, 255, 0.02) !important;
+    padding: 12px !important;
+    border-radius: 16px !important;
+}
+
+.lms-c-modal-card-vid-thumb {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    margin-bottom: 12px;
+}
+
+.lms-c-modal-card-vid-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lms-c-modal-card-vid-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+}
+
+.lms-c-modal-card-vid-play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(var(--color-accent-r-rgb), 0.9);
+    border: none;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.lms-c-modal-card-vid-num {
+    position: absolute;
+    bottom: 8px;
+    left: 12px;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 950;
+}
+
+.lms-c-modal-card-title {
+    font-size: 14px !important;
+    margin: 0 0 4px 0 !important;
+    font-weight: 950 !important;
+}
+
+.lms-c-modal-card-actions {
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.lms-c-modal-card-icon-btn {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.lms-c-modal-td-doc-icon {
+    width: 60px !important;
+}
+
+.lms-c-modal-doc-icon-wrap {
+    width: 32px !important;
+    height: 32px !important;
+}
+
+.lms-c-modal-td-doc-actions {
+    justify-content: flex-start !important;
+}
+
+.lms-c-modal-card-doc {
+    background: rgba(var(--color-success-rgb), 0.04) !important;
+    padding: 16px !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(var(--color-success-rgb), 0.05) !important;
+}
+
+.lms-c-modal-card-doc-icon {
+    width: 40px !important;
+    height: 40px !important;
+    margin-bottom: 16px !important;
+}
+
+.lms-c-modal-card-doc-title {
+    font-size: 14px !important;
+    margin: 0 0 8px 0 !important;
+    font-weight: 950 !important;
+    min-height: 34px !important;
+}
+
+.lms-c-modal-card-doc-actions {
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.lms-c-modal-btn-view {
+    height: 36px !important;
+    font-size: 11px !important;
+}
+
+.lms-c-modal-view-tabs {
+    margin-bottom: 24px !important;
+    padding: 6px !important;
+    border-radius: 24px !important;
+}
+
+.lms-c-modal-tab-btn {
+    height: 52px !important;
+}
+
+.lms-c-modal-select-org {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23763121' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right center !important;
+    appearance: none !important;
+    padding-right: 24px !important;
+    cursor: pointer !important;
+}
+
+.lms-c-modal-desc-textarea {
+    min-height: 120px !important;
+}
+
+.lms-c-modal-thumb-input {
+    height: auto !important;
+    padding: 6px 0 !important;
+    border: none !important;
+}
+
+.lms-c-modal-status-wrap {
+    margin-top: 8px;
+}
+
+.lms-c-modal-status-label {
+    font-size: 14px;
+    font-weight: 800;
+    color: #763121;
+}
+
+.lms-c-modal-status-checkbox {
+    width: 22px;
+    height: 22px;
+    accent-color: #763121;
+    cursor: pointer;
+}
+
+.lms-categories-page {
+    padding: 0 20px;
+}
+
+.lms-categories-loader {
+    padding: 80px 40px;
+    text-align: center;
+}
+
+.lms-categories-loader-spinner {
+    margin: 0 auto 24px;
+}
+
+.lms-categories-loader-text {
+    font-size: 18px;
+    font-weight: 800;
+    opacity: 0.6;
+}
+
+.lms-categories-card-title {
+    margin: 0;
+}
+
+.lms-categories-perspective-wrapper {
+    margin-left: 12px;
+}
+
+.lms-categories-add-btn {
+    height: 44px;
+    padding: 0 24px;
+}
+
+@media (max-width: 1100px) {
+    .lms-categories-page {
+        padding: 0 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .lms-courselist-flex-row {
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+.lms-courses-page {
+    padding: 0 20px;
+}
+
+.lms-courses-loader {
+    padding: 80px 40px;
+    text-align: center;
+}
+
+.lms-courses-loader-spinner {
+    margin: 0 auto 24px;
+}
+
+.lms-courses-loader-text {
+    font-size: 18px;
+    font-weight: 800;
+    opacity: 0.6;
+}
+
+@media (max-width: 1100px) {
+    .lms-courses-page {
+        padding: 0 12px;
+    }
+}
