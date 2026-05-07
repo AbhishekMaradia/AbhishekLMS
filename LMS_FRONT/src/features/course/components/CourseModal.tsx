@@ -8,8 +8,6 @@ interface CourseModalProps {
     user: any;
     isSuperAdmin: boolean;
     db: any;
-    formTenantId: any;
-    setFormTenantId: any;
     courseTab: any;
     setCourseTab: any;
     courseMedia: any;
@@ -26,6 +24,7 @@ interface CourseModalProps {
     setPreviewImage: any;
     setPreviewMedia: any;
     hasPermission: any;
+    cats: any;
 }
 
 export const CourseModal = ({
@@ -33,8 +32,6 @@ export const CourseModal = ({
     user,
     isSuperAdmin,
     db,
-    formTenantId,
-    setFormTenantId,
     courseTab,
     setCourseTab,
     courseMedia,
@@ -50,7 +47,8 @@ export const CourseModal = ({
     handleCrud,
     setPreviewImage,
     setPreviewMedia,
-    hasPermission
+    hasPermission,
+    cats
 }: any) => {
 
     const renderMediaStudio = () => {
@@ -355,15 +353,10 @@ export const CourseModal = ({
                                             <select
                                                 name="TenantId"
                                                 defaultValue={ui.target?.tenantId ?? 0}
-                                                onChange={(e) => {
-                                                    setFormTenantId(Number(e.currentTarget.value));
-                                                    const catSelect = e.currentTarget.form?.elements.namedItem('CategoryId') as HTMLSelectElement;
-                                                    if (catSelect) catSelect.value = "";
-                                                }}
                                                 className="lms-input-premium lms-c-modal-select-org"
                                                 required
                                             >
-                                                <option value={0}>Super Admin (Global)</option>
+                                                <option value={0}>Super Admin</option>
                                                 {db.orgs.filter((o: any) => (o.isActive ?? o.IsActive) !== false).map((o: any) => <option key={o.id || o.Id} value={o.id || o.Id}>{o.orgName || o.OrgName}</option>)}
                                             </select>
                                         </div>
@@ -426,11 +419,7 @@ export const CourseModal = ({
                                         <div className="lms-modal-panel-premium">
                                             <select name="CategoryId" defaultValue={ui.target?.categoryId || ''} className="lms-input-premium" required>
                                                 <option value="">-- Choose Category --</option>
-                                                {(cats || db?.cat || []).filter((c: any) => {
-                                                    const isGlobal = formTenantId === 0 || formTenantId === null;
-                                                    const cTid = c.tenantId ?? (c as any).TenantId;
-                                                    return isGlobal || cTid === 0 || cTid === null || Number(cTid) === Number(formTenantId);
-                                                }).map((c: any) => <option key={c.categoryId || c.Id} value={c.categoryId || c.Id}>{c.categoryName || c.Name}</option>)}
+                                                {(cats || db?.cat || []).map((c: any) => <option key={c.categoryId || c.Id} value={c.categoryId || c.Id}>{c.categoryName || c.Name}</option>)}
                                             </select>
                                         </div>
                                     </div>

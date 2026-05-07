@@ -94,7 +94,7 @@ export const MediaPage: React.FC<MediaPageProps> = (props) => {
                 <CourseList
                     {...props}
                     courses={db.courses}
-                    cats={db.cat}
+                    cats={(db.cats && db.cats.length > 0) ? db.cats : (db.cat || [])}
                     orgs={db.orgs}
                     tab="cm"
                     loading={ui.loading}

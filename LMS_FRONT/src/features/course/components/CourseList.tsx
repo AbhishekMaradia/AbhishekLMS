@@ -28,14 +28,26 @@ export const CourseList = ({
 
     const getOrgName = (c: any) => {
         if (c.orgName || c.OrgName) return c.orgName || c.OrgName;
-        const tid = c.tenantId || c.TenantId;
-        if (!tid || tid === 0) return 'Super Admin';
-        const org = orgs?.find((o: any) => Number(o.id || o.Id) === Number(tid));
-        if (org) return org.orgName || org.Name || org.OrgName;
+        
+        // Use the robust extraction logic again as it handles inconsistent API property names
+        const rawTid = c.tenantId ?? c.TenantId ?? (c as any).organizationId ?? (c as any).OrganizationId ?? (c as any).tid;
+        
+        // Super Admin fallback for 0 or null
+        if (rawTid === undefined || rawTid === null || Number(rawTid) === 0 || String(rawTid).toLowerCase() === 'null') {
+            return 'Super Admin';
+        }
+        
+        const tidNum = Number(rawTid);
+        const org = (orgs || []).find((o: any) => {
+            const oid = o.id ?? o.Id ?? o.tenantId ?? o.TenantId ?? o.tid ?? o.Tid ?? o.organizationId ?? o.OrganizationId;
+            return Number(oid) === tidNum;
+        });
+        
+        if (org) return org.orgName || org.OrgName || org.name || org.Name;
         if (!isSuperAdmin && (user?.orgName || user?.OrgName)) {
             return user.orgName || user.OrgName;
         }
-        return 'Unknown';
+        return 'Super Admin';
     };
 
     const headers: Column[] = [
@@ -75,7 +87,7 @@ export const CourseList = ({
                             <span className="lms-tag info">
                                 {tab === 'cm'
                                     ? (getOrgName(c) || 'SYSTEM').toUpperCase()
-                                    : (cats.find((cat: any) => cat.categoryId === c.categoryId)?.categoryName || 'GENERAL').toUpperCase()
+                                    : ((cats || []).find((cat: any) => cat.categoryId === c.categoryId)?.categoryName || 'GENERAL').toUpperCase()
                                 }
                             </span>
                         </td>
@@ -144,7 +156,7 @@ export const CourseList = ({
                             <Icons.Org s={12} />
                             <span>{getOrgName(c)}</span>
                             <span className="lms-courselist-meta-dot">•</span>
-                            <span>{cats.find((cat: any) => cat.categoryId === c.categoryId)?.categoryName || 'GENERAL'}</span>
+                            <span>{(cats || []).find((cat: any) => cat.categoryId === c.categoryId)?.categoryName || 'GENERAL'}</span>
                         </div>
 
                         <div className="lms-grid-description">

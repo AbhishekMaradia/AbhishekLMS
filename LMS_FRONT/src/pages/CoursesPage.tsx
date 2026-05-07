@@ -66,7 +66,7 @@ export const CoursesPage: React.FC<CoursesPageProps> = ({
             <div className="lms-container">
                 <CourseList
                     courses={db.courses}
-                    cats={db.cat}
+                    cats={(db.cats && db.cats.length > 0) ? db.cats : (db.cat || [])}
                     orgs={db.orgs}
                     viewMode={viewMode}
                     hasPermission={hasPermission}
