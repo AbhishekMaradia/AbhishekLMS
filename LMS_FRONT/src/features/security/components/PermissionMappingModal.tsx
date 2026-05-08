@@ -83,13 +83,13 @@ export const PermissionMappingModal: React.FC<PermissionMappingModalProps> = ({
                         <div className="lms-modal-panel-dashed">
                             <select
                                 name="TenantId"
-                                value={formTenantId || ""}
-                                onChange={(e) => setFormTenantId(e.target.value ? Number(e.target.value) : null)}
+                                value={formTenantId ?? ""}
+                                onChange={(e) => setFormTenantId(e.target.value === "" ? null : Number(e.target.value))}
                                 className="lms-select-premium"
                             >
                                 <option value="">Super Admin</option>
                                 {db.orgs.filter((o: any) => (o.isActive ?? o.IsActive) !== false).map((o: any) => <option key={o.id || o.Id} value={o.id || o.Id}>{o.orgName || o.OrgName}</option>)}
-                                <option value={0}>Super Admin Context</option>
+                                <option value="0">Super Admin Context</option>
                             </select>
                         </div>
                     </>
@@ -193,13 +193,13 @@ export const PermissionMappingModal: React.FC<PermissionMappingModalProps> = ({
                         <div className="lms-modal-panel-dashed lms-pm-modal-org-panel">
                             <select
                                 name="TenantId"
-                                value={formTenantId || ""}
-                                onChange={(e) => setFormTenantId(e.target.value ? Number(e.target.value) : null)}
+                                value={formTenantId ?? ""}
+                                onChange={(e) => setFormTenantId(e.target.value === "" ? null : Number(e.target.value))}
                                 className="lms-select-premium"
                             >
                                 <option value="">-- Select Organization --</option>
                                 {db.orgs.filter((o: any) => (o.isActive ?? o.IsActive) !== false).map((o: any) => <option key={o.id || o.Id} value={o.id || o.Id}>{o.orgName || o.OrgName}</option>)}
-                                <option value={0}>Super Admin Context</option>
+                                <option value="0">Super Admin Context</option>
                             </select>
                         </div>
                     </>
