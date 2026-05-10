@@ -26,6 +26,11 @@ export const OrganizationList: React.FC<OrganizationListProps> = ({
     loading = false
 }) => {
     const filteredOrgs = orgs.filter(o => {
+        // Filter out SuperAdmin/Global system records from the list
+        if (o.orgCode?.toUpperCase() === 'SUPERADMIN' || o.orgName?.toLowerCase().includes('super admin')) {
+            return false;
+        }
+
         const activeVal = o.isActive;
         const matchesStatus = orgStatusFilter === 'all' ? true :
             orgStatusFilter === 'active' ? (activeVal !== false) :

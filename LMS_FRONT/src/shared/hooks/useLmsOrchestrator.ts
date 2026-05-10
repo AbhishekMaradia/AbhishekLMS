@@ -78,7 +78,7 @@ export const useLmsOrchestrator = () => {
     // Multi-tenant Context
     const isSuperAdmin = useMemo(() => {
         const roleCode = (user?.roleCode || user?.RoleCode || user?.userRole || user?.UserRole || '').toUpperCase();
-        const hasAdminRole = roleCode === 'SUPER_ADMIN' || roleCode === 'SUPERADMIN' || user?.email === 'admin@gmail.com' || user?.email === 'admin@lms.com';
+        const hasAdminRole = roleCode === 'SUPER_ADMIN' || roleCode === 'SUPERADMIN' || user?.isSuperAdmin === true;
 
         // A true System SuperAdmin must have NO tenantId (or tenantId 0)
         const utid = user?.tenantId ?? user?.TenantId;

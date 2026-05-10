@@ -21,6 +21,12 @@ export const CourseList = ({
 }: any) => {
 
     const filtered = (courses || []).filter((c: any) => {
+        // Filter out Super Admin / Global courses from the listing
+        const tid = c.tenantId ?? c.TenantId ?? (c as any).organizationId ?? (c as any).OrganizationId ?? (c as any).tid;
+        if (tid === undefined || tid === null || Number(tid) === 0 || String(tid).toLowerCase() === 'null') {
+            return false;
+        }
+
         const active = c.isActive ?? c.IsActive;
         const matchesStatus = (!courseStatusFilter || courseStatusFilter === 'all') ? true : courseStatusFilter === 'active' ? (active !== false) : (active === false);
         return matchesStatus;

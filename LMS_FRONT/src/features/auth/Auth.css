@@ -17,6 +17,11 @@
     border-radius: 12px;
     padding: 32px 24px;
     box-shadow: var(--shadow-sm);
+    transition: max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lms-auth-card-wide {
+    max-width: 800px;
 }
 
 .lms-auth-brand-minimal {
@@ -43,10 +48,111 @@
     gap: 16px;
 }
 
+.lms-auth-form-split {
+    display: flex;
+    gap: 32px;
+}
+
+.lms-auth-form-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.lms-form-row-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+/* --- RESPONSIVENESS REFINEMENTS --- */
+@media (max-width: 1200px) {
+    .lms-auth-card-wide {
+        max-width: 800px;
+        margin: 20px;
+    }
+}
+
+@media (max-width: 992px) {
+    .lms-auth-card-wide {
+        max-width: 720px;
+        padding: 32px 28px;
+    }
+    
+    .lms-auth-form-split {
+        gap: 24px;
+    }
+}
+
+@media (max-width: 850px) {
+    .lms-auth-card-wide {
+        max-width: 100%;
+        margin: 16px;
+        padding: 24px 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .lms-auth-form-split {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .lms-auth-form-column {
+        width: 100%;
+    }
+
+    /* Add spacing between stacked columns */
+    .lms-auth-form-column + .lms-auth-form-column {
+        margin-top: 24px;
+        padding-top: 24px;
+        border-top: 1px dashed var(--color-border);
+    }
+
+    .lms-auth-card-wide {
+        max-width: 480px;
+        margin: 12px auto;
+    }
+
+    .lms-auth-brand-minimal h1 {
+        font-size: 22px;
+    }
+}
+
+@media (max-width: 480px) {
+    .lms-auth-simple-card {
+        padding: 24px 16px;
+        border-radius: 16px;
+    }
+
+    .lms-auth-card-wide {
+        margin: 0;
+        border-radius: 0;
+        min-height: 100vh;
+        max-width: 100%;
+    }
+
+    .lms-form-row-2col {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .lms-auth-brand-minimal h1 {
+        font-size: 20px;
+    }
+
+    .lms-auth-simple-btn {
+        height: 50px;
+        font-size: 15px;
+    }
+}
+
 .lms-auth-simple-field {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    width: 100%;
 }
 
 .lms-auth-simple-field label {

@@ -590,7 +590,7 @@ export const AuthGate = ({ onComplete, decryptor }: any) => {
 
     return (
         <div className="lms-auth-centered-root">
-            <div className="lms-auth-simple-card lms-fade-in">
+            <div className={`lms-auth-simple-card lms-fade-in ${mode === 'org_register' ? 'lms-auth-card-wide' : ''}`}>
                 <div className="lms-auth-brand-minimal">
                     <h1>SoulCode</h1>
                     <p>
@@ -626,28 +626,38 @@ export const AuthGate = ({ onComplete, decryptor }: any) => {
                     )}
 
                     {mode === 'register' && (
-                        <form onSubmit={handleRegister} className="lms-auth-simple-group">
+                        <form onSubmit={handleRegister} className="lms-auth-simple-group" autoComplete="off">
+                            {/* Honeypot fields to catch aggressive browser autofill */}
+                            <div style={{ position: 'absolute', opacity: 0, height: 0, overflow: 'hidden', zIndex: -1 }}>
+                                <input type="text" name="fake_email_autofill" tabIndex={-1} />
+                                <input type="password" name="fake_password_autofill" tabIndex={-1} />
+                            </div>
+
                             <div className="lms-form-row-2col">
                                 <div className="lms-auth-simple-field">
                                     <label>First Name <span style={{ color: 'var(--color-primary)' }}>*</span></label>
-                                    <input name="firstName" placeholder="First Name" className="lms-auth-simple-input" required />
+                                    <input name="firstName" placeholder="First Name" className="lms-auth-simple-input" required autoComplete="given-name" />
                                 </div>
                                 <div className="lms-auth-simple-field">
                                     <label>Last Name <span style={{ color: 'var(--color-primary)' }}>*</span></label>
-                                    <input name="lastName" placeholder="Last Name" className="lms-auth-simple-input" required />
+                                    <input name="lastName" placeholder="Last Name" className="lms-auth-simple-input" required autoComplete="family-name" />
                                 </div>
                             </div>
                             <div className="lms-auth-simple-field">
                                 <label>Email <span style={{ color: 'var(--color-primary)' }}>*</span></label>
-                                <input name="email" type="email" placeholder="Email" className="lms-auth-simple-input" required />
+                                <input name="email" type="email" placeholder="Email" className="lms-auth-simple-input" required autoComplete="email" />
                             </div>
                             <div className="lms-auth-simple-field">
                                 <label>Org Code <span style={{ color: 'var(--color-primary)' }}>*</span></label>
                                 <input name="orgCode" placeholder="Organization Code" className="lms-auth-simple-input" required />
                             </div>
                             <div className="lms-auth-simple-field">
+                                <label>Mobile <span style={{ color: 'var(--color-primary)' }}>*</span></label>
+                                <input name="mobile" placeholder="Mobile" className="lms-auth-simple-input" required autoComplete="tel" />
+                            </div>
+                            <div className="lms-auth-simple-field">
                                 <label>Password <span style={{ color: 'var(--color-primary)' }}>*</span></label>
-                                <input name="password" type="password" placeholder="••••••••" className="lms-auth-simple-input" required />
+                                <input name="password" type="password" placeholder="••••••••" className="lms-auth-simple-input" required autoComplete="new-password" />
                             </div>
 
                             <button type="submit" disabled={loading} className="lms-auth-simple-btn">

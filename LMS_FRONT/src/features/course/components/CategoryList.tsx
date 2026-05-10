@@ -27,7 +27,12 @@ export const CategoryList: React.FC<CategoryListProps> = ({
     user,
     isSuperAdmin
 }) => {
-    const data = cats || [];
+    const data = (cats || []).filter(c => {
+        const tid = c.tenantId || c.TenantId;
+        // Filter out Super Admin / Global categories from the listing
+        if (!tid || tid === 0) return false;
+        return true;
+    });
 
     const getOrgName = (c: any) => {
         if (c.orgName || c.OrgName) return c.orgName || c.OrgName;
