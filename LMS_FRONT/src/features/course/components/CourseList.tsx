@@ -21,12 +21,6 @@ export const CourseList = ({
 }: any) => {
 
     const filtered = (courses || []).filter((c: any) => {
-        // Filter out Super Admin / Global courses from the listing
-        const tid = c.tenantId ?? c.TenantId ?? (c as any).organizationId ?? (c as any).OrganizationId ?? (c as any).tid;
-        if (tid === undefined || tid === null || Number(tid) === 0 || String(tid).toLowerCase() === 'null') {
-            return false;
-        }
-
         const active = c.isActive ?? c.IsActive;
         const matchesStatus = (!courseStatusFilter || courseStatusFilter === 'all') ? true : courseStatusFilter === 'active' ? (active !== false) : (active === false);
         return matchesStatus;
@@ -34,21 +28,21 @@ export const CourseList = ({
 
     const getOrgName = (c: any) => {
         if (c.orgName || c.OrgName) return c.orgName || c.OrgName;
-        
+
         // Use the robust extraction logic again as it handles inconsistent API property names
         const rawTid = c.tenantId ?? c.TenantId ?? (c as any).organizationId ?? (c as any).OrganizationId ?? (c as any).tid;
-        
+
         // Super Admin fallback for 0 or null
         if (rawTid === undefined || rawTid === null || Number(rawTid) === 0 || String(rawTid).toLowerCase() === 'null') {
             return 'Super Admin';
         }
-        
+
         const tidNum = Number(rawTid);
         const org = (orgs || []).find((o: any) => {
             const oid = o.id ?? o.Id ?? o.tenantId ?? o.TenantId ?? o.tid ?? o.Tid ?? o.organizationId ?? o.OrganizationId;
             return Number(oid) === tidNum;
         });
-        
+
         if (org) return org.orgName || org.OrgName || org.name || org.Name;
         if (!isSuperAdmin && (user?.orgName || user?.OrgName)) {
             return user.orgName || user.OrgName;

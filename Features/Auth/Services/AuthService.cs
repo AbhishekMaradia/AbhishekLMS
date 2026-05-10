@@ -77,6 +77,16 @@ namespace LMS_SoulCode.Features.Auth.Services
         {
             int? tenantId = request.TenantId;
 
+            // If TenantId is missing but OrganizationCode is provided, look it up
+            if ((!tenantId.HasValue || tenantId.Value == 0) && !string.IsNullOrEmpty(request.OrganizationCode))
+            {
+                var org = await _orgRepo.GetByCodeAsync(request.OrganizationCode, cancellationToken);
+                if (org != null)
+                {
+                    tenantId = org.Id;
+                }
+            }
+
             // check uniqueness within the tenant
             if (await _userRepo.IsEmailTakenAsync(request.Email, tenantId, cancellationToken))
                 return ApiResponse<List<LoginResponse>>.Fail(Messages.EmailExists, StatusCodes.BadRequest);

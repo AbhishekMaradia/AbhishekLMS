@@ -32,14 +32,14 @@ namespace LMS_SoulCode.Features.Auth.Repositories
         => await _context.Users
             .IgnoreQueryFilters()
             .AsNoTracking()
-            .AnyAsync(u => u.Email == email && !u.IsDeleted, cancellationToken);
+            .AnyAsync(u => u.Email == email && u.TenantId == tenantId && !u.IsDeleted, cancellationToken);
 
 
         public async Task<bool> IsMobileTakenAsync(string mobile, int? tenantId = null, CancellationToken cancellationToken = default)
         => await _context.Users
             .IgnoreQueryFilters()
             .AsNoTracking()
-            .AnyAsync(u => u.Mobile == mobile && !u.IsDeleted, cancellationToken);
+            .AnyAsync(u => u.Mobile == mobile && u.TenantId == tenantId && !u.IsDeleted, cancellationToken);
 
         public async Task<(IEnumerable<UserDto> Items, int TotalCount)> GetUsersAsync(string? searchTerm, int pageNumber, int pageSize, int? tenantId, CancellationToken cancellationToken)
         => await GetPagedAsync<UserDto>(

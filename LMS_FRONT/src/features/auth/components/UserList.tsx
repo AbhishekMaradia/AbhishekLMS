@@ -34,10 +34,6 @@ export const UserList: React.FC<UserListProps> = ({
     extractData,
 }) => {
     const filteredUsers = (users || []).filter(u => {
-        // Filter out SuperAdmins / System Users dynamically based on role or missing tenantId
-        const isSysAdmin = u.userRole === 'SUPER_ADMIN' || u.isSuperAdmin === true || !u.tenantId || u.tenantId === 0;
-        if (isSysAdmin) return false;
-
         const uid = u.id || (u as any).Id;
         const currentUid = currentUser?.id || (currentUser as any)?.Id;
         const matchesStatus =

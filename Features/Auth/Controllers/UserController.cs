@@ -60,7 +60,7 @@ namespace LMS_SoulCode.Features.Auth.Controllers
                 return BadRequest(ApiResponse<string>.Fail(string.Join(", ", validation.Errors.Select(e => e.ErrorMessage)), StatusCodes.BadRequest));
             }
 
-            var targetTenantId = CurrentTenantId ?? request.TenantId;
+            var targetTenantId = (CurrentTenantId == null || CurrentTenantId == 0) ? request.TenantId : CurrentTenantId;
             var response = await _userService.CreateAdminUserAsync(request, targetTenantId, cancellationToken);
             return StatusCode(response.Code, response);
         }

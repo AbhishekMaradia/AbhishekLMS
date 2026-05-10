@@ -35,12 +35,7 @@ export const GroupList: React.FC<GroupListProps> = ({
     user,
     isSuperAdmin
 }) => {
-    const filteredGroups = (groups || []).filter(g => {
-        const tid = g.tenantId || g.TenantId;
-        // Filter out Super Admin / Global groups from the listing
-        if (!tid || tid === 0) return false;
-        return true;
-    });
+    const filteredGroups = groups || [];
 
     const getOrgName = (g: any) => {
         if (g.orgName || g.OrgName) return g.orgName || g.OrgName;

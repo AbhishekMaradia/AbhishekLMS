@@ -31,7 +31,7 @@ export const UserModal: React.FC<UserModalProps> = ({
 
         const getVal = (key: string) => {
             let val = rawData[key];
-            
+
             // Fallback for fields not present in the DOM (e.g. hidden for self-edit)
             if (val === undefined && ui.target) {
                 const t = ui.target;
@@ -75,7 +75,7 @@ export const UserModal: React.FC<UserModalProps> = ({
     };
 
     const targetTenantId = formTenantId ?? ((user as any).tenantId ?? (user as any).TenantId ?? null);
-    
+
     const targetUserId = ui.target?.id || ui.target?.Id;
     const currentUserId = user?.id || user?.Id;
     const isCurrentUser = Boolean(targetUserId && currentUserId && Number(targetUserId) === Number(currentUserId));

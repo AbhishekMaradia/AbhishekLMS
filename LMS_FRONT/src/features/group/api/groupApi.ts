@@ -12,7 +12,7 @@ export const groupApi = {
         return apiClient.get<ApiResponse<any>>(`/Groups/list?${q.toString()}`);
     },
 
-    getGroups: (searchTerm: string = '', page: number = 1, size: number = 10, tenantId?: number | null) => 
+    getGroups: (searchTerm: string = '', page: number = 1, size: number = 10, tenantId?: number | null) =>
         groupApi.list(searchTerm, page, size, tenantId),
 
     // READ: Individual resource
