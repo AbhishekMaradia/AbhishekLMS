@@ -78,8 +78,8 @@ export const securityApi = {
         apiClient.put<ApiResponse<PermissionDto>>(`Permissions/update/${id}`, data),
 
     // ASSIGNMENTS (User-Role)
-    assignUserRole: (userId: number, roleId: number) =>
-        apiClient.post<ApiResponse<string>>('user-permissions/assign-role', { userId, roleId }),
+    assignUserRole: (userId: number, roleId: number, tenantId?: number | null) =>
+        apiClient.post<ApiResponse<string>>('user-permissions/assign-role', { userId, roleId, tenantId }),
 
     // ASSIGNMENTS (Role-Module-Permission)
     getRolePermissions: (roleId: number, moduleId: number, tenantId?: number | null) =>
@@ -91,10 +91,13 @@ export const securityApi = {
     getUserPermissions: (userId: number) =>
         apiClient.get<ApiResponse<any>>(`user-permissions/user/${userId}`),
 
-    updateUserRoleStatus: (userId: number, roleId: number, isActive: boolean) =>
-        apiClient.put<ApiResponse<string>>(`user-permissions/user/${userId}/role/${roleId}`, { isActive }),
-    removeUserRole: (userId: number, roleId: number) =>
-        apiClient.delete<ApiResponse<string>>(`user-permissions/user/${userId}/role/${roleId}`),
+    updateUserRole: (userId: number, roleId: number, data: { isActive: boolean; newRoleId?: number; newTenantId?: number | null }, tenantId?: number | null) =>
+        apiClient.put<ApiResponse<string>>(`user-permissions/user/${userId}/role/${roleId}${tenantId !== undefined && tenantId !== null ? `?tenantId=${tenantId}` : ''}`, data),
+    
+    updateUserRoleStatus: (userId: number, roleId: number, isActive: boolean, tenantId?: number | null) =>
+        apiClient.put<ApiResponse<string>>(`user-permissions/user/${userId}/role/${roleId}${tenantId !== undefined && tenantId !== null ? `?tenantId=${tenantId}` : ''}`, { isActive }),
+    removeUserRole: (userId: number, roleId: number, tenantId?: number | null) =>
+        apiClient.delete<ApiResponse<string>>(`user-permissions/user/${userId}/role/${roleId}${tenantId !== undefined && tenantId !== null ? `?tenantId=${tenantId}` : ''}`),
     getUserRoles: (userId: number) =>
         apiClient.get<ApiResponse<UserRoleDto[]>>(`user-permissions/user/${userId}/roles`),
     getUserRolesList: (searchTerm: string = '', page: number = 1, size: number = 10, tenantId?: number | null, isActive?: boolean) =>

@@ -88,12 +88,13 @@ export const UserRoleModal: React.FC<UserRoleModalProps> = ({
                 const fd = new FormData(e.currentTarget);
                 const uid = Number(fd.get('UserId'));
                 const rid = Number(fd.get('RoleId'));
+                const tid = isSuperAdmin ? (selectedTenant ?? 0) : (user?.tenantId ?? user?.TenantId ?? 0);
+                
                 if (!uid || !rid) { toast.error("Please select both User and Role"); return; }
-                if (alreadyHasRole) { toast.warning("User already holds this security role!"); return; }
 
                 setUi({ ...ui, loading: true });
                 try {
-                    await securityApi.assignUserRole(uid, rid);
+                    await securityApi.assignUserRole(uid, rid, tid);
                     toast.success("Role Assigned Successfully!");
                     setUi({ ...ui, modal: null, loading: false });
                     syncUserRoles();
@@ -195,20 +196,29 @@ export const UserRoleModal: React.FC<UserRoleModalProps> = ({
             <form className="lms-fade-in lms-col-gap-md" onSubmit={async (e) => {
                 e.preventDefault();
                 const fd = new FormData(e.currentTarget);
-                const userId = ui.target.userId || ui.target.UserId;
+                const userId = ui.target.userId || ui.target.UserId || ui.target.id || ui.target.Id;
                 const oldRoleId = ui.target.roleId || ui.target.RoleId;
+                const oldTenantId = Number(fd.get('OriginalTenantId'));
                 const newRoleId = Number(fd.get('RoleId'));
+                const newTenantId = isSuperAdmin ? Number(fd.get('TenantId')) : (ui.target.tenantId || ui.target.TenantId || ui.target.orgId || ui.target.OrgId || 0);
                 const isActive = (e.currentTarget.elements.namedItem('IsActive') as HTMLInputElement).checked;
 
                 setUi({ ...ui, loading: true });
                 try {
-                    if (newRoleId !== oldRoleId) {
-                        await securityApi.removeUserRole(userId, oldRoleId);
-                        await securityApi.assignUserRole(userId, newRoleId);
-                        await securityApi.updateUserRoleStatus(userId, newRoleId, isActive);
-                        toast.success("Role Reassigned!");
+                    const tenantChanged = Number(newTenantId) !== Number(oldTenantId);
+                    const roleChanged = newRoleId !== oldRoleId;
+
+                    if (roleChanged || tenantChanged) {
+                        // Use update method instead of delete/add
+                        await securityApi.updateUserRole(userId, oldRoleId, {
+                            isActive: isActive,
+                            newRoleId: newRoleId,
+                            newTenantId: newTenantId
+                        }, oldTenantId);
+                        toast.success("Role Reassigned Successfully!");
                     } else {
-                        const res = await securityApi.updateUserRoleStatus(userId, oldRoleId, isActive);
+                        // Just a status update for the existing assignment
+                        const res = await securityApi.updateUserRoleStatus(userId, oldRoleId, isActive, oldTenantId);
                         if (extractData(res)) toast.success(`Status updated to ${isActive ? 'Active' : 'Inactive'}`);
                     }
                     setUi({ ...ui, modal: null, loading: false });
@@ -218,31 +228,75 @@ export const UserRoleModal: React.FC<UserRoleModalProps> = ({
                     setUi({ ...ui, loading: false });
                 }
             }}>
+                <input type="hidden" name="OriginalTenantId" value={ui.target.tenantId ?? ui.target.TenantId ?? ui.target.orgId ?? ui.target.OrgId ?? 0} />
+                
                 <label className="lms-label-premium">User Integrity</label>
                 <div className="lms-modal-panel-premium lms-user-role-panel-flex sm">
                     <h3 className="lms-modal-title lms-user-role-title">{ui.target.userEmail || 'User'}</h3>
                     <div className="lms-tag info lms-user-role-tag xs">UPDATING SECURITY CONTEXT</div>
                 </div>
 
+                {isSuperAdmin && (
+                    <>
+                        <label className="lms-label-premium">Organization Context</label>
+                        <div className="lms-modal-panel-premium">
+                            <select
+                                name="TenantId"
+                                className="lms-select-premium"
+                                defaultValue={ui.target.tenantId ?? ui.target.TenantId ?? 0}
+                                onChange={(e) => {
+                                    // Update target tenant in UI state to trigger role list refresh
+                                    setUi({ 
+                                        ...ui, 
+                                        target: { 
+                                            ...ui.target, 
+                                            tenantId: Number(e.target.value),
+                                            // Optional: reset roleId if moving to a different tenant context?
+                                            // roleId: "" 
+                                        } 
+                                    });
+                                }}
+                            >
+                                <option value={0}>Super Admin (Global)</option>
+                                {db.orgs.filter((o: any) => (o.isActive ?? o.IsActive) !== false).map((o: any) => (
+                                    <option key={o.id || o.Id} value={o.id || o.Id}>{o.orgName || o.OrgName}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </>
+                )}
+
                 <label className="lms-label-premium required">Role</label>
                 <div className="lms-modal-panel-premium">
                     <select
                         name="RoleId"
+                        key={ui.target?.tenantId || 'global'} // Re-mount select to refresh defaultValue if tenant changes
                         className="lms-select-premium"
                         defaultValue={ui.target.roleId || ui.target.RoleId}
                         required
                     >
                         <option value="">-- Choose Role --</option>
                         {db.roles.filter((r: any) => {
-                            const targetT = ui.target?.tenantId ?? ui.target?.TenantId;
-                            const roleT = r.tenantId ?? r.TenantId;
                             const isActive = (r.isActive ?? r.IsActive) !== false;
-                            const isGlobal = !roleT || roleT === 0;
-                            const isMatch = targetT && roleT === targetT;
-                            return isActive && (isSuperAdmin || isGlobal || isMatch);
+                            if (!isActive) return false;
+                            
+                            if (!isSuperAdmin) return true;
+
+                            const targetT = ui.target?.tenantId ?? ui.target?.TenantId ?? ui.target?.orgId ?? ui.target?.OrgId;
+                            const roleT = r.tenantId ?? r.TenantId;
+                            const isGlobalRole = !roleT || roleT === 0;
+                            const isMatch = targetT !== undefined && Number(roleT) === Number(targetT);
+                            
+                            if (targetT === 0 || !targetT) {
+                                // If Global context is selected, show only Global roles
+                                return isGlobalRole;
+                            } else {
+                                // If a Tenant is selected, show only that Tenant's roles
+                                return isMatch;
+                            }
                         }).map((r: any) => (
                             <option key={r.id || r.Id} value={r.id || r.Id}>
-                                {r.name || r.Name} {(!r.tenantId && !r.TenantId) ? '(Global)' : `(${r.orgName || 'Tenant'})`}
+                                {r.name || r.Name} {(!r.tenantId && !r.TenantId) ? '(Global)' : `(${r.orgName || db.orgs.find((o: any) => (o.id || o.Id) === (r.tenantId || r.TenantId))?.orgName || 'Tenant'})`}
                             </option>
                         ))}
                     </select>

@@ -7,6 +7,7 @@ namespace LMS_SoulCode.Features.Common
         public const string CATEGORY = "CATEGORY";
         public const string USER = "USER";
         public const string VIDEO = "VIDEO";
+        public const string DOCUMENT = "DOCUMENT";
         public const string CERTIFICATE = "CERTIFICATE";
         public const string SUBSCRIPTION = "SUBSCRIPTION";
         public const string REPORT = "REPORT";

@@ -12,14 +12,14 @@
     padding: 0 !important;
     border-radius: 32px !important;
     overflow: hidden !important;
-    background: #FFFDF9 !important;
-    border: 1px solid rgba(166, 124, 82, 0.2) !important;
+    background: var(--color-bg-alt) !important;
+    border: 1px solid var(--color-border) !important;
     box-shadow: 0 40px 100px rgba(0,0,0,0.5) !important;
 }
 
 .lms-ga-header {
     padding: 24px 32px;
-    border-bottom: 1.5px solid #F2E8D5;
+    border-bottom: 1.5px solid var(--color-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -34,19 +34,19 @@
 .lms-ga-icon-box {
     width: 44px;
     height: 44px;
-    background: #FAF3E7;
-    color: #4A2118;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
     border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid #F2E8D5;
+    border: 1px solid var(--color-border);
 }
 
 .lms-ga-title {
     font-size: 20px !important;
     font-weight: 950 !important;
-    color: #4A2118 !important;
+    color: var(--color-primary) !important;
     margin: 0 !important;
 }
 
@@ -84,11 +84,11 @@
 }
 
 .lms-ga-sidebar-box {
-    background: #FAF3E7;
+    background: var(--color-primary-soft);
     border-radius: 24px;
     padding: 20px 16px;
     text-align: center;
-    border: 1px solid rgba(166, 124, 82, 0.1);
+    border: 1px solid var(--color-border);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -105,7 +105,7 @@
 .lms-ga-stats-val {
     font-size: 42px;
     font-weight: 950;
-    color: #4A2118;
+    color: var(--color-primary);
     line-height: 1;
 }
 
@@ -126,9 +126,9 @@
 .lms-ga-pill-btn {
     height: 42px !important;
     border-radius: 21px !important;
-    border: 1.2px solid #F2E8D5 !important;
-    background: #FFFFFF !important;
-    color: #4A2118 !important;
+    border: 1.2px solid var(--color-border) !important;
+    background: var(--color-bg-alt) !important;
+    color: var(--color-primary) !important;
     font-size: 12px !important;
     font-weight: 900 !important;
     cursor: pointer !important;
@@ -167,7 +167,7 @@
     top: 50%;
     transform: translateY(-50%);
     opacity: 0.3;
-    color: #4A2118;
+    color: var(--color-primary);
 }
 
 .lms-ga-search-input {
@@ -178,9 +178,9 @@
     padding-left: 48px !important;
     font-size: 14px !important;
     font-weight: 700 !important;
-    color: #4A2118 !important;
+    color: var(--color-primary) !important;
     outline: none !important;
-    background: #FFF !important;
+    background: var(--color-bg-alt) !important;
 }
 
 .lms-ga-grid-wrap {
@@ -204,14 +204,14 @@
     align-items: center;
     gap: 12px;
     background: #FFFFFF;
-    border: 1.5px solid #F2E8D5;
+    border: 1.5px solid var(--color-border);
     box-shadow: none;
     user-select: none;
 }
 
 .lms-ga-card.active {
-    background: #FAF3E7;
-    border: 1.5px solid #A67C52;
+    background: var(--color-primary-soft);
+    border: 1.5px solid var(--color-primary);
     box-shadow: 0 6px 15px rgba(166, 124, 82, 0.08);
 }
 
@@ -219,7 +219,7 @@
     width: 22px;
     height: 22px;
     border-radius: 11px;
-    border: 2px solid #A67C52;
+    border: 2px solid var(--color-primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -233,7 +233,7 @@
 }
 
 .lms-ga-checkbox.active {
-    background: #A67C52;
+    background: var(--color-primary);
 }
 
 .lms-ga-card-info {
@@ -243,7 +243,7 @@
 
 .lms-ga-card-name {
     font-weight: 900;
-    color: #4A2118;
+    color: var(--color-primary);
     font-size: 14px;
     white-space: nowrap;
     overflow: hidden;
@@ -253,7 +253,7 @@
 .lms-ga-card-sub {
     font-size: 10px;
     font-weight: 900;
-    color: #A67C52;
+    color: var(--color-primary);
     opacity: 0.8;
 }
 
@@ -274,7 +274,7 @@
     padding: 60px 20px;
     background: rgba(166,124,82,0.03);
     border-radius: 24px;
-    border: 1.5px dashed #F2E8D5;
+    border: 1.5px dashed var(--color-border);
 }
 
 .lms-ga-empty-icon {
@@ -286,14 +286,14 @@
 .lms-ga-empty-text {
     font-size: 15px;
     font-weight: 800;
-    color: #4A2118;
+    color: var(--color-primary);
     opacity: 0.6;
 }
 
 .lms-ga-footer {
     padding: 24px 32px;
-    border-top: 1.5px solid #F2E8D5;
-    background: #FAF3E7;
+    border-top: 1.5px solid var(--color-border);
+    background: var(--color-primary-soft);
     display: flex;
     justify-content: flex-end;
     gap: 16px;
@@ -303,7 +303,7 @@
 .lms-ga-cancel {
     background: none !important;
     border: none !important;
-    color: #A67C52 !important;
+    color: var(--color-primary) !important;
     font-weight: 800 !important;
     cursor: pointer !important;
     font-size: 14px !important;
@@ -313,12 +313,12 @@
     height: 50px !important;
     padding: 0 32px !important;
     border-radius: 14px !important;
-    background: #4A2118 !important;
+    background: var(--color-primary) !important;
     color: #FFFFFF !important;
     border: none !important;
     font-size: 14px !important;
     font-weight: 950 !important;
-    box-shadow: 0 8px 20px rgba(74, 33, 24, 0.2) !important;
+    box-shadow: 0 8px 20px var(--color-primary-soft) !important;
     cursor: pointer !important;
 }
 .lms-gc-overlay {
@@ -357,13 +357,13 @@
 .lms-gc-icon-box {
     width: 44px;
     height: 44px;
-    background: #FAF3E7;
-    color: #4A2118;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
     border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid #F2E8D5;
+    border: 1px solid var(--color-border);
 }
 
 .lms-gc-title {
@@ -548,8 +548,8 @@
 }
 
 .lms-gc-card.active {
-    background: #FAF3E7;
-    border: 1.5px solid #A67C52;
+    background: var(--color-primary-soft);
+    border: 1.5px solid var(--color-primary);
     box-shadow: 0 6px 15px rgba(166, 124, 82, 0.08);
 }
 
@@ -826,13 +826,13 @@
 .lms-gu-icon-box {
     width: 44px;
     height: 44px;
-    background: #FAF3E7;
-    color: #4A2118;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
     border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid #F2E8D5;
+    border: 1px solid var(--color-border);
 }
 
 .lms-gu-title {
@@ -987,8 +987,8 @@
 }
 
 .lms-gu-card.active {
-    background: #FAF3E7;
-    border: 1.5px solid #A67C52;
+    background: var(--color-primary-soft);
+    border: 1.5px solid var(--color-primary);
     box-shadow: 0 6px 15px rgba(166, 124, 82, 0.08);
 }
 

@@ -144,7 +144,7 @@ namespace LMS_SoulCode.Features.CourseVideos.Controllers
             return StatusCode(response.Code, response);
         }
         [HttpDelete("delete/{videoId}")]
-        [BackOfficePermission(ModuleCodes.COURSE, PermissionCodes.COURSE_DELETE)]
+        [BackOfficePermission(ModuleCodes.VIDEO, PermissionCodes.VIDEO_DELETE)]
         public async Task<IActionResult> Delete(int videoId, CancellationToken cancellationToken)
         {
             var response = await _courseVideoService.DeleteAsync(videoId, CurrentTenantId, cancellationToken);
@@ -154,7 +154,7 @@ namespace LMS_SoulCode.Features.CourseVideos.Controllers
         [HttpPost("upload/{courseId}")]
         [DisableRequestSizeLimit]
         [RequestFormLimits(MultipartBodyLengthLimit = 1_610_612_736, ValueLengthLimit = int.MaxValue)]
-        [BackOfficePermission(ModuleCodes.COURSE, PermissionCodes.COURSE_EDIT)]
+        [BackOfficePermission(ModuleCodes.VIDEO, PermissionCodes.VIDEO_ADD)]
         public async Task<IActionResult> Upload(int courseId, [FromForm] IFormFile file, [FromForm] string title, [FromForm] string description, CancellationToken cancellationToken)
         {
             var response = await _courseVideoService.UploadAsync(courseId, file, title, description, CurrentTenantId, cancellationToken);
@@ -162,7 +162,7 @@ namespace LMS_SoulCode.Features.CourseVideos.Controllers
         }
 
         [HttpPut("update/{videoId}")]
-        [BackOfficePermission(ModuleCodes.COURSE, PermissionCodes.COURSE_EDIT)]
+        [BackOfficePermission(ModuleCodes.VIDEO, PermissionCodes.VIDEO_EDIT)]
         public async Task<IActionResult> Update(int videoId, [FromBody] UpdateVideoRequest request, CancellationToken cancellationToken)
         {
             var response = await _courseVideoService.UpdateAsync(videoId, request.Title, request.Description, CurrentTenantId, cancellationToken);

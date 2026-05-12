@@ -28,7 +28,7 @@ namespace LMS_SoulCode.Features.CourseVideos.Controllers
         }
 
         [HttpGet("course/{courseId}")]
-        // [BackOfficePermission(ModuleCodes.COURSE, PermissionCodes.COURSE_VIEW, PermissionCodes.COURSE_EDIT)]
+        [BackOfficePermission(ModuleCodes.DOCUMENT, PermissionCodes.DOCUMENT_VIEW)]
         public async Task<IActionResult> GetByCourse(int courseId, CancellationToken cancellationToken)
         {
             var response = await _service.GetByCourseAsync(courseId, CurrentTenantId, cancellationToken);
@@ -36,7 +36,7 @@ namespace LMS_SoulCode.Features.CourseVideos.Controllers
         }
 
         [HttpPost("upload/{courseId}")]
-        [BackOfficePermission(ModuleCodes.COURSE, PermissionCodes.COURSE_EDIT)]
+        [BackOfficePermission(ModuleCodes.DOCUMENT, PermissionCodes.DOCUMENT_ADD)]
         public async Task<IActionResult> Upload(int courseId, [FromForm] IFormFile file, [FromForm] string? docName, [FromForm] string? description, CancellationToken cancellationToken)
         {
             var response = await _service.UploadAsync(courseId, file, docName ?? string.Empty, description ?? string.Empty, CurrentTenantId, cancellationToken);
@@ -44,7 +44,7 @@ namespace LMS_SoulCode.Features.CourseVideos.Controllers
         }
 
         [HttpDelete("delete/{documentId}")]
-        [BackOfficePermission(ModuleCodes.COURSE, PermissionCodes.COURSE_DELETE)]
+        [BackOfficePermission(ModuleCodes.DOCUMENT, PermissionCodes.DOCUMENT_DELETE)]
         public async Task<IActionResult> Delete(int documentId, CancellationToken cancellationToken)
         {
             var response = await _service.DeleteAsync(documentId, CurrentTenantId, cancellationToken);
@@ -52,7 +52,7 @@ namespace LMS_SoulCode.Features.CourseVideos.Controllers
         }
 
         [HttpGet("download/{documentId}")]
-        // [BackOfficePermission(ModuleCodes.COURSE, PermissionCodes.COURSE_VIEW)]
+        [BackOfficePermission(ModuleCodes.DOCUMENT, PermissionCodes.DOCUMENT_VIEW)]
         public async Task Download(int documentId, CancellationToken cancellationToken)
         {
             try
@@ -101,7 +101,7 @@ namespace LMS_SoulCode.Features.CourseVideos.Controllers
         }
 
         [HttpPut("update/{documentId}")]
-        [BackOfficePermission(ModuleCodes.COURSE, PermissionCodes.COURSE_EDIT)]
+        [BackOfficePermission(ModuleCodes.DOCUMENT, PermissionCodes.DOCUMENT_EDIT)]
         public async Task<IActionResult> Update(int documentId, [FromBody] UpdateDocumentRequest request, CancellationToken cancellationToken)
         {
             var response = await _service.UpdateAsync(documentId, request.DocName, request.Description, CurrentTenantId, cancellationToken);

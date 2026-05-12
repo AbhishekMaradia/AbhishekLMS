@@ -60,15 +60,7 @@ export const GroupModal: React.FC<GroupModalProps> = ({
                     </div>
                 </>
             ) : (
-                <>
-                    <label className="lms-label-premium">Organization</label>
-                    <div className="lms-modal-panel-premium">
-                        <input type="hidden" name="TenantId" value={user?.tenantId ?? (user as any)?.TenantId ?? 0} />
-                        <div className="lms-input-premium lms-group-modal-org-display">
-                            {db.orgs.find((o: any) => Number(o.id || o.Id) === Number(user?.tenantId ?? user?.TenantId))?.orgName || 'Organization Unit'}
-                        </div>
-                    </div>
-                </>
+                <input type="hidden" name="TenantId" value={user?.tenantId ?? (user as any)?.TenantId ?? 0} />
             )}
 
             <button type="submit" disabled={ui.loading} className="lms-btn-commit lms-group-modal-btn">

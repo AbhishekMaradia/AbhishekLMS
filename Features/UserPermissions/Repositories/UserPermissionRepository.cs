@@ -28,7 +28,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Repositories
             // Check if record exists even if soft-deleted (IgnoreQueryFilters)
             var existing = await _context.UserRoles
                 .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId && (ur.TenantId == tenantId || (tenantId == null && ur.TenantId == 0) || (tenantId == 0 && ur.TenantId == null)), cancellationToken);
+                .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId && (ur.TenantId ?? 0) == (tenantId ?? 0), cancellationToken);
 
             if (existing != null)
             {
@@ -56,7 +56,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Repositories
         {
             // 1. Find or create RoleModule
             var roleModule = await _context.RoleModules
-                .FirstOrDefaultAsync(rm => rm.RoleId == dto.RoleId && rm.ModuleId == dto.ModuleId && (rm.TenantId == tenantId || (tenantId == null && rm.TenantId == 0) || (tenantId == 0 && rm.TenantId == null)), cancellationToken);
+                .FirstOrDefaultAsync(rm => rm.RoleId == dto.RoleId && rm.ModuleId == dto.ModuleId && (rm.TenantId ?? 0) == (tenantId ?? 0), cancellationToken);
 
             if (roleModule == null)
             {
@@ -176,10 +176,10 @@ namespace LMS_SoulCode.Features.UserPermissions.Repositories
                          .AnyAsync(cancellationToken);
         }
 
-        public async Task RemoveRoleFromUserAsync(int userId, int roleId, CancellationToken cancellationToken = default)
+        public async Task RemoveRoleFromUserAsync(int userId, int roleId, int? tenantId, CancellationToken cancellationToken = default)
         {
             var userRole = await _context.UserRoles
-                .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId && !ur.IsDeleted, cancellationToken);
+                .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId && (ur.TenantId ?? 0) == (tenantId ?? 0) && !ur.IsDeleted, cancellationToken);
             
             if (userRole != null)
             {
@@ -210,54 +210,46 @@ namespace LMS_SoulCode.Features.UserPermissions.Repositories
                 .ToListAsync(cancellationToken);
         
 
-        public async Task<bool> UserRoleExistsAsync(int userId, int roleId, CancellationToken cancellationToken = default)
+        public async Task<bool> UserRoleExistsAsync(int userId, int roleId, int? tenantId, CancellationToken cancellationToken = default)
         => await _context.UserRoles
-                .AnyAsync(ur => ur.UserId == userId && ur.RoleId == roleId && ur.IsActive && !ur.IsDeleted, cancellationToken);
+                .AnyAsync(ur => ur.UserId == userId && ur.RoleId == roleId && (ur.TenantId ?? 0) == (tenantId ?? 0) && ur.IsActive && !ur.IsDeleted, cancellationToken);
         
+
+        public async Task UpdateUserRoleAsync(int userId, int oldRoleId, int? oldTenantId, int newRoleId, int? newTenantId, CancellationToken cancellationToken = default)
+        {
+            var userRole = await _context.UserRoles
+                .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == oldRoleId && (ur.TenantId ?? 0) == (oldTenantId ?? 0) && !ur.IsDeleted, cancellationToken);
+
+            if (userRole != null)
+            {
+                userRole.RoleId = newRoleId;
+                userRole.TenantId = newTenantId;
+                userRole.UpdatedAt = DateTime.UtcNow;
+                _context.UserRoles.Update(userRole);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+        }
 
         public async Task<List<string>> GetUserRolesAsync(int userId, int? targetTenantId = null, CancellationToken cancellationToken = default)
         {
-            // Check cache first
-            var cacheKey = $"user_roles_{userId}_{(targetTenantId.HasValue ? targetTenantId.Value.ToString() : "global")}";
-            if (_cache.TryGetValue(cacheKey, out List<string> cachedRoles))
-            {
-                return cachedRoles;
-            }
-
             var currentTenantId = targetTenantId > 0 ? targetTenantId : _context.CurrentTenantId;
-
-            // OPTIMIZED: Direct JOIN query for maximum performance (even first time)
-            var roles = await (from ur in _context.UserRoles.IgnoreQueryFilters()
-                              join u in _context.Users.IgnoreQueryFilters() on ur.UserId equals u.Id
-                              join r in _context.Roles.IgnoreQueryFilters() on ur.RoleId equals r.Id
-                              where ur.UserId == userId 
-                                    && u.IsActive
-                                    && !u.IsDeleted
-                                    && ur.IsActive 
-                                    && !ur.IsDeleted 
-                                    && r.IsActive
-                                    && !r.IsDeleted
-                                    // Manual Tenant Filtering Logic
-                                    && (r.TenantId == null || r.TenantId == 0 || r.TenantId == currentTenantId)
-                              select r.Code)
-                              .AsNoTracking()
-                              .ToListAsync(cancellationToken);
-
-            // Cache for 10 minutes with size
-            var cacheOptions = new MemoryCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10),
-                Size = 1 // Small size for role list
-            };
-            _cache.Set(cacheKey, roles, cacheOptions);
-
-            return roles;
+            return await (from ur in _context.UserRoles.IgnoreQueryFilters()
+                               join r in _context.Roles.IgnoreQueryFilters() on ur.RoleId equals r.Id
+                               where ur.UserId == userId 
+                                     && ur.IsActive 
+                                     && !ur.IsDeleted 
+                                     && r.IsActive
+                                     && !r.IsDeleted
+                                     && (r.TenantId ?? 0) == (currentTenantId ?? 0)
+                               select r.Code)
+                               .AsNoTracking()
+                               .ToListAsync(cancellationToken);
         }
 
-        public async Task<Common.ApiResponse<List<string>>> UpdateUserRoleStatusAsync(int userId, int roleId, bool isActive, CancellationToken cancellationToken = default)
+        public async Task<Common.ApiResponse<List<string>>> UpdateUserRoleStatusAsync(int userId, int roleId, bool isActive, int? tenantId, CancellationToken cancellationToken = default)
         {
             var userRole = await _context.UserRoles
-                .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId && !ur.IsDeleted, cancellationToken);
+                .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId && (ur.TenantId ?? 0) == (tenantId ?? 0) && !ur.IsDeleted, cancellationToken);
 
             if (userRole == null)
                 return Common.ApiResponse<List<string>>.Fail("User-Role assignment not found", Common.StatusCodes.NotFound);
@@ -275,23 +267,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Repositories
             return Common.ApiResponse<List<string>>.Success(new List<string>(), message);
         }
 
-        public async Task<List<UserRoleDto>> GetUserRolesWithStatusAsync(int userId, CancellationToken cancellationToken = default)
-        {
-            return await _context.UserRoles
-                .AsNoTracking()
-                .Include(ur => ur.Role)
-                .Where(ur => ur.UserId == userId && !ur.IsDeleted)  // Exclude soft deleted UserRoles
-                .Select(ur => new UserRoleDto
-                {
-                    UserId = ur.UserId,
-                    RoleId = ur.RoleId,
-                    RoleName = ur.Role.Name,
-                    RoleCode = ur.Role.Code,
-                    IsActive = ur.IsActive,
-                    RoleIsActive = ur.Role.IsActive
-                })
-                .ToListAsync(cancellationToken);
-        }
+
 
         public async Task<(IEnumerable<UserRoleDto> Items, int TotalCount)> GetUserRolesPagedAsync(
             int? userId,
@@ -373,39 +349,10 @@ namespace LMS_SoulCode.Features.UserPermissions.Repositories
                 .Where(rmp => 
                     rmp.RoleModule.RoleId == roleId && 
                     rmp.RoleModule.ModuleId == moduleId &&
-                    (rmp.TenantId == tenantId || (tenantId == null && rmp.TenantId == 0) || (tenantId == 0 && rmp.TenantId == null)) &&
+                    (rmp.TenantId ?? 0) == (tenantId ?? 0) &&
                     (rmp.Permission.IsActive ?? true))
                 .ProjectTo<UserPermissionDto>(_mapper.ConfigurationProvider)
                 .ToListAsync(cancellationToken);
 
-        public async Task<bool> SoftDeleteUserRoleAsync(int userId, int roleId, CancellationToken cancellationToken = default)
-        {
-            var userRole = await _context.UserRoles
-                .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId && !ur.IsDeleted, cancellationToken);
-            
-            if (userRole == null || userRole.IsDeleted) return false;
-
-            userRole.IsDeleted = true;
-            // DeletedAt will be set automatically by DbContext SaveChangesAsync override
-            _context.UserRoles.Update(userRole);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            return true;
-        }
-
-        public async Task<bool> RestoreUserRoleAsync(int userId, int roleId, CancellationToken cancellationToken = default)
-        {
-            var userRole = await _context.UserRoles
-                .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId && ur.IsDeleted, cancellationToken);
-            
-            if (userRole == null || !userRole.IsDeleted) return false;
-
-            userRole.IsDeleted = false;
-            // DeletedAt will be cleared automatically by DbContext SaveChangesAsync override
-            _context.UserRoles.Update(userRole);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            return true;
-        }
     }
 }

@@ -22,7 +22,8 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
         [BackOfficePermission(ModuleCodes.USER_ROLE, PermissionCodes.USER_ROLE_ADD)]
         public async Task<IActionResult> AssignRoleToUser([FromBody] AssignRoleDto dto, CancellationToken cancellationToken)
         {
-            var response = await _userPermissionService.AssignRoleToUserAsync(dto, CurrentTenantId, cancellationToken);
+            var targetTenantId = dto.TenantId ?? CurrentTenantId;
+            var response = await _userPermissionService.AssignRoleToUserAsync(dto, targetTenantId, cancellationToken);
             return StatusCode(response.Code, response);
         }
 
@@ -61,17 +62,32 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
 
         [HttpDelete("user/{userId:int}/role/{roleId:int}")]
         [BackOfficePermission(ModuleCodes.USER_ROLE, PermissionCodes.USER_ROLE_DELETE)]
-        public async Task<IActionResult> RemoveRoleFromUser(int userId, int roleId, CancellationToken cancellationToken)
+        public async Task<IActionResult> RemoveRoleFromUser(int userId, int roleId, [FromQuery] int? tenantId, CancellationToken cancellationToken)
         {
-            var response = await _userPermissionService.RemoveRoleFromUserAsync(userId, roleId, CurrentTenantId, cancellationToken);
+            var targetTenantId = tenantId ?? CurrentTenantId;
+            var response = await _userPermissionService.RemoveRoleFromUserAsync(userId, roleId, targetTenantId, cancellationToken);
             return StatusCode(response.Code, response);
         }
 
         [HttpPut("user/{userId:int}/role/{roleId:int}")]
         [BackOfficePermission(ModuleCodes.USER_ROLE, PermissionCodes.USER_ROLE_ADD)]
-        public async Task<IActionResult> UpdateUserRole(int userId, int roleId, [FromBody] UpdateUserRoleDto dto, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateUserRole(int userId, int roleId, [FromBody] UpdateUserRoleDto dto, [FromQuery] int? tenantId, CancellationToken cancellationToken)
         {
-            var response = await _userPermissionService.UpdateUserRoleStatusAsync(userId, roleId, dto.IsActive, CurrentTenantId, cancellationToken);
+            var targetTenantId = tenantId ?? CurrentTenantId;
+            
+            if (dto.NewRoleId.HasValue && (dto.NewRoleId.Value != roleId || (dto.NewTenantId ?? 0) != (targetTenantId ?? 0)))
+            {
+                // Full role/tenant reassignment (No soft delete)
+                var updateRes = await _userPermissionService.UpdateUserRoleAsync(userId, roleId, targetTenantId, dto.NewRoleId.Value, dto.NewTenantId, cancellationToken);
+                if (updateRes.Code != StatusCodes.Success) return StatusCode(updateRes.Code, updateRes);
+                
+                // Also update status of the NEW role if requested
+                await _userPermissionService.UpdateUserRoleStatusAsync(userId, dto.NewRoleId.Value, dto.IsActive, dto.NewTenantId, cancellationToken);
+                return StatusCode(updateRes.Code, updateRes);
+            }
+
+            // Just status update
+            var response = await _userPermissionService.UpdateUserRoleStatusAsync(userId, roleId, dto.IsActive, targetTenantId, cancellationToken);
             return StatusCode(response.Code, response);
         }
 
@@ -79,7 +95,8 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
         [BackOfficePermission(ModuleCodes.USER_ROLE, PermissionCodes.USER_ROLE_VIEW, PermissionCodes.USER_ROLE_ADD)]
         public async Task<IActionResult> GetUserRoles(int userId, CancellationToken cancellationToken)
         {
-            var response = await _userPermissionService.GetUserRolesWithStatusAsync(userId, CurrentTenantId, cancellationToken);
+            var request = new UserRoleListRequest { UserId = userId, PageSize = 1000 };
+            var response = await _userPermissionService.GetUserRolesPagedAsync(request, CurrentTenantId, cancellationToken);
             return StatusCode(response.Code, response);
         }
 

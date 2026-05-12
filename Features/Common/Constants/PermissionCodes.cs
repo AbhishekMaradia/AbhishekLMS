@@ -60,6 +60,12 @@ namespace LMS_SoulCode.Features.Common
         public const string CATEGORY_EDIT = "CATEGORY_EDIT";
         public const string CATEGORY_DELETE = "CATEGORY_DELETE";
 
+        // Document
+        public const string DOCUMENT_VIEW = "DOCUMENT_VIEW";
+        public const string DOCUMENT_ADD = "DOCUMENT_ADD";
+        public const string DOCUMENT_EDIT = "DOCUMENT_EDIT";
+        public const string DOCUMENT_DELETE = "DOCUMENT_DELETE";
+
         // User (General)
         public const string USER_VIEW = "USER_VIEW";
         public const string USER_ADD = "USER_ADD";

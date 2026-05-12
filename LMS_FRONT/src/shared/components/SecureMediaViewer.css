@@ -182,7 +182,8 @@
 
 .lms-secure-media-object {
     position: absolute;
-    top: -56px; /* Crop the browser's PDF toolbar */
+    top: -56px;
+    /* Crop the browser's PDF toolbar */
     left: 0;
     width: 100%;
     height: calc(100% + 56px);
@@ -213,7 +214,8 @@
     z-index: 1001;
     background: transparent;
     cursor: default;
-    pointer-events: none; /* Allows scroll/gestures to reach the underlying content */
+    pointer-events: none;
+    /* Allows scroll/gestures to reach the underlying content */
 }
 
 @media (max-width: 768px) {

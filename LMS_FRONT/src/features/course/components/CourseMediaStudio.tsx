@@ -160,7 +160,7 @@ export const CourseMediaStudio = ({
             ) : (
                 <div className="lms-fade-in">
                     {((cmStudioTab === 'videos' && (isSuperAdmin || hasPermission('VIDEO', 'VIDEO_ADD'))) ||
-                        (cmStudioTab === 'docs' && (isSuperAdmin || hasPermission('COURSE', 'COURSE_DOCUMENT_ADD')))) && (
+                        (cmStudioTab === 'docs' && (isSuperAdmin || hasPermission('DOCUMENT', 'DOCUMENT_ADD')))) && (
                             <div className="lms-cms-upload-wrap">
                                 <div className="lms-cms-upload-header" onClick={() => setShowUpload(!showUpload)} style={{ cursor: 'pointer' }}>
                                     <div className="lms-status-icon accent lms-cms-upload-header-icon">
@@ -280,11 +280,11 @@ export const CourseMediaStudio = ({
                                                             const downloadUrl = `${o}/CourseDocument/download/${d.id || d.Id}?access_token=${t}`;
                                                             setPreviewMedia({ url: `${downloadUrl}#toolbar=0`, name: d.docName, type: 'doc' });
                                                         }} className="lms-btn-commit lms-flex-2 lms-cms-card-doc-view">VIEW</button>
-                                                        {(isSuperAdmin || hasPermission('COURSE', 'COURSE_DOCUMENT_EDIT')) && (
+                                                        {(isSuperAdmin || hasPermission('DOCUMENT', 'DOCUMENT_EDIT')) && (
                                                             <button onClick={() => setCmEditTarget({ type: 'doc', item: d })} className="lms-icon-btn-sm lms-cms-card-doc-edit"><Icons.Edit s={14} /></button>
                                                         )}
 
-                                                        {(isSuperAdmin || hasPermission('COURSE', 'COURSE_DOCUMENT_DELETE')) && (
+                                                        {(isSuperAdmin || hasPermission('DOCUMENT', 'DOCUMENT_DELETE')) && (
                                                             <button onClick={() => handleCmDelete(d.id || d.Id, 'doc')} className="lms-cms-card-doc-del"><Icons.Trash s={14} /></button>
                                                         )}
 
@@ -327,11 +327,11 @@ export const CourseMediaStudio = ({
                                                         }
                                                     }} className="lms-icon-btn-sm lms-cms-td-btn-view" title="View Source"><Icons.Play s={14} /></button>
                                                     {((cmStudioTab === 'videos' && (isSuperAdmin || hasPermission('VIDEO', 'VIDEO_EDIT'))) ||
-                                                        (cmStudioTab === 'docs' && (isSuperAdmin || hasPermission('COURSE', 'COURSE_DOCUMENT_EDIT')))) && (
+                                                        (cmStudioTab === 'docs' && (isSuperAdmin || hasPermission('DOCUMENT', 'DOCUMENT_EDIT')))) && (
                                                             <button onClick={() => setCmEditTarget({ type: cmStudioTab === 'videos' ? 'vid' : 'doc', item: m })} className="lms-icon-btn-sm info lms-cms-td-btn-edit" title="Edit Metadata"><Icons.Edit s={14} /></button>
                                                         )}
                                                     {((cmStudioTab === 'videos' && (isSuperAdmin || hasPermission('VIDEO', 'VIDEO_DELETE'))) ||
-                                                        (cmStudioTab === 'docs' && (isSuperAdmin || hasPermission('COURSE', 'COURSE_DOCUMENT_DELETE')))) && (
+                                                        (cmStudioTab === 'docs' && (isSuperAdmin || hasPermission('DOCUMENT', 'DOCUMENT_DELETE')))) && (
                                                             <button onClick={() => handleCmDelete(m.id || m.Id, cmStudioTab === 'videos' ? 'vid' : 'doc')} className="lms-icon-btn-sm danger lms-cms-td-btn-del" title="Purge Asset"><Icons.Trash s={14} /></button>
                                                         )}
                                                 </div>

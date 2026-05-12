@@ -65,10 +65,8 @@ namespace LMS_SoulCode.Features.CourseVideos.Services
             if (course == null) return ApiResponse<List<string>>.Fail("Course not found", StatusCodes.NotFound);
 
             var ext = Path.GetExtension(file.FileName).ToLower();
-            var allowedExtensions = new[] { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt" };
-            if (!allowedExtensions.Contains(ext))
-                return ApiResponse<List<string>>.Fail("Invalid document format.", StatusCodes.BadRequest);
-
+            // All extensions are allowed as per user request
+            
             var folderPath = _config["AppSettings:DocsPath"] ?? "wwwroot/uploads/documents";
             
             if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);

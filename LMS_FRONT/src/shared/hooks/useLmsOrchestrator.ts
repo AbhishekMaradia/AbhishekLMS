@@ -353,10 +353,15 @@ export const useLmsOrchestrator = () => {
                 const page = ctx.page;
                 const size = ctx.size;
 
-                if (isSuperAdmin && ['users', 'cat', 'group', 'curr', 'cm', 'sec', 'reports'].includes(tab)) {
-                    organizationApi.list('', 1, 1000).then(meta => {
-                        setDb((prev: any) => ({ ...prev, orgs: extract(meta) }));
-                    }).catch(e => console.error("Org Meta Fetch Error", e));
+                if (['users', 'cat', 'group', 'curr', 'cm', 'sec', 'reports'].includes(tab)) {
+                    if (isSuperAdmin) {
+                        organizationApi.list('', 1, 1000).then(meta => {
+                            setDb((prev: any) => ({ ...prev, orgs: extract(meta) }));
+                        }).catch(e => console.error("Org Meta Fetch Error", e));
+                    } else if (activeOrg) {
+                        // For tenant admins, ensure their own org is in the db.orgs for lookup logic
+                        setDb((prev: any) => ({ ...prev, orgs: [activeOrg] }));
+                    }
                 }
 
                 if (['reports', 'users'].includes(tab)) {

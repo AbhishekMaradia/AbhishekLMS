@@ -18,7 +18,7 @@ namespace LMS_SoulCode.Features.Course.Repositories
         {
             var query = _context.Courses
                 .AsNoTracking()
-                .Where(c => (tenantId == null || tenantId == 0 || c.TenantId == tenantId || c.TenantId == 0 || c.TenantId == null) &&
+                .Where(c => ((tenantId == null || tenantId == 0) ? true : c.TenantId == tenantId) &&
                             !c.IsDeleted &&
                             (!isActive.HasValue || c.IsActive == isActive) &&
                             (string.IsNullOrWhiteSpace(searchTerm) || 
@@ -52,7 +52,7 @@ namespace LMS_SoulCode.Features.Course.Repositories
         {
             var query = _context.Courses
                 .AsNoTracking()
-                .Where(c => (tenantId == null || tenantId == 0 || c.TenantId == tenantId || c.TenantId == 0 || c.TenantId == null) && c.IsActive);
+                .Where(c => ((tenantId == null || tenantId == 0) ? true : c.TenantId == tenantId) && c.IsActive);
 
             if (groupId.HasValue || userId.HasValue)
             {
@@ -115,28 +115,28 @@ namespace LMS_SoulCode.Features.Course.Repositories
         public async Task<CourseEntity?> GetByIdAsync(int id, int? tenantId, CancellationToken cancellationToken = default)
         {
             var query = _context.Courses.Where(c => c.Id == id && c.IsActive);
-            if (tenantId.HasValue && tenantId != 0) query = query.Where(c => c.TenantId == tenantId.Value || c.TenantId == 0 || c.TenantId == null);
+            if (tenantId.HasValue && tenantId != 0) query = query.Where(c => c.TenantId == tenantId.Value);
             return await query.FirstOrDefaultAsync(cancellationToken);
         }
 
         public async Task<CourseEntity?> GetByIdForAdminAsync(int id, int? tenantId, CancellationToken cancellationToken = default)
         {
              var query = _context.Courses.Include(c => c.Videos).Where(c => c.Id == id);
-             if (tenantId.HasValue && tenantId != 0) query = query.Where(c => c.TenantId == tenantId.Value || c.TenantId == 0 || c.TenantId == null);
+             if (tenantId.HasValue && tenantId != 0) query = query.Where(c => c.TenantId == tenantId.Value);
              return await query.FirstOrDefaultAsync(cancellationToken);
         }
 
         public async Task<List<CourseEntity>> GetByCategoryIdAsync(int categoryId, int? tenantId, CancellationToken cancellationToken = default)
         {
             var query = _context.Courses.Where(c => c.CategoryId == categoryId && c.IsActive);
-            if (tenantId.HasValue && tenantId != 0) query = query.Where(c => c.TenantId == tenantId.Value || c.TenantId == 0 || c.TenantId == null);
+            if (tenantId.HasValue && tenantId != 0) query = query.Where(c => c.TenantId == tenantId.Value);
             return await query.ToListAsync(cancellationToken);
         }
 
         public async Task<List<CourseEntity>> GetAllActiveCoursesAsync(int? tenantId, CancellationToken cancellationToken = default)
         {
             var query = _context.Courses.Where(c => c.IsActive);
-            if (tenantId.HasValue && tenantId != 0) query = query.Where(c => c.TenantId == tenantId.Value || c.TenantId == 0 || c.TenantId == null);
+            if (tenantId.HasValue && tenantId != 0) query = query.Where(c => c.TenantId == tenantId.Value);
             return await query.ToListAsync(cancellationToken);
         }
 
