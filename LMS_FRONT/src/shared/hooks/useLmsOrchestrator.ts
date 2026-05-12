@@ -105,7 +105,7 @@ export const useLmsOrchestrator = () => {
         );
 
         // 4. Exclusion logic
-        const isAdmin = r.includes('ADMIN') || r.includes('SUPER') || r.includes('ORG');
+        const isAdmin = r.includes('ADMIN') || r.includes('SUPER') || r.includes('ORG') || r.includes('TENANT');
         const hasGroupId = !!(user?.groupId || user?.GroupId);
 
         // If they have "SUBSCRIBE" permission specifically, they are likely a student
@@ -286,7 +286,7 @@ export const useLmsOrchestrator = () => {
 
         const extract = (res: any) => {
             const d = res.data?.data || res.data?.Data || (Array.isArray(res.data) ? res.data : (res.data || res));
-            return Array.isArray(d) ? d : (d?.items || d?.Items || []);
+            return Array.isArray(d) ? d : (d?.items || d?.Items || d?.data || d?.Data || []);
         };
 
         try {
@@ -461,7 +461,12 @@ export const useLmsOrchestrator = () => {
                 if (res) {
                     const resData = res.data as any;
                     const items = applyIsolation(extract(res));
-                    const totalCount = resData?.totalCount || resData?.TotalCount || items.length;
+                    // Smart totalCount extraction: check top-level AND nested data (for PagedApiResponse)
+                    const totalCount = resData?.totalCount || resData?.TotalCount || 
+                                     resData?.data?.totalCount || resData?.data?.TotalCount || 
+                                     resData?.totalRecords || resData?.TotalRecords ||
+                                     resData?.data?.totalRecords || resData?.data?.TotalRecords ||
+                                     items.length;
 
                     if (tab === 'sec') {
                         const st = ui.secTab || 'sec';

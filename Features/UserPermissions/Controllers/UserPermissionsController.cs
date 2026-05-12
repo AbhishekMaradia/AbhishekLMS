@@ -79,7 +79,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Controllers
             {
                 // Full role/tenant reassignment (No soft delete)
                 var updateRes = await _userPermissionService.UpdateUserRoleAsync(userId, roleId, targetTenantId, dto.NewRoleId.Value, dto.NewTenantId, cancellationToken);
-                if (updateRes.Code != StatusCodes.Success) return StatusCode(updateRes.Code, updateRes);
+                if (updateRes.Code != LMS_SoulCode.Features.Common.StatusCodes.Success) return StatusCode(updateRes.Code, updateRes);
                 
                 // Also update status of the NEW role if requested
                 await _userPermissionService.UpdateUserRoleStatusAsync(userId, dto.NewRoleId.Value, dto.IsActive, dto.NewTenantId, cancellationToken);

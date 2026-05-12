@@ -132,7 +132,7 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
                             });
 
                             const allVisibleIds = filtered.map((p: any) => Number(p.id || p.Id || p.permissionId || p.PermissionId));
-                            const isAllSelected = allVisibleIds.length > 0 && allVisibleIds.every(id => pm.rPerms.includes(id));
+                            const isAllSelected = allVisibleIds.length > 0 && allVisibleIds.every((id: number) => pm.rPerms.includes(id));
 
                             const handleToggleAll = () => {
                                 if (isAllSelected) {

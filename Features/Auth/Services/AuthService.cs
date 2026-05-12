@@ -56,7 +56,12 @@ namespace LMS_SoulCode.Features.Auth.Services
 
             var (token, expires) = await _jwtService.CreateTokenAsync(user, cancellationToken);
 
-            var userDto = _mapper.Map<UserDto>(user);
+            var userDto = await _userRepo.GetUserByIdAsync(user.Id, user.TenantId, cancellationToken);
+            if (userDto == null)
+            {
+                // Fallback to simple mapping if for some reason GetUserByIdAsync fails
+                userDto = _mapper.Map<UserDto>(user);
+            }
 
             // Fetch and Encrypt Permissions
             string? encryptedPermissions = null;
@@ -103,7 +108,11 @@ namespace LMS_SoulCode.Features.Auth.Services
 
             var (token, expires) = await _jwtService.CreateTokenAsync(user, cancellationToken);
 
-            var userDto = _mapper.Map<UserDto>(user);
+            var userDto = await _userRepo.GetUserByIdAsync(user.Id, user.TenantId, cancellationToken);
+            if (userDto == null)
+            {
+                userDto = _mapper.Map<UserDto>(user);
+            }
 
             // Fetch and Encrypt Permissions
             string? encryptedPermissions = null;

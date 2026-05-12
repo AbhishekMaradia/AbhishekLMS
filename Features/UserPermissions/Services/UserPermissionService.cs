@@ -24,9 +24,10 @@ namespace LMS_SoulCode.Features.UserPermissions.Services
 
         private async Task ValidateTenantAccessAsync(int? entityTenantId, string entityName, int? currentTenantId)
         {
-            if (currentTenantId.HasValue)
+            if (currentTenantId.HasValue && currentTenantId.Value != 0)
             {
-                if (entityTenantId.HasValue && entityTenantId.Value != currentTenantId.Value)
+                // Allow if entity is global (0 or null) OR belongs to the same tenant
+                if (entityTenantId.HasValue && entityTenantId.Value != 0 && entityTenantId.Value != currentTenantId.Value)
                 {
                     throw new UnauthorizedAccessException($"You do not have permission to access {entityName}");
                 }
@@ -49,11 +50,11 @@ namespace LMS_SoulCode.Features.UserPermissions.Services
                 var role = await _roleRepo.GetByIdAsync(dto.RoleId, cancellationToken);
                 if (role == null) return ApiResponse<List<string>>.Fail(Messages.RoleNotFound, StatusCodes.NotFound);
 
-                if (tenantId.HasValue && role.TenantId.HasValue && role.TenantId != tenantId.Value)
+                if (tenantId.HasValue && role.TenantId.HasValue && role.TenantId.Value != 0 && role.TenantId.Value != tenantId.Value)
                      return ApiResponse<List<string>>.Fail(Messages.RoleNotFound, StatusCodes.NotFound);
                 
                 // Check if user already has this role
-                var userRoleExists = await _userPermissionRepo.UserRoleExistsAsync(dto.UserId, dto.RoleId, cancellationToken);
+                var userRoleExists = await _userPermissionRepo.UserRoleExistsAsync(dto.UserId, dto.RoleId, tenantId, cancellationToken);
                 if (userRoleExists)
                     return ApiResponse<List<string>>.Fail(Messages.UserRoleExists, StatusCodes.BadRequest);
 
@@ -73,7 +74,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Services
             var role = await _roleRepo.GetByIdAsync(dto.RoleId, cancellationToken);
             if (role == null) return ApiResponse<List<string>>.Fail(Messages.RoleNotFound, StatusCodes.NotFound);
             
-            if (tenantId.HasValue && role.TenantId.HasValue && role.TenantId != tenantId.Value)
+            if (tenantId.HasValue && role.TenantId.HasValue && role.TenantId.Value != 0 && role.TenantId.Value != tenantId.Value)
                  return ApiResponse<List<string>>.Fail(Messages.RoleNotFound, StatusCodes.NotFound); // Or Forbidden
 
             // Validate Module exists and is active
@@ -157,7 +158,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Services
                 var role = await _roleRepo.GetByIdAsync(roleId, cancellationToken);
                 if (role == null) return ApiResponse<List<string>>.Fail(Messages.RoleNotFound, StatusCodes.NotFound);
                 
-                if (tenantId.HasValue && role.TenantId.HasValue && role.TenantId != tenantId.Value)
+                if (tenantId.HasValue && role.TenantId.HasValue && role.TenantId.Value != 0 && role.TenantId.Value != tenantId.Value)
                      return ApiResponse<List<string>>.Fail(Messages.RoleNotFound, StatusCodes.NotFound);
 
                 // Check if user has this role
@@ -189,7 +190,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Services
 
                 // Validate Role exists in DB
                 var role = await _roleRepo.GetByIdAsync(roleId, cancellationToken);
-                if (role == null || (tenantId.HasValue && role.TenantId.HasValue && role.TenantId != tenantId.Value))
+                if (role == null || (tenantId.HasValue && role.TenantId.HasValue && role.TenantId.Value != 0 && role.TenantId.Value != tenantId.Value))
                      return ApiResponse<List<string>>.Fail(Messages.RoleNotFound, StatusCodes.NotFound);
                 
                 // Check if user has this role
@@ -269,7 +270,7 @@ namespace LMS_SoulCode.Features.UserPermissions.Services
             var role = await _roleRepo.GetByIdAsync(roleId, cancellationToken);
             if (role == null) return ApiResponse<IEnumerable<UserPermissionDto>>.Fail(Messages.RoleNotFound, StatusCodes.NotFound);
 
-            if (tenantId.HasValue && role.TenantId.HasValue && role.TenantId != tenantId.Value)
+            if (tenantId.HasValue && role.TenantId.HasValue && role.TenantId.Value != 0 && role.TenantId.Value != tenantId.Value)
                  return ApiResponse<IEnumerable<UserPermissionDto>>.Fail(Messages.RoleNotFound, StatusCodes.NotFound);
 
             // Validate Module exists and is active

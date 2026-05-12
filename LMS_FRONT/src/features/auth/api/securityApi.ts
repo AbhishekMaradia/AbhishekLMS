@@ -99,9 +99,9 @@ export const securityApi = {
     removeUserRole: (userId: number, roleId: number, tenantId?: number | null) =>
         apiClient.delete<ApiResponse<string>>(`user-permissions/user/${userId}/role/${roleId}${tenantId !== undefined && tenantId !== null ? `?tenantId=${tenantId}` : ''}`),
     getUserRoles: (userId: number) =>
-        apiClient.get<ApiResponse<UserRoleDto[]>>(`user-permissions/user/${userId}/roles`),
+        apiClient.get<ApiResponse<{ items: UserRoleDto[] }>>(`user-permissions/user/${userId}/roles`),
     getUserRolesList: (searchTerm: string = '', page: number = 1, size: number = 10, tenantId?: number | null, isActive?: boolean) =>
-        apiClient.get<ApiResponse<UserRoleDto[]>>(`user-permissions/user-roles/list?SearchTerm=${encodeURIComponent(searchTerm)}&PageNumber=${page}&PageSize=${size}${(tenantId !== undefined && tenantId !== null) ? `&TenantId=${tenantId}` : ''}${isActive !== undefined ? `&IsActive=${isActive}` : ''}`),
+        apiClient.get<ApiResponse<{ items: UserRoleDto[]; totalCount: number }>>(`user-permissions/user-roles/list?SearchTerm=${encodeURIComponent(searchTerm)}&PageNumber=${page}&PageSize=${size}${(tenantId !== undefined && tenantId !== null) ? `&TenantId=${tenantId}` : ''}${isActive !== undefined ? `&IsActive=${isActive}` : ''}`),
     checkUserPermission: (userId: number, moduleCode: string, permissionCode: string) =>
         apiClient.get<ApiResponse<any>>(`user-permissions/user/${userId}/check/${moduleCode}/${permissionCode}`),
 
