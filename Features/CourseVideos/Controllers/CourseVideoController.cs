@@ -1,4 +1,5 @@
 using LMS_SoulCode.Features.CourseVideos.Services;
+using System.Security.Cryptography;
 using LMS_SoulCode.Features.CourseVideos.DTOs;
 using LMS_SoulCode.Features.SubscribedCourse.Services;
 using LMS_SoulCode.Features.Common;
@@ -102,23 +103,56 @@ namespace LMS_SoulCode.Features.CourseVideos.Controllers
 
                 var fullPath = Path.Combine(_env.ContentRootPath, video.VideoUrl.TrimStart('/'));
 
-                if (!System.IO.File.Exists(fullPath))
+                using var fileStream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                
+                // --- SMART LENGTH CALCULATION ---
+                // We read the last 32 bytes to determine the exact PKCS7 padding size
+                // and report 100% accurate Content-Length to the browser.
+                long decryptedLength = fileStream.Length - 16; // Default
+                if (fileStream.Length >= 32)
                 {
-                    Response.StatusCode = 404;
-                    return;
+                    byte[] lastTwoBlocks = new byte[32];
+                    fileStream.Seek(-32, SeekOrigin.End);
+                    await fileStream.ReadAsync(lastTwoBlocks, 0, 32, cancellationToken);
+                    fileStream.Seek(0, SeekOrigin.Begin); // Reset for streaming
+
+                    using var aesLen = Aes.Create();
+                    aesLen.Key = _cryptoService.Key;
+                    aesLen.IV = lastTwoBlocks.Take(16).ToArray(); // Previous block is IV for last block
+                    aesLen.Padding = PaddingMode.None; // Manual padding check
+                    using var decryptorLen = aesLen.CreateDecryptor();
+                    byte[] lastBlockDec = decryptorLen.TransformFinalBlock(lastTwoBlocks.Skip(16).ToArray(), 0, 16);
+                    
+                    int paddingSize = lastBlockDec[15]; // PKCS7: last byte is the padding size
+                    if (paddingSize >= 1 && paddingSize <= 16) decryptedLength -= paddingSize;
                 }
 
-                var stream = _cryptoService.GetDecryptStream(fullPath);
+                using var stream = _cryptoService.GetDecryptStream(fullPath);
                 
                 Response.ContentType = "video/mp4";
-                
-                // Decrypt and stream directly to the response
-                await stream.CopyToAsync(Response.Body, cancellationToken);
+                Response.ContentLength = decryptedLength; 
+                Response.Headers["Accept-Ranges"] = "none";
+
+                _logger.LogInformation("[LMS_STREAM] Starting stream for {VideoId}. Exact Size: {Size} bytes", videoId, decryptedLength);
+
+                byte[] buffer = new byte[1048576]; // 1MB buffer
+                long totalBytesSent = 0;
+                int bytesRead;
+
+                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
+                {
+                    // Ensure we don't send padding bytes if any (though CryptoStream usually handles this, 
+                    // providing exact Content-Length is the key for Chrome)
+                    await Response.Body.WriteAsync(buffer, 0, bytesRead, cancellationToken);
+                    await Response.Body.FlushAsync(cancellationToken); 
+                    totalBytesSent += bytesRead;
+                }
+
+                _logger.LogInformation("[LMS_STREAM] Successfully completed stream for {VideoId}", videoId);
             }
-            catch
+            catch (OperationCanceledException)
             {
-                if (!Response.HasStarted)
-                    Response.StatusCode = 500;
+                _logger.LogWarning("[LMS_STREAM] Playback cancelled for {VideoId}", videoId);
             }
         }
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using LMS_SoulCode.Features.Auth.Models;
 using LMS_SoulCode.Features.Auth.Services;
 using LMS_SoulCode.Features.Auth.Validators;
@@ -10,7 +10,6 @@ using StatusCodes = LMS_SoulCode.Features.Common.StatusCodes;
 
 namespace LMS_SoulCode.Features.Auth.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : BaseApiController

@@ -9,9 +9,14 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'https://keratometric-autotypic-collin.ngrok-free.dev',
+        target: 'http://localhost:5209',
         changeOrigin: true,
         secure: false,
+        timeout: 600000,
+        proxyTimeout: 600000,
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
       }
     }
   }

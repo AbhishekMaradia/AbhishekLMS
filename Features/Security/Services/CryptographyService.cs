@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using SixLabors.ImageSharp;
@@ -10,6 +10,7 @@ namespace LMS_SoulCode.Features.Security.Services
     public class CryptographyService
     {
         private readonly byte[] _key;
+        public byte[] Key => _key;
         private readonly IConfiguration _config;
 
         public CryptographyService(IConfiguration config)

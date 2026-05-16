@@ -15,49 +15,50 @@ interface GroupAssignModalProps {
     saveGroupUsers: () => Promise<void>;
 }
 
+const Layout = ({ sidebar, content, footer, title, icon: Icon, onClose }: { sidebar: any, content: any, footer: any, title: string, icon: any, onClose: () => void }) => (
+    <div className="lms-modal-overlay lms-modal-overlay-smooth lms-ga-overlay" onClick={onClose}>
+        <div
+            className="lms-modal-content lms-slide-up lms-ga-content"
+            onClick={e => e.stopPropagation()}
+        >
+            {/* Modal Header */}
+            <div className="lms-ga-header">
+                <div className="lms-ga-header-left">
+                    <div className="lms-ga-icon-box">
+                        <Icon s={22} />
+                    </div>
+                    <div>
+                        <h2 className="lms-ga-title">{title}</h2>
+                        <div className="lms-ga-subtitle">Resource Manager</div>
+                    </div>
+                </div>
+                <button onClick={onClose} className="lms-ga-close-btn">
+                    <Icons.Close s={24} />
+                </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="lms-ga-body">
+                <div className="lms-ga-sidebar">{sidebar}</div>
+                <div className="lms-ga-main">
+                    {content}
+                </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="lms-ga-footer">
+                {footer}
+            </div>
+        </div>
+    </div>
+);
+
 export const GroupAssignModal: React.FC<GroupAssignModalProps> = ({
     gcModal, setGcModal,
     guModal, setGuModal,
     toggleAllVisibleCourses, toggleCourse, saveGroupCourses,
     toggleAllVisibleUsers, toggleUserInGroup, saveGroupUsers
 }) => {
-    const Layout = ({ sidebar, content, footer, title, icon: Icon, onClose }: { sidebar: any, content: any, footer: any, title: string, icon: any, onClose: () => void }) => (
-        <div className="lms-modal-overlay lms-modal-overlay-smooth lms-ga-overlay" onClick={onClose}>
-            <div
-                className="lms-modal-content lms-slide-up lms-ga-content"
-                onClick={e => e.stopPropagation()}
-            >
-                {/* Modal Header */}
-                <div className="lms-ga-header">
-                    <div className="lms-ga-header-left">
-                        <div className="lms-ga-icon-box">
-                            <Icon s={22} />
-                        </div>
-                        <div>
-                            <h2 className="lms-ga-title">{title}</h2>
-                            <div className="lms-ga-subtitle">Resource Manager</div>
-                        </div>
-                    </div>
-                    <button onClick={onClose} className="lms-ga-close-btn">
-                        <Icons.Close s={24} />
-                    </button>
-                </div>
-
-                {/* Modal Body */}
-                <div className="lms-ga-body">
-                    <div className="lms-ga-sidebar">{sidebar}</div>
-                    <div className="lms-ga-main">
-                        {content}
-                    </div>
-                </div>
-
-                {/* Modal Footer */}
-                <div className="lms-ga-footer">
-                    {footer}
-                </div>
-            </div>
-        </div>
-    );
 
     if (gcModal) {
         const searchQ = (gcModal.search || "").toLowerCase();

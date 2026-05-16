@@ -19,14 +19,10 @@ namespace LMS_SoulCode.Features.Reports.Controllers
         }
 
         [HttpGet("course/{userId}/{courseId}")]
-        // [BackOfficePermission(ModuleCodes.REPORT, PermissionCodes.REPORT_VIEW, PermissionCodes.REPORT_GENERATE)]
+        [BackOfficePermission(ModuleCodes.REPORT, PermissionCodes.REPORT_VIEW, PermissionCodes.REPORT_GENERATE)]
         public async Task<IActionResult> GetReport(int userId, int courseId, CancellationToken cancellationToken)
-        {
-            // Security: Students can only see their own report
-            if (userId != CurrentUserId && !CurrentIsSuperAdmin)
-                return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status403Forbidden, ApiResponse<List<CourseProgressReportDto>>.Fail(Messages.Forbidden, LMS_SoulCode.Features.Common.StatusCodes.Forbidden));
-
-            var response = await _report.GetUserCourseReport(userId, courseId, CurrentTenantId, cancellationToken);
+        {       
+           var response = await _report.GetUserCourseReport(userId, courseId, CurrentTenantId, cancellationToken);
             return StatusCode(response.Code, response);
         }
 
