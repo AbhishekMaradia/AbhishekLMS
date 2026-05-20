@@ -85,7 +85,7 @@ export const useLmsOrchestrator = () => {
             
             // Reset groupTab ONLY if we are actually CHANGING the main route to /groups 
             // from a different section (not switching sub-tabs or coming from att/att_logs)
-            if (targetTab === 'group' && tab !== 'group' && tab !== 'att' && tab !== 'att_logs') {
+            if (targetTab === 'group' && groupTab !== 'att' && groupTab !== 'att_logs') {
                 setGroupTab('groups');
             }
         }
