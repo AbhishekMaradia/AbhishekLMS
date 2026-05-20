@@ -113,5 +113,11 @@ namespace LMS_SoulCode.Features.Common
         public const string FILE_DECRYPT = "FILE_DECRYPT";
         public const string FILE_UPLOAD = "FILE_UPLOAD";
         public const string FILE_DOWNLOAD = "FILE_DOWNLOAD";
+        
+        // Attendance
+        public const string ATTENDANCE_VIEW = "ATTENDANCE_VIEW";
+        public const string ATTENDANCE_ADD = "ATTENDANCE_ADD";
+        public const string ATTENDANCE_EDIT = "ATTENDANCE_EDIT";
+        public const string ATTENDANCE_DELETE = "ATTENDANCE_DELETE";
     }
 }

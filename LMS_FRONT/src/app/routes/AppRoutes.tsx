@@ -27,8 +27,8 @@ interface AppRoutesProps {
     setSearchTerm: (s: string) => void;
     viewMode: 'table' | 'grid';
     setViewMode: (v: 'table' | 'grid') => void;
-    groupTab: 'groups' | 'gc' | 'gu';
-    setGroupTab: (t: 'groups' | 'gc' | 'gu') => void;
+    groupTab: 'groups' | 'gc' | 'gu' | 'att' | 'att_logs';
+    setGroupTab: (t: 'groups' | 'gc' | 'gu' | 'att' | 'att_logs') => void;
     pagination: any;
     changePage: (e: string, p: number) => void;
     changePageSize: (e: string, s: number) => void;

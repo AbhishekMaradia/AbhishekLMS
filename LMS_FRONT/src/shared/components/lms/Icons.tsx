@@ -64,6 +64,8 @@ export const Settings = (p: any) => <BaseSvg {...p}><circle cx="12" cy="12" r="3
 export const Globe = (p: any) => <BaseSvg {...p}><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" /></BaseSvg>;
 export const UserPlus = (p: any) => <BaseSvg {...p}><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="8" cy="7" r="4" /><line x1="20" y1="8" x2="20" y2="14" /><line x1="23" y1="11" x2="17" y2="11" /></BaseSvg>;
 export const Alert = (p: any) => <BaseSvg {...p}><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></BaseSvg>;
+export const Message = (p: any) => <BaseSvg {...p}><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" /></BaseSvg>;
+export const X = Close;
 
 export const StatIcons: Record<string, React.FC<any>> = {
     Orgs: Org,
@@ -80,5 +82,5 @@ export const Maximize = (p: any) => <BaseSvg {...p}><path d="M8 3H5a2 2 0 00-2 2
 
 // Summary object for convenience
 export const Icons = {
-    Logo, Menu, Close, Dash, Org, User, Book, Lock, Cat, Grid, Table, Trash, Logout, Users, Groups, Plus, Video, Doc, Pdf, Word, Excel, Sun, Moon, Play, Shield, Check, Eye, EyeOff, Edit, Mail, Next, Prev, Clock, Phone, Loader, Search, ChevronDown, ChevronLeft, ChevronRight, Settings, Globe, UserPlus, Alert, Maximize, BarChart
+    Logo, Menu, Close, Dash, Org, User, Book, Lock, Cat, Grid, Table, Trash, Logout, Users, Groups, Plus, Video, Doc, Pdf, Word, Excel, Sun, Moon, Play, Shield, Check, Eye, EyeOff, Edit, Mail, Next, Prev, Clock, Phone, Loader, Search, ChevronDown, ChevronLeft, ChevronRight, Settings, Globe, UserPlus, Alert, Maximize, BarChart, X, Message
 };

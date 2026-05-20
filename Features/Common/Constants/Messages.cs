@@ -57,5 +57,9 @@ namespace LMS_SoulCode.Features.Common
         public const string DeleteBlockedUserAdmin = "Cannot delete this user because they are the Organization Admin. Please assign another admin first.";
         public const string SelfDeactivationError = "You cannot deactivate your own account.";
         public const string SelfDeletionError = "You cannot delete your own account.";
+        
+        // Attendance Specific
+        public const string NoAttendanceRecords = "No attendance records provided";
+        public const string AttendanceModuleRequired = "Attendance module data is required";
     }
 }

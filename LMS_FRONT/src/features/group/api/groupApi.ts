@@ -43,4 +43,15 @@ export const groupApi = {
 
     assignUsers: (data: any) =>
         apiClient.put<ApiResponse<any>>(`/Groups/assign-users`, data),
+
+    submitAttendance: (data: any) => apiClient.post<ApiResponse<any>>('/Attendance/submit', data),
+    getAttendanceList: (tenantId?: number, groupId?: number, courseId?: number) => {
+        let url = `/Attendance/list?`;
+        if (tenantId) url += `tenantId=${tenantId}&`;
+        if (groupId) url += `groupId=${groupId}&`;
+        if (courseId) url += `courseId=${courseId}&`;
+        return apiClient.get<ApiResponse<any>>(url);
+    },
+    getAttendanceByFilters: (groupId: number, courseId: number, date: string) => apiClient.get<ApiResponse<any>>(`/Attendance/get?groupId=${groupId}&courseId=${courseId}&date=${date}`),
+    deleteAttendance: (id: number) => apiClient.delete<ApiResponse<string>>(`/Attendance/delete/${id}`)
 };

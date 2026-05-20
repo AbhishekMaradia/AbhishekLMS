@@ -5,7 +5,7 @@ import './SecureMediaViewer.css';
 interface MediaData {
     url: string;
     name: string;
-    type: 'video' | 'doc';
+    type: 'video' | 'doc' | 'img';
 }
 
 interface SecureMediaViewerProps {
@@ -16,6 +16,7 @@ interface SecureMediaViewerProps {
 
 export const SecureMediaViewer: React.FC<SecureMediaViewerProps & { user: any, accentColor?: string }> = ({ media, onClose, user, isDarkMode = true, accentColor = '#6366f1' }) => {
     const ACCENT = accentColor;
+    console.log('[SMV] rendering. media=', media, 'user=', user);
 
     useEffect(() => {
         let frameId: number;
@@ -137,9 +138,21 @@ export const SecureMediaViewer: React.FC<SecureMediaViewerProps & { user: any, a
                         >
                             Your gadget does not support video streaming.
                         </video>
+                    ) : media.type === 'img' ? (
+                        <div className="lms-secure-media-doc-shell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000' }}>
+                            <img
+                                src={media.url}
+                                alt={media.name}
+                                className="lms-secure-media-img"
+                                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }}
+                                onContextMenu={e => e.preventDefault()}
+                                draggable={false}
+                            />
+                            <div className="lms-secure-media-shield" onContextMenu={e => e.preventDefault()} />
+                        </div>
                     ) : (
                         <div className="lms-secure-media-doc-shell">
-                            {/* Using object tag for better PDF security handshakes and compatibility */}
+                            {/* object tag: browser uses Content-Type from server for rendering */}
                             <object
                                 data={`${media.url}#toolbar=0&navpanes=0&view=FitH`}
                                 type="application/pdf"

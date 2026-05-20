@@ -7,6 +7,7 @@ import {
     LayoutDashboard,
     ShieldCheck,
     UsersRound,
+    CheckSquare,
     type LucideIcon
 } from 'lucide-react';
 import { Icons, SecureImage } from '../lms/LmsComponents';
@@ -27,23 +28,24 @@ export const Sidebar = ({ sidebarOpen, activeTab: tab, setTab, hasPermission, is
             'dash': '/dashboard', 'users': '/users', 'orgs': '/organizations',
             'cat': '/categories', 'curr': '/courses', 'cm': '/media',
             'group': '/groups', 'sec': '/security', 'enroll': '/enrollments',
-            'reports': '/reports'
+            'reports': '/reports', 'att': '/groups'
         };
 
         if (disabled) return null;
 
         return (
-            <NavLink
-                to={tabToRoute[id] || '/dashboard'}
-                onClick={() => setTab(id)}
-                className={({ isActive }) => `lms-nav-item${isActive ? ' active' : ''}`}
+            <div
+                onClick={() => {
+                    setTab(id);
+                }}
+                className={`lms-nav-item${tab === id ? ' active' : ''}`}
+                style={{ cursor: 'pointer' }}
             >
                 <div>
                     <Icon size={20} strokeWidth={2.2} />
-
                 </div>
                 <span>{label}</span>
-            </NavLink>
+            </div>
         );
     };
 
@@ -56,6 +58,7 @@ export const Sidebar = ({ sidebarOpen, activeTab: tab, setTab, hasPermission, is
     const canSeeSecurity = (hasPermission('ROLE', 'ROLE_VIEW') || hasPermission('PERMISSION', 'PERMISSION_VIEW') || hasPermission('MODULE', 'MODULE_VIEW') || hasPermission('ROLE_MODULE', 'ROLE_MODULE_PERMISSION_VIEW') || hasPermission('USER_ROLE', 'USER_ROLE_VIEW'));
     const canSeeEnrollment = isSuperAdmin || hasPermission('SUBSCRIPTION', 'SUBSCRIPTION_VIEW');
     const canSeeReport = isSuperAdmin || hasPermission('REPORT', 'REPORT_VIEW');
+    const canSeeAttendance = isSuperAdmin || hasPermission('ATTENDANCE', 'ATTENDANCE_VIEW');
 
     return (
         <aside className={`lms-sidebar-modern ${sidebarOpen ? 'open' : ''}`}>
@@ -88,6 +91,7 @@ export const Sidebar = ({ sidebarOpen, activeTab: tab, setTab, hasPermission, is
                 <NavItem id="group" icon={UsersRound} label="Groups" disabled={!canSeeGroup} />
                 <NavItem id="enroll" icon={ShieldCheck} label="Course Enrollments" disabled={!canSeeEnrollment} />
                 <NavItem id="reports" icon={BarChart3} label="Analytical Reports" disabled={!canSeeReport} />
+                <NavItem id="att" icon={CheckSquare} label="Group Attendance" disabled={!canSeeAttendance} />
 
 
                 <div className="lms-sidebar-section-label">CORE</div>

@@ -4,6 +4,7 @@ using LMS_SoulCode.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS_SoulCode.Migrations
 {
     [DbContext(typeof(LmsDbContext))]
-    partial class LmsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260516173450_FinalAttendanceRename")]
+    partial class FinalAttendanceRename
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +25,7 @@ namespace LMS_SoulCode.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("LMS_SoulCode.Features.Attendance.Models.Attendance", b =>
+            modelBuilder.Entity("LMS_SoulCode.Features.Attendance.Models.AttendanceRecord", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -41,9 +44,6 @@ namespace LMS_SoulCode.Migrations
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("DocumentUrl")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("GroupId")
                         .HasColumnType("int");
@@ -67,9 +67,6 @@ namespace LMS_SoulCode.Migrations
                     b.Property<int?>("TenantId")
                         .HasColumnType("int");
 
-                    b.Property<string>("ThumbUrl")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -84,7 +81,7 @@ namespace LMS_SoulCode.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Attendance");
+                    b.ToTable("AttendanceRecords");
                 });
 
             modelBuilder.Entity("LMS_SoulCode.Features.Auth.Models.User", b =>
@@ -936,7 +933,7 @@ namespace LMS_SoulCode.Migrations
                     b.ToTable("UserRoles");
                 });
 
-            modelBuilder.Entity("LMS_SoulCode.Features.Attendance.Models.Attendance", b =>
+            modelBuilder.Entity("LMS_SoulCode.Features.Attendance.Models.AttendanceRecord", b =>
                 {
                     b.HasOne("LMS_SoulCode.Features.Course.Models.Course", "Course")
                         .WithMany()

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using LMS_SoulCode.Features.Security.Services;
 using LMS_SoulCode.Features.Common;
 using Microsoft.AspNetCore.Authorization;
@@ -123,53 +123,271 @@ namespace LMS_SoulCode.Features.Security.Controllers
 
         [HttpGet("get")]
         [AllowAnonymous]
-        public IActionResult GetMedia([FromQuery] string path)
+        public async Task<IActionResult> GetMedia(
+      [FromQuery] string path,
+      CancellationToken cancellationToken = default)
         {
             try
             {
-                if (string.IsNullOrEmpty(path)) return BadRequest("Path is required.");
+                if (string.IsNullOrWhiteSpace(path))
+                    return BadRequest("Path is required.");
 
-                var normalizedPath = path.Replace("/", "\\").TrimStart('\\');
-                // Use ContentRootPath instead of GetCurrentDirectory for reliability
-                var fullPath = Path.Combine(_env.ContentRootPath, normalizedPath);
+                // =========================
+                // PATH NORMALIZATION
+                // =========================
 
-                if (!System.IO.File.Exists(fullPath)) 
+                var normalizedPath = path
+                    .Replace("/", Path.DirectorySeparatorChar.ToString())
+                    .TrimStart(Path.DirectorySeparatorChar);
+
+                var rootPath = _env.ContentRootPath;
+
+                var fullPath = Path.GetFullPath(
+                    Path.Combine(rootPath, normalizedPath));
+
+                // Prevent path traversal attacks
+                if (!fullPath.StartsWith(rootPath, StringComparison.OrdinalIgnoreCase))
+                    return BadRequest("Invalid path.");
+
+                // =========================
+                // FILE EXISTENCE CHECK
+                // =========================
+
+                if (!System.IO.File.Exists(fullPath))
                 {
-                    // Fallback: Check without 'wwwroot' prefix if path already includes it and file not found
-                    // Or if CurrentDirectory works better in some environments
-                    var altPath = Path.Combine(Directory.GetCurrentDirectory(), normalizedPath);
+                    // Try current directory
+                    var altPath = Path.GetFullPath(
+                        Path.Combine(Directory.GetCurrentDirectory(), normalizedPath));
+
                     if (System.IO.File.Exists(altPath))
                     {
                         fullPath = altPath;
                     }
-                    else if (normalizedPath.StartsWith("wwwroot\\"))
+                    else if (normalizedPath.StartsWith("wwwroot", StringComparison.OrdinalIgnoreCase))
                     {
-                         var noWwwRoot = normalizedPath.Substring(8);
-                         var webRootPath = Path.Combine(_env.ContentRootPath, "wwwroot", noWwwRoot);
-                         if (System.IO.File.Exists(webRootPath)) fullPath = webRootPath;
-                         else return NotFound($"File not found. Path: {normalizedPath}");
+                        var noWwwRoot = normalizedPath.Substring("wwwroot".Length)
+                            .TrimStart(Path.DirectorySeparatorChar);
+
+                        var webRootPath = Path.Combine(
+                            _env.ContentRootPath,
+                            "wwwroot",
+                            noWwwRoot);
+
+                        webRootPath = Path.GetFullPath(webRootPath);
+
+                        if (System.IO.File.Exists(webRootPath))
+                        {
+                            fullPath = webRootPath;
+                        }
+                        else
+                        {
+                            return NotFound($"File not found: {normalizedPath}");
+                        }
                     }
                     else
                     {
-                        return NotFound($"File not found. Path: {normalizedPath}");
+                        return NotFound($"File not found: {normalizedPath}");
                     }
                 }
 
-                string cleanPath = path.Replace(".enc", "");
-                string ext = Path.GetExtension(cleanPath).ToLower();
-                
-                var stream = _crypto.GetDecryptStream(fullPath);
+                // =========================
+                // EXTENSION DETECTION
+                // =========================
 
-                if (ext == ".mp4" || ext == ".webm" || ext == ".mkv")
+                string cleanPath = path;
+
+                if (cleanPath.EndsWith(".enc", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new FileStreamResult(stream, "video/mp4") { EnableRangeProcessing = true };
+                    cleanPath = cleanPath[..^4];
                 }
 
-                return File(stream, GetContentType(ext));
+                string detectedExt = Path.GetExtension(cleanPath).ToLowerInvariant();
+
+                // =========================
+                // MIME TYPE
+                // =========================
+
+                string contentType = detectedExt switch
+                {
+                    ".pdf" => "application/pdf",
+                    ".doc" => "application/msword",
+                    ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    ".xls" => "application/vnd.ms-excel",
+                    ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+
+                    ".png" => "image/png",
+                    ".jpg" or ".jpeg" => "image/jpeg",
+                    ".gif" => "image/gif",
+                    ".webp" => "image/webp",
+                    ".bmp" => "image/bmp",
+
+                    ".txt" => "text/plain",
+                    ".css" => "text/css",
+                    ".csv" => "text/csv",
+                    ".html" or ".htm" => "text/html",
+                    ".json" => "application/json",
+
+                    ".mp3" => "audio/mpeg",
+                    ".wav" => "audio/wav",
+
+                    ".mp4" => "video/mp4",
+                    ".webm" => "video/webm",
+                    ".mkv" => "video/x-matroska",
+
+                    _ => "application/octet-stream"
+                };
+
+                // =========================
+                // CLEAN FILE NAME
+                // =========================
+
+                string cleanFileName = Path.GetFileName(cleanPath);
+
+                if (!Path.HasExtension(cleanFileName) &&
+                    !string.IsNullOrWhiteSpace(detectedExt))
+                {
+                    cleanFileName += detectedExt;
+                }
+
+                // =========================
+                // VIDEO HANDLING
+                // =========================
+                // IMPORTANT:
+                // Range processing ONLY works
+                // with seekable streams.
+                // If your decrypt stream is not seekable,
+                // disable range processing.
+
+                if (detectedExt == ".mp4" ||
+                    detectedExt == ".webm" ||
+                    detectedExt == ".mkv")
+                {
+                    var videoStream = _crypto.GetDecryptStream(fullPath);
+
+                    // DEBUG
+                    // Console.WriteLine(videoStream.CanSeek);
+
+                    Response.Headers["Content-Disposition"] =
+                        $"inline; filename=\"{cleanFileName}\"";
+
+                    // If decrypt stream is NOT seekable:
+                    if (!videoStream.CanSeek)
+                    {
+                        return File(
+                            videoStream,
+                            contentType,
+                            enableRangeProcessing: false);
+                    }
+
+                    // If stream IS seekable:
+                    return File(
+                        videoStream,
+                        contentType,
+                        enableRangeProcessing: true);
+                }
+
+                // =========================
+                // DOCUMENT / IMAGE HANDLING
+                // =========================
+
+                var memoryStream = new MemoryStream();
+
+                await _crypto.DecryptLargeFileToStreamAsync(
+                    fullPath,
+                    memoryStream,
+                    cancellationToken);
+
+                memoryStream.Position = 0;
+
+                // =========================
+                // MAGIC BYTE DETECTION
+                // =========================
+
+                string magicExt = "";
+                if (string.IsNullOrWhiteSpace(detectedExt))
+                {
+                    byte[] header = new byte[8];
+
+                    int bytesRead = await memoryStream.ReadAsync(
+                        header,
+                        0,
+                        header.Length,
+                        cancellationToken);
+
+                    memoryStream.Position = 0;
+
+                    if (bytesRead >= 4 &&
+                        header[0] == 0x25 &&
+                        header[1] == 0x50 &&
+                        header[2] == 0x44 &&
+                        header[3] == 0x46)
+                    {
+                        contentType = "application/pdf";
+                        magicExt = ".pdf";
+                    }
+                    else if (bytesRead >= 3 &&
+                             header[0] == 0xFF &&
+                             header[1] == 0xD8 &&
+                             header[2] == 0xFF)
+                    {
+                        contentType = "image/jpeg";
+                        magicExt = ".jpg";
+                    }
+                    else if (bytesRead >= 4 &&
+                             header[0] == 0x89 &&
+                             header[1] == 0x50 &&
+                             header[2] == 0x4E &&
+                             header[3] == 0x47)
+                    {
+                        contentType = "image/png";
+                        magicExt = ".png";
+                    }
+                    else if (bytesRead >= 4 &&
+                             header[0] == 0x50 &&
+                             header[1] == 0x4B &&
+                             header[2] == 0x03 &&
+                             header[3] == 0x04)
+                    {
+                        contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                        magicExt = ".docx";
+                    }
+                }
+
+                // =========================
+                // RESPONSE HEADERS
+                // =========================
+
+                string resolvedExt = !string.IsNullOrWhiteSpace(detectedExt) ? detectedExt : magicExt;
+                if (!Path.HasExtension(cleanFileName) && !string.IsNullOrWhiteSpace(resolvedExt))
+                {
+                    cleanFileName += resolvedExt;
+                }
+
+                Response.Headers["Content-Disposition"] =
+                    $"inline; filename=\"{cleanFileName}\"";
+
+                // =========================
+                // RETURN STREAM DIRECTLY
+                // =========================
+                // DO NOT USE:
+                // ms.ToArray()
+
+                return File(
+                    memoryStream,
+                    contentType,
+                    enableRangeProcessing: false);
+            }
+            catch (OperationCanceledException)
+            {
+                return BadRequest("Request cancelled.");
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, new
+                {
+                    message = "Error serving media.",
+                    error = ex.Message
+                });
             }
         }
 

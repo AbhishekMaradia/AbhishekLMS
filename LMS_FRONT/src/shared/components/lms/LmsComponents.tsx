@@ -11,6 +11,7 @@ import './LmsComponents.css';
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     variant?: 'primary' | 'secondary' | 'accent' | 'danger' | 'success' | 'info' | 'ghost';
     solid?: boolean;
+    outline?: boolean;
     size?: 'sm' | 'md' | 'lg';
     loading?: boolean;
     icon?: React.ElementType;
@@ -492,7 +493,7 @@ export const SecuritySwitcher: React.FC<any> = ({ tab, setTab, hasPermission, is
         { id: 'user_roles', label: 'USER ROLES', icon: Icons.User, visible: isSuperAdmin || hasPermission('USER_ROLE', 'USER_ROLE_VIEW') },
     ].filter(i => i.visible);
 
-    return <TabSwitcher tabs={items as any} activeTab={tab} onTabSelect={setTab} style={{ marginTop: '24px' }} />;
+    return <TabSwitcher tabs={items as any} activeTab={tab} onTabSelect={setTab as any} style={{ marginTop: '24px' }} />;
 };
 
 
@@ -504,7 +505,7 @@ export const GroupSwitcher: React.FC<any> = ({ tab, setTab, hasPermission, isSup
         { id: 'gu', label: 'GROUP USER', icon: Icons.Users, visible: isSuperAdmin || hasPermission('GROUP', 'GROUP_USER_VIEW') || hasPermission('GROUP', 'GROUP_USER_EDIT') },
     ].filter(i => i.visible);
 
-    return <TabSwitcher tabs={items as any} activeTab={tab} onTabSelect={setTab} style={{ marginTop: '24px' }} />;
+    return <TabSwitcher tabs={items as any} activeTab={tab} onTabSelect={setTab as any} style={{ marginTop: '24px' }} />;
 };
 
 

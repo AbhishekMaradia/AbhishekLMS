@@ -78,6 +78,7 @@ namespace LMS_SoulCode.Features.Common.Utilities
                     else if (perm.Code.StartsWith("SUBSCRIPTION_")) targetModuleCode = ModuleCodes.SUBSCRIPTION;
                     else if (perm.Code.StartsWith("REPORT_")) targetModuleCode = ModuleCodes.REPORT;
                     else if (perm.Code.StartsWith("FILE_")) targetModuleCode = ModuleCodes.FILE_MANAGEMENT;
+                    else if (perm.Code.StartsWith("ATTENDANCE_")) targetModuleCode = ModuleCodes.ATTENDANCE;
 
                     if (!string.IsNullOrEmpty(targetModuleCode))
                     {

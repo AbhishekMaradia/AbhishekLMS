@@ -89,6 +89,7 @@ export const GlobalModalOrchestrator: React.FC<GlobalModalOrchestratorProps> = (
     subscriptions, playCourse, toggleSubscription,
     pm, setPm, pmSearch, setPmSearch, togglePermission, openModPM, savePermissions, permissions
 }) => {
+    console.log('[GMO] rendered. previewMedia=', previewMedia, 'user=', user);
 
     React.useEffect(() => {
         const handleEsc = (e: KeyboardEvent) => {
@@ -156,7 +157,7 @@ export const GlobalModalOrchestrator: React.FC<GlobalModalOrchestratorProps> = (
     };
 
     const modalContent = renderModalContent();
-    const isShowingAnyModal = !!ui.modal || !!pm.open || !!gcModal || !!guModal;
+    const isShowingAnyModal = !!ui.modal || !!pm.open || !!gcModal || !!guModal || !!previewMedia;
 
     if (!isShowingAnyModal) return null;
 

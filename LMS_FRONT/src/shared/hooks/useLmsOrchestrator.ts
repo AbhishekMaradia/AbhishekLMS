@@ -38,10 +38,9 @@ export const useLmsOrchestrator = () => {
     const { user, isAuthenticated, permissions = {} } = useAppSelector((state: any) => state.auth);
 
     // UI State Management
-    const [tab, setTabState] = useState<string>(() => {
-        const path = window.location.pathname.replace('/', '');
-        return path === 'dashboard' || path === '' ? 'dash' : path;
-    });
+    const [searchTerm, setSearchTerm] = useState('');
+    const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+    const [groupTab, setGroupTab] = useState<'groups' | 'gc' | 'gu' | 'att' | 'att_logs'>('groups');
 
     const setTab = useCallback((id: string) => {
         const tabToRoute: Record<string, string> = {
@@ -49,6 +48,7 @@ export const useLmsOrchestrator = () => {
             'cat': '/categories', 'curr': '/courses', 'cm': '/media',
             'group': '/groups', 'sec': '/security', 'enroll': '/enrollments',
             'reports': '/reports',
+            'att': '/groups',
             'student-dash': '/student/dashboard', 'student-discover': '/student/discover',
             'student-my-courses': '/student/my-courses', 'student-peers': '/student/peers', 'student-reports': '/student/reports'
         };
@@ -56,6 +56,11 @@ export const useLmsOrchestrator = () => {
         if (target && location.pathname !== target) {
             navigate(target);
         }
+        
+        // Ensure sub-tab sync when clicking from Sidebar
+        if (id === 'att') setGroupTab('att_logs');
+        if (id === 'group') setGroupTab('groups');
+        
         setTabState(id);
     }, [navigate, location.pathname]);
 
@@ -68,12 +73,28 @@ export const useLmsOrchestrator = () => {
             'student/dashboard': 'student-dash', 'student/discover': 'student-discover',
             'student/my-courses': 'student-my-courses', 'student/peers': 'student-peers', 'student/reports': 'student-reports'
         };
-        if (routeToTab[path]) setTabState(routeToTab[path]);
-    }, [location.pathname]);
+        if (routeToTab[path]) {
+            let targetTab = routeToTab[path];
+            
+            // If we are on /groups and the sub-tab is 'att' or 'att_logs', keep sidebar on 'att'
+            if (targetTab === 'group' && (groupTab === 'att' || groupTab === 'att_logs')) {
+                targetTab = 'att';
+            }
 
-    const [searchTerm, setSearchTerm] = useState('');
-    const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
-    const [groupTab, setGroupTab] = useState<'groups' | 'gc' | 'gu'>('groups');
+            setTabState(targetTab);
+            
+            // Reset groupTab ONLY if we are actually CHANGING the main route to /groups 
+            // from a different section (not switching sub-tabs or coming from att/att_logs)
+            if (targetTab === 'group' && tab !== 'group' && tab !== 'att' && tab !== 'att_logs') {
+                setGroupTab('groups');
+            }
+        }
+    }, [location.pathname, groupTab]); 
+
+    const [tab, setTabState] = useState<string>(() => {
+        const path = window.location.pathname.replace('/', '');
+        return path === 'dashboard' || path === '' ? 'dash' : path;
+    });
 
     // Multi-tenant Context
     const isSuperAdmin = useMemo(() => {

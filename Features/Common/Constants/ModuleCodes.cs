@@ -21,5 +21,6 @@ namespace LMS_SoulCode.Features.Common
         public const string MODULE = "MODULE";
         public const string ROLE_MODULE = "ROLE_MODULE";
         public const string USER_ROLE = "USER_ROLE";
+        public const string ATTENDANCE = "ATTENDANCE";
     }
 }

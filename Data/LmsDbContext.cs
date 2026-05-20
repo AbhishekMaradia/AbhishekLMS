@@ -7,6 +7,7 @@ using LMS_SoulCode.Features.Certificates.Models;
 using LMS_SoulCode.Features.UserPermissions.Models;
 using LMS_SoulCode.Features.Organizations.Models;
 using LMS_SoulCode.Features.Groups.Models;
+using LMS_SoulCode.Features.Attendance.Models;
 using Microsoft.AspNetCore.Http;
 using LMS_SoulCode.Features.Common.Models;
 using LMS_SoulCode.Features.Common;
@@ -54,6 +55,7 @@ namespace LMS_SoulCode.Data
         public DbSet<Organization> Organizations { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<GroupCourse> GroupCourses { get; set; }
+        public DbSet<Attendance> Attendances { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -68,6 +70,7 @@ namespace LMS_SoulCode.Data
             // ---------------------------------------------------------
             
             // 1. Entities with Multi-Tenancy AND Soft-Delete (BaseTenantEntity)
+            modelBuilder.Entity<Attendance>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0 || e.TenantId == null) && !e.IsDeleted);
             modelBuilder.Entity<User>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0 || e.TenantId == null) && !e.IsDeleted);
             modelBuilder.Entity<Category>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0 || e.TenantId == null) && !e.IsDeleted);
             modelBuilder.Entity<Course>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0 || e.TenantId == null) && !e.IsDeleted);
