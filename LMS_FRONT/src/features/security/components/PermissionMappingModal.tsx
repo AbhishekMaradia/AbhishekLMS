@@ -87,9 +87,8 @@ export const PermissionMappingModal: React.FC<PermissionMappingModalProps> = ({
                                 onChange={(e) => setFormTenantId(e.target.value === "" ? null : Number(e.target.value))}
                                 className="lms-select-premium"
                             >
-                                <option value="">Super Admin</option>
+                                <option value="">Super Admin (Global)</option>
                                 {db.orgs.filter((o: any) => (o.isActive ?? o.IsActive) !== false).map((o: any) => <option key={o.id || o.Id} value={o.id || o.Id}>{o.orgName || o.OrgName}</option>)}
-                                <option value="0">Super Admin Context</option>
                             </select>
                         </div>
                     </>
@@ -197,9 +196,8 @@ export const PermissionMappingModal: React.FC<PermissionMappingModalProps> = ({
                                 onChange={(e) => setFormTenantId(e.target.value === "" ? null : Number(e.target.value))}
                                 className="lms-select-premium"
                             >
-                                <option value="">-- Select Organization --</option>
+                                <option value="">Super Admin (Global)</option>
                                 {db.orgs.filter((o: any) => (o.isActive ?? o.IsActive) !== false).map((o: any) => <option key={o.id || o.Id} value={o.id || o.Id}>{o.orgName || o.OrgName}</option>)}
-                                <option value="0">Super Admin Context</option>
                             </select>
                         </div>
                     </>

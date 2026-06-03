@@ -60,7 +60,13 @@ export const OrganizationModal: React.FC<OrganizationModalProps> = ({
             keysToRemove.forEach(k => fd.delete(k));
 
             handleCrud(isEdit ? 'update' : 'create', 'org', fd);
-        }} className="lms-fade-in lms-col-gap-md">
+        }} className="lms-fade-in lms-col-gap-md" autoComplete="off">
+            {/* Decoy fields to catch aggressive browser autofill */}
+            <div style={{ position: 'absolute', top: '-9999px', left: '-9999px', width: '1px', height: '1px', opacity: 0.01, overflow: 'hidden', pointerEvents: 'none' }}>
+                <input type="text" name="fake_username_autofill" tabIndex={-1} autoComplete="off" style={{ width: '1px', height: '1px' }} />
+                <input type="email" name="fake_email_autofill" tabIndex={-1} autoComplete="off" style={{ width: '1px', height: '1px' }} />
+                <input type="password" name="fake_password_autofill" tabIndex={-1} autoComplete="new-password" style={{ width: '1px', height: '1px' }} />
+            </div>
             {isEdit && (
                 <div className="lms-view-toggle lms-org-modal-view-toggle">
                     <button type="button" onClick={() => setOrgEditTab('org')} className={`lms-view-btn lms-org-modal-view-btn ${orgEditTab === 'org' ? 'active' : ''}`}>
@@ -184,7 +190,7 @@ export const OrganizationModal: React.FC<OrganizationModalProps> = ({
                         </div>
                         <label className="lms-label-premium required">Email Address</label>
                         <div className="lms-modal-panel-premium">
-                            <input name="Email" type="email" placeholder="admin@org.com" className="lms-input-premium" required={ui.modal === 'org_create'} />
+                            <input name="Email" type="email" autoComplete="new-email" placeholder="admin@org.com" className="lms-input-premium" required={ui.modal === 'org_create'} />
                         </div>
                         <div className="lms-form-grid lms-org-modal-form-grid">
                             <div>
@@ -196,7 +202,7 @@ export const OrganizationModal: React.FC<OrganizationModalProps> = ({
                             <div>
                                 <label className="lms-label-premium required">Password</label>
                                 <div className="lms-modal-panel-premium">
-                                    <input name="Password" type="password" placeholder="••••••••" className="lms-input-premium" required={ui.modal === 'org_create'} />
+                                    <input name="Password" type="password" autoComplete="new-password" placeholder="••••••••" className="lms-input-premium" required={ui.modal === 'org_create'} />
                                 </div>
                             </div>
                         </div>

@@ -77,7 +77,9 @@ export const useCourseStudio = (courseId: number | null) => {
     };
 
     const handleMediaDelete = async (id: number, type: 'vid' | 'doc') => {
-        if (!window.confirm("Confirm asset decomposition?")) return;
+        if (!window.confirm("Confirm asset decomposition?")) {
+            return;
+        }
         try {
             setCourseMedia(prev => ({ ...prev, loading: true }));
             const res = type === 'vid' 

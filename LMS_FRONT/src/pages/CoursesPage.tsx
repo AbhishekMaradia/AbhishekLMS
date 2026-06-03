@@ -26,7 +26,19 @@ export const CoursesPage: React.FC<CoursesPageProps> = ({
     viewMode, setViewMode, pagination, changePage, changePageSize, hasPermission, handleCrud
 }) => {
     const p = pagination['curr'] || { page: 1, size: 50, total: 0 };
-    const totalPages = Math.ceil((p.total || 0) / (p.size || 50)) || 1;
+    
+    // Filter courses client-side for correct counts/pagination when filtered by status
+    const filteredCourses = (db.courses || []).filter((c: any) => {
+        const activeVal = c.isEnable ?? c.IsEnable;
+        const matchesStatus =
+            (ui.statusFilter || 'all') === 'all' ? true :
+                (ui.statusFilter || 'all') === 'active' ? (activeVal !== false) :
+                    (activeVal === false);
+        return matchesStatus;
+    });
+
+    const adjustedTotal = p.total <= (p.size || 50) ? filteredCourses.length : p.total;
+    const totalPages = Math.ceil(adjustedTotal / (p.size || 50)) || 1;
 
     const canCreate = isSuperAdmin || hasPermission('COURSE', 'COURSE_ADD');
 
@@ -36,7 +48,7 @@ export const CoursesPage: React.FC<CoursesPageProps> = ({
                 <div className="lms-entity-header">
                     <div className="lms-section-heading">
                         <h1 className="lms-card-title">Courses</h1>
-                        <span className="lms-section-count">{p.total} courses</span>
+                        <span className="lms-section-count">{adjustedTotal} courses</span>
                     </div>
                     <div className="lms-card-actions">
                         <PerspectiveSwitcher viewMode={viewMode} setViewMode={setViewMode} />
@@ -83,7 +95,7 @@ export const CoursesPage: React.FC<CoursesPageProps> = ({
                 <Pagination
                     current={p.page}
                     total={totalPages}
-                    totalItems={p.total}
+                    totalItems={adjustedTotal}
                     itemsPerPage={p.size}
                     onPageChange={(page: number) => changePage('curr', page)}
                     onPageSizeChange={(size: number) => changePageSize('curr', size)}

@@ -5,7 +5,7 @@ const BaseSvg = ({ s = 17, children, fill = 'none', strokeWidth = 2.1, viewBox =
         width={s} height={s} viewBox={viewBox} fill={fill}
         stroke="currentColor" strokeWidth={strokeWidth}
         strokeLinecap="round" strokeLinejoin="round"
-        style={style}
+        style={{ pointerEvents: 'none', ...style }}
         className={className}
     >
         {children}

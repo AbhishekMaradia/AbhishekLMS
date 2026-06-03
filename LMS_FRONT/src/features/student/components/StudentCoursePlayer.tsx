@@ -15,8 +15,29 @@ const StudentCoursePlayer: React.FC<StudentCoursePlayerProps> = ({ course, media
     const [selectedVideo, setSelectedVideo] = useState<any>(null);
     const [selectedDoc, setSelectedDoc] = useState<any>(null);
     const [activeTab, setActiveTab] = useState<'videos' | 'docs'>('videos');
+    const [videoUrl, setVideoUrl] = useState<string>('');
+    const [videoLoading, setVideoLoading] = useState<boolean>(false);
     const videoRef = useRef<HTMLVideoElement>(null);
+    const furthestTimeRef = useRef<number>(0);
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const selectedVideoRef = useRef<any>(null);
+    const [videoProgress, setVideoProgress] = useState<{ watchedPercentage: number, isCompleted: boolean } | null>(null);
+
+    useEffect(() => {
+        selectedVideoRef.current = selectedVideo;
+    }, [selectedVideo]);
+
+    const getAuthUrl = (isDoc = false) => {
+        const token = localStorage.getItem('token');
+        const sfx = token ? `?access_token=${token}` : '';
+        let base = API_ORIGIN;
+        if (!base.startsWith('http')) base = window.location.origin + (base.startsWith('/') ? '' : '/') + base;
+        const origin = base.endsWith('/') ? base.slice(0, -1) : base;
+
+        if (isDoc && selectedDoc) return `${origin}/CourseDocument/download/${selectedDoc.id || selectedDoc.Id}${sfx}#toolbar=0&navpanes=0&view=Fit`;
+        if (selectedVideo) return `${origin}/CourseVideo/stream/${selectedVideo.id || selectedVideo.Id}${sfx}`;
+        return '';
+    };
 
     // Auto-select assets on load
     useEffect(() => {
@@ -65,44 +86,161 @@ const StudentCoursePlayer: React.FC<StudentCoursePlayerProps> = ({ course, media
     const syncInterval = useRef<any>(null);
 
     const saveProgress = async (isCompleted = false) => {
-        if (!selectedVideo || !videoRef.current) return;
+        const currentVideo = selectedVideoRef.current;
+        if (!currentVideo || !videoRef.current) return;
+
+        const initialPercentage = videoProgress?.watchedPercentage || 0;
+        const wasCompleted = videoProgress?.isCompleted || initialPercentage >= 95;
+        
+        // If already completed, do not send progress updates
+        if (wasCompleted && !isCompleted) return;
+
         const v = videoRef.current;
         if (v.duration === 0 || isNaN(v.duration)) return;
         
-        const watched = (v.currentTime / v.duration) * 100;
-        const finalPercentage = isCompleted ? 100 : Math.floor(watched);
+        // Progress calculation based on furthest point watched, not current time
+        const watched = (furthestTimeRef.current / v.duration) * 100;
+        const finalPercentage = isCompleted ? 100 : Math.min(100, Math.max(0, Math.floor(watched)));
+
+        // If the new percentage is not greater than the already saved progress, skip the API call
+        if (finalPercentage <= initialPercentage && !isCompleted) return;
 
         try {
             await api.post('CourseVideo/update-progress', {
-                videoId: selectedVideo.id || selectedVideo.Id,
+                videoId: currentVideo.id || currentVideo.Id,
                 groupId: user.groupId,
+                watchedPercentage: finalPercentage,
+                isCompleted: isCompleted || finalPercentage >= 95
+            });
+
+            // Update local state in memory immediately
+            setVideoProgress({
                 watchedPercentage: finalPercentage,
                 isCompleted: isCompleted || finalPercentage >= 95
             });
         } catch (e) { console.error("[LMS] Sync Error:", e); }
     };
 
-    // Periodic Progress Sync: Every 15 seconds
+    const selectedVideoId = selectedVideo?.id || selectedVideo?.Id || null;
+
+    // Video Blob Downloader & Progress Loader - Only runs when the actual video ID changes!
     useEffect(() => {
-        if (!selectedVideo) return;
+        if (!selectedVideoId) {
+            setVideoUrl('');
+            setVideoLoading(false);
+            setVideoProgress(null);
+            return;
+        }
+
+        let active = true;
+        setVideoLoading(true);
+        setVideoUrl('');
+        setVideoProgress(null);
+        furthestTimeRef.current = 0;
+
+        const downloadAndLoadProgress = async () => {
+            try {
+                // 1. Fetch user progress for this specific video
+                const progressRes = await api.get(`CourseVideo/progress/${selectedVideoId}`).catch(() => ({ data: { data: [] } }));
+                const progressData = progressRes.data?.data?.[0] || progressRes.data?.[0] || null;
+                
+                let initialPercentage = 0;
+                let isComp = false;
+
+                if (progressData) {
+                    initialPercentage = progressData.watchedPercentage ?? progressData.WatchedPercentage ?? 0;
+                    isComp = progressData.isCompleted ?? progressData.IsCompleted ?? false;
+                }
+
+                if (!active) return;
+                setVideoProgress({ watchedPercentage: initialPercentage, isCompleted: isComp });
+
+                // 2. Fetch the video stream as Blob
+                const response = await fetch(getAuthUrl());
+                if (!response.ok) throw new Error("Failed to load secure stream");
+                
+                const blob = await response.blob();
+                if (!active) return;
+                
+                const localUrl = URL.createObjectURL(blob);
+                setVideoUrl(localUrl);
+                setVideoLoading(false);
+            } catch (err) {
+                console.error("[LMS] Video download error:", err);
+                if (active) {
+                    toast.error("Failed to load video stream.");
+                    setVideoLoading(false);
+                }
+            }
+        };
+
+        downloadAndLoadProgress();
+
+        return () => {
+            active = false;
+            // Revoke the old object URL to prevent memory leaks
+            setVideoUrl(prev => {
+                if (prev) {
+                    URL.revokeObjectURL(prev);
+                    console.log(`[LMS_PLAYER] Revoked video URL for video ID: ${selectedVideoId}`);
+                }
+                return '';
+            });
+        };
+    }, [selectedVideoId]);
+
+    // Periodic Progress Sync - Only runs/re-registers when video ID changes!
+    useEffect(() => {
+        if (!selectedVideoId) return;
+
         const interval = setInterval(() => saveProgress(), 15000);
         return () => {
             clearInterval(interval);
             saveProgress(); 
         };
-    }, [selectedVideo]);
+    }, [selectedVideoId]);
 
-    const getAuthUrl = (isDoc = false) => {
-        const token = localStorage.getItem('token');
-        const sfx = token ? `?access_token=${token}` : '';
-        let base = API_ORIGIN;
-        if (!base.startsWith('http')) base = window.location.origin + (base.startsWith('/') ? '' : '/') + base;
-        const origin = base.endsWith('/') ? base.slice(0, -1) : base;
+    const isAlreadyCompleted = Boolean(
+        videoProgress?.isCompleted || 
+        (videoProgress?.watchedPercentage && videoProgress.watchedPercentage >= 95)
+    );
 
-        if (isDoc && selectedDoc) return `${origin}/CourseDocument/download/${selectedDoc.id || selectedDoc.Id}${sfx}#toolbar=0&navpanes=0&view=Fit`;
-        if (selectedVideo) return `${origin}/CourseVideo/stream/${selectedVideo.id || selectedVideo.Id}${sfx}`;
-        return '';
+    const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+        const v = e.currentTarget;
+        const initialPercentage = videoProgress?.watchedPercentage || 0;
+        furthestTimeRef.current = (initialPercentage / 100) * v.duration;
+        console.log(`[LMS_PLAYER] Metadata Loaded. Duration: ${v.duration}s. Initial percentage: ${initialPercentage}%, Furthest time set to: ${furthestTimeRef.current}s`);
     };
+
+    const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+        const v = e.currentTarget;
+        if (v.duration === 0 || isNaN(v.duration)) return;
+        
+        // Lazy initialize furthestTimeRef.current if needed
+        if (furthestTimeRef.current === 0 && videoProgress) {
+            const initialPercentage = videoProgress.watchedPercentage || 0;
+            furthestTimeRef.current = (initialPercentage / 100) * v.duration;
+            console.log(`[LMS_PLAYER] Lazy initialized furthestTimeRef to: ${furthestTimeRef.current}s (${initialPercentage}%)`);
+        }
+
+        // If already completed, let them seek freely
+        if (isAlreadyCompleted) {
+            furthestTimeRef.current = Math.max(furthestTimeRef.current, v.currentTime);
+            return;
+        }
+
+        // Check if user is seeking forward beyond the furthest time watched (+ 2 seconds buffer)
+        if (v.currentTime > furthestTimeRef.current + 2) {
+            // Block seeking forward! Snap back to furthestTimeRef.current
+            v.currentTime = furthestTimeRef.current;
+            toast.warning("Seeking forward is disabled. Please watch the content sequentially.");
+        } else {
+            // Keep track of the furthest time reached
+            furthestTimeRef.current = Math.max(furthestTimeRef.current, v.currentTime);
+        }
+    };
+
+    // (getAuthUrl moved to top)
 
     return (
         <div className="student-player-overlay lms-fade-in">
@@ -150,14 +288,21 @@ const StudentCoursePlayer: React.FC<StudentCoursePlayerProps> = ({ course, media
                             selectedDoc ? (
                                 <iframe src={getAuthUrl(true)} className="player-media-content" title="Document Viewer" />
                             ) : <div className="empty-state">Select a resource file</div>
-                        ) : selectedVideo ? (
+                        ) : videoLoading ? (
+                            <div className="empty-state">
+                                <div className="lms-loader-spinner"></div>
+                                <div style={{ marginTop: 12 }}>DECRYPTING SECURE STREAM...</div>
+                            </div>
+                        ) : selectedVideo && videoUrl ? (
                             <video 
                                 ref={videoRef} 
-                                src={getAuthUrl()} 
-                                controls autoPlay muted 
+                                src={videoUrl} 
+                                controls autoPlay 
                                 className="player-media-content"
                                 onEnded={() => { console.log('[LMS_PLAYER] Video Ended'); saveProgress(true); }} 
                                 onPause={() => { console.log('[LMS_PLAYER] Video Paused'); saveProgress(); }}
+                                onTimeUpdate={handleTimeUpdate}
+                                onLoadedMetadata={handleLoadedMetadata}
                                 onStalled={() => console.warn('[LMS_PLAYER] Video Stalled - Network or Buffer issue')}
                                 onError={(e) => console.error('[LMS_PLAYER] Video Error:', e)}
                                 onWaiting={() => console.log('[LMS_PLAYER] Video Waiting/Buffering...')}

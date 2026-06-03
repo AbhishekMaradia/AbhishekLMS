@@ -176,7 +176,8 @@ export const CustomSelect: React.FC<{
     placeholder?: string;
     style?: React.CSSProperties;
     className?: string;
-}> = ({ options, value, onChange, placeholder, style, className = '' }) => {
+    disabled?: boolean;
+}> = ({ options, value, onChange, placeholder, style, className = '', disabled }) => {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -194,16 +195,20 @@ export const CustomSelect: React.FC<{
     const currentLabel = selectedOption ? selectedOption.label : (placeholder || 'Select...');
 
     return (
-        <div className={`lms-custom-select-container ${className}`} style={{ ...style }} ref={containerRef}>
+        <div 
+            className={`lms-custom-select-container ${className} ${disabled ? 'disabled' : ''}`} 
+            style={{ ...style, pointerEvents: disabled ? 'none' : 'auto', opacity: disabled ? 0.6 : 1 }} 
+            ref={containerRef}
+        >
             <div
-                className={`lms-custom-select-trigger ${isOpen ? 'open' : ''}`}
-                onClick={() => setIsOpen(!isOpen)}
+                className={`lms-custom-select-trigger ${isOpen && !disabled ? 'open' : ''}`}
+                onClick={() => !disabled && setIsOpen(!isOpen)}
             >
                 <span className="lms-custom-select-label">{currentLabel}</span>
                 <Icons.Prev s={12} className={`lms-custom-select-icon ${isOpen ? 'open' : 'closed'}`} />
             </div>
 
-            {isOpen && (
+            {isOpen && !disabled && (
                 <div className="lms-custom-select-menu lms-fade-in">
                     {options.map((o, idx) => (
                         <div
@@ -319,7 +324,7 @@ export const Pagination = ({
                         value={itemsPerPage}
                         onChange={(e) => onPageSizeChange(Number(e.target.value))}
                     >
-                        {[10, 25, 50, 100].map(s => (
+                        {[5, 10, 25, 50, 100].map(s => (
                             <option key={s} value={s}>{s} items</option>
                         ))}
                     </select>

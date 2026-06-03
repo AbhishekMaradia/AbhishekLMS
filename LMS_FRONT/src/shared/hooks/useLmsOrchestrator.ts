@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTheme } from '../../app/providers/ThemeProvider';
 import { useAppSelector, useAppDispatch } from '../../store/index';
 import { toast } from 'react-toastify';
@@ -42,6 +42,8 @@ export const useLmsOrchestrator = () => {
     const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
     const [groupTab, setGroupTab] = useState<'groups' | 'gc' | 'gu' | 'att' | 'att_logs'>('groups');
 
+    const lastPathnameRef = useRef(location.pathname);
+
     const setTab = useCallback((id: string) => {
         const tabToRoute: Record<string, string> = {
             'dash': '/dashboard', 'users': '/users', 'orgs': '/organizations',
@@ -73,6 +75,9 @@ export const useLmsOrchestrator = () => {
             'student/dashboard': 'student-dash', 'student/discover': 'student-discover',
             'student/my-courses': 'student-my-courses', 'student/peers': 'student-peers', 'student/reports': 'student-reports'
         };
+        const pathChanged = lastPathnameRef.current !== location.pathname;
+        lastPathnameRef.current = location.pathname;
+
         if (routeToTab[path]) {
             let targetTab = routeToTab[path];
             
@@ -85,7 +90,7 @@ export const useLmsOrchestrator = () => {
             
             // Reset groupTab ONLY if we are actually CHANGING the main route to /groups 
             // from a different section (not switching sub-tabs or coming from att/att_logs)
-            if (targetTab === 'group' && groupTab !== 'att' && groupTab !== 'att_logs') {
+            if (pathChanged && targetTab === 'group' && groupTab !== 'att' && groupTab !== 'att_logs') {
                 setGroupTab('groups');
             }
         }
@@ -161,7 +166,7 @@ export const useLmsOrchestrator = () => {
         mod_perms: { page: 1, size: 10, total: 0 },
         role_modules: { page: 1, size: 10, total: 0 },
         role_mod_perms: { page: 1, size: 10, total: 0 },
-        reports: { page: 1, size: 20, total: 0 },
+        reports: { page: 1, size: 5, total: 0 },
         enroll: { page: 1, size: 50, total: 0 }
     });
 
@@ -879,7 +884,9 @@ export const useLmsOrchestrator = () => {
             toast.error("Process aborted: Course reference context lost.");
             return;
         }
-        if (!window.confirm("Delete this asset permanently?")) return;
+        if (!window.confirm("Delete this asset permanently?")) {
+            return;
+        }
         setCourseMedia((prev: any) => ({ ...prev, loading: true }));
         try {
             const res = type === 'vid' ? await courseApi.deleteVideo(id) : await courseApi.deleteDocument(id);
@@ -1010,6 +1017,11 @@ export const useLmsOrchestrator = () => {
 
 
     const handleCrud = async (action: string, type: string, data: any) => {
+        if (action === 'delete') {
+            if (!window.confirm(`Are you sure you want to delete this ${type}?`)) {
+                return;
+            }
+        }
         setUi((prev: any) => ({ ...prev, loading: true }));
         try {
             const getId = (d: any) => {
@@ -1047,10 +1059,6 @@ export const useLmsOrchestrator = () => {
             }
             else if (action === 'assign' && type === 'user') res = await service.assign({ userId: Number(id), RoleId: Number(data.RoleId) });
             else if (action === 'delete') {
-                if (!window.confirm(`Are you sure you want to delete this ${type}?`)) {
-                    setUi((p: any) => ({ ...p, loading: false }));
-                    return;
-                }
                 if (type === 'role') res = await securityApi.deleteRole(id);
                 else if (type === 'perm') res = await securityApi.deletePermission(id);
                 else if (type === 'module') res = await securityApi.deleteModule(id);
@@ -1095,7 +1103,9 @@ export const useLmsOrchestrator = () => {
     };
 
     const revokeEnrollment = async (userId: number, courseId: number) => {
-        if (!window.confirm("Are you sure you want to revoke this student's access to this course?")) return;
+        if (!window.confirm("Are you sure you want to revoke this student's access to this course?")) {
+            return;
+        }
         setUi((prev: any) => ({ ...prev, loading: true }));
         try {
             const res = await subscriptionApi.revoke(userId, courseId);

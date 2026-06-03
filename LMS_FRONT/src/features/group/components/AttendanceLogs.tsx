@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { groupApi } from '../api/groupApi';
 import { Icons } from '../../../shared/components/lms/Icons';
 import { CommonTable } from '../../../shared/components/lms/LmsComponents';
+import { toast } from 'react-toastify';
 
 interface AttendanceLog {
     id: number;
@@ -96,19 +97,22 @@ export const AttendanceLogs: React.FC<{
     };
 
     const handleDelete = async (id: number) => {
-        if (!window.confirm("Are you sure you want to delete this attendance record? This cannot be undone.")) return;
+        if (!window.confirm("Are you sure you want to delete this attendance record? This cannot be undone.")) {
+            return;
+        }
         
         try {
             const res = await groupApi.deleteAttendance(id);
             if (res.data?.success) {
                 // Remove the deleted log from state
                 setLogs(prev => prev.filter(log => (log.id || (log as any).Id) !== id));
+                toast.success(res.data?.message || "Attendance record deleted successfully.");
             } else {
-                alert(res.data?.message || "Failed to delete attendance record");
+                toast.error(res.data?.message || "Failed to delete attendance record.");
             }
         } catch (err: any) {
             console.error("Delete failed:", err);
-            alert("An error occurred while deleting the record.");
+            toast.error(err.message || "An error occurred while deleting the record.");
         }
     };
 
@@ -227,22 +231,13 @@ export const AttendanceLogs: React.FC<{
                         </td>
                         <td>
                             <button
-                                onClick={() => handleDelete(log.id || (log as any).Id)}
-                                style={{
-                                    background: 'rgba(255, 60, 60, 0.1)',
-                                    border: '1px solid rgba(255, 60, 60, 0.2)',
-                                    cursor: 'pointer',
-                                    color: '#ff3c3c',
-                                    padding: '6px',
-                                    borderRadius: '4px',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    transition: 'all 0.2s ease'
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(log.id || (log as any).Id);
                                 }}
+                                className="lms-icon-btn-sm danger"
                                 title="Delete Record"
-                                onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 60, 60, 0.2)'}
-                                onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 60, 60, 0.1)'}
+                                style={{ position: 'relative', zIndex: 10, pointerEvents: 'auto' }}
                             >
                                 <Icons.Trash s={14} />
                             </button>

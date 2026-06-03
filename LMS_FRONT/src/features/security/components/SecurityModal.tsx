@@ -67,9 +67,8 @@ export const SecurityModal: React.FC<SecurityModalProps> = ({
                                 className="lms-select-premium lms-sec-modal-select-flat"
                                 defaultValue={ui.target?.tenantId || ui.target?.TenantId || ""}
                             >
-                                <option value="">Super Admin</option>
+                                <option value="">Super Admin (Global)</option>
                                 {db.orgs.filter((o: any) => (o.isActive ?? o.IsActive) !== false).map((o: any) => <option key={o.id || o.Id} value={o.id || o.Id}>{o.orgName || o.OrgName}</option>)}
-                                <option value={0}>Super Admin Context</option>
                             </select>
                         </div>
                     </>

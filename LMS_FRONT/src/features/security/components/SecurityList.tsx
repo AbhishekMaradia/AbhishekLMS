@@ -320,6 +320,18 @@ export const SecurityList: React.FC<SecurityListProps> = ({
 
     const p = pagination[pageKey] || { page: 1, size: 10, total: 0 };
 
+    let adjustedTotal = p.total;
+    if (tab === 'user_roles') {
+        const matchesSearch = !searchTerm || 
+            (user?.email || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+            `${user?.firstName || ''} ${user?.lastName || ''}`.toLowerCase().includes(searchTerm.toLowerCase());
+        const status = userRoleStatusFilter || ui.statusFilter || 'all';
+        const matchesStatus = status === 'all' || status === 'active';
+        const isCurrentUserCounted = matchesSearch && matchesStatus;
+        adjustedTotal = isCurrentUserCounted ? Math.max(0, p.total - 1) : p.total;
+    }
+    const totalPages = Math.ceil(adjustedTotal / (p.size || 10)) || 1;
+
     if (viewMode === 'table') {
         return (
             <>
@@ -332,8 +344,8 @@ export const SecurityList: React.FC<SecurityListProps> = ({
 
                 <Pagination
                     current={p.page}
-                    total={Math.ceil((p.total || 0) / (p.size || 10))}
-                    totalItems={p.total}
+                    total={totalPages}
+                    totalItems={adjustedTotal}
                     itemsPerPage={p.size}
                     onPageChange={(val: number) => changePage(pageKey, val)}
                     onPageSizeChange={(val: number) => changePageSize(pageKey, val)}
@@ -352,8 +364,8 @@ export const SecurityList: React.FC<SecurityListProps> = ({
 
             <Pagination
                 current={p.page}
-                total={Math.ceil((p.total || 0) / (p.size || 10))}
-                totalItems={p.total}
+                total={totalPages}
+                totalItems={adjustedTotal}
                 itemsPerPage={p.size}
                 onPageChange={(val: number) => changePage(pageKey, val)}
                 onPageSizeChange={(val: number) => changePageSize(pageKey, val)}

@@ -27,7 +27,32 @@ export const UsersPage: React.FC<UsersPageProps> = ({
     hasPermission, handleCrud
 }) => {
     const p = pagination['users'] || { page: 1, size: 50, total: 0 };
-    const totalPages = Math.ceil((p.total || 0) / (p.size || 50)) || 1;
+    
+    // Calculate filtered users to count active/inactive users correctly
+    const filteredUsers = (db.users || []).filter((u: any) => {
+        const uid = u.id || u.Id;
+        const currentUid = user?.id || user?.Id;
+        const matchesStatus =
+            ui.statusFilter === 'all' ? true :
+                ui.statusFilter === 'active' ? (u.isActive !== false) :
+                    (u.isActive === false);
+        return uid !== currentUid && matchesStatus;
+    });
+
+    const matchesSearch = !searchTerm || 
+        (user?.email || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+        `${user?.firstName || ''} ${user?.lastName || ''}`.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = ui.statusFilter === 'all' || ui.statusFilter === 'active';
+    const isCurrentUserCounted = matchesSearch && matchesStatus;
+
+    // Use exact loaded filtered count if all users fit in a single page, otherwise approximate.
+    const adjustedTotal = p.total <= (p.size || 50)
+        ? filteredUsers.length
+        : (ui.statusFilter === 'inactive'
+            ? (db.users || []).filter((u: any) => u.isActive === false).length
+            : (isCurrentUserCounted ? Math.max(0, p.total - 1) : p.total));
+
+    const totalPages = Math.ceil(adjustedTotal / (p.size || 50)) || 1;
 
     const canCreate = isSuperAdmin || hasPermission('USER', 'USER_ADD');
 
@@ -37,7 +62,7 @@ export const UsersPage: React.FC<UsersPageProps> = ({
                 <div className="lms-entity-header">
                     <div className="lms-section-heading">
                         <h1 className="lms-card-title">Users</h1>
-                        <span className="lms-section-count">{p.total} users</span>
+                        <span className="lms-section-count">{adjustedTotal} users</span>
                     </div>
 
                     <div className="lms-card-actions">
@@ -45,7 +70,7 @@ export const UsersPage: React.FC<UsersPageProps> = ({
                         {canCreate && (
                             <Button
                                 variant="primary"
-                                onClick={() => setUi({ ...ui, modal: 'user_create' })}
+                                onClick={() => setUi({ ...ui, modal: 'user_create', target: null })}
                                 className="lms-btn-primary lms-users-add-btn"
                             >
                                 <Icons.Plus s={18} /> ADD USER
@@ -82,7 +107,7 @@ export const UsersPage: React.FC<UsersPageProps> = ({
                 <Pagination
                     current={p.page}
                     total={totalPages}
-                    totalItems={p.total}
+                    totalItems={adjustedTotal}
                     itemsPerPage={p.size}
                     onPageChange={(page: number) => changePage('users', page)}
                     onPageSizeChange={(size: number) => changePageSize('users', size)}

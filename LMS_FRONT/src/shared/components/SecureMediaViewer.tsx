@@ -129,7 +129,6 @@ export const SecureMediaViewer: React.FC<SecureMediaViewerProps & { user: any, a
                             src={media.url}
                             controls
                             autoPlay
-                            muted
                             playsInline
                             controlsList="nodownload"
                             disablePictureInPicture

@@ -81,7 +81,14 @@ export const UserModal: React.FC<UserModalProps> = ({
     const isCurrentUser = Boolean(targetUserId && currentUserId && Number(targetUserId) === Number(currentUserId));
 
     return (
-        <form onSubmit={handleSubmit} className="lms-fade-in lms-col-gap-md lms-user-modal-form">
+        <form onSubmit={handleSubmit} className="lms-fade-in lms-col-gap-md lms-user-modal-form" autoComplete="off">
+            {/* Decoy fields to catch aggressive browser autofill */}
+            <div style={{ position: 'absolute', top: '-9999px', left: '-9999px', width: '1px', height: '1px', opacity: 0.01, overflow: 'hidden', pointerEvents: 'none' }}>
+                <input type="text" name="fake_username_autofill" tabIndex={-1} autoComplete="off" style={{ width: '1px', height: '1px' }} />
+                <input type="email" name="fake_email_autofill" tabIndex={-1} autoComplete="off" style={{ width: '1px', height: '1px' }} />
+                <input type="password" name="fake_password_autofill" tabIndex={-1} autoComplete="new-password" style={{ width: '1px', height: '1px' }} />
+            </div>
+
             {ui.modal !== 'user_create' && <input type="hidden" name="Id" value={ui.target?.id || ui.target?.Id || 0} />}
 
             {isSuperAdmin && !isCurrentUser && (
@@ -123,7 +130,7 @@ export const UserModal: React.FC<UserModalProps> = ({
                 <div>
                     <label className="lms-label-premium required">Email Address</label>
                     <div className="lms-modal-panel-premium">
-                        <input name="Email" type="email" defaultValue={ui.target?.email || ui.target?.Email} placeholder="john@example.com" className="lms-input-premium" required />
+                        <input name="Email" type="email" autoComplete="new-email" defaultValue={ui.target?.email || ui.target?.Email} placeholder="john@example.com" className="lms-input-premium" required />
                     </div>
                 </div>
                 <div>
@@ -136,7 +143,7 @@ export const UserModal: React.FC<UserModalProps> = ({
 
             <label className="lms-label-premium">{ui.modal === 'user_create' ? 'Initial Password' : 'Change Password'}</label>
             <div className="lms-modal-panel-premium">
-                <input name="Password" type="password" placeholder={ui.modal !== 'user_create' ? '•••••••• (Leave blank to keep current)' : 'Enter password'} className="lms-input-premium" required={ui.modal === 'user_create'} />
+                <input name="Password" type="password" autoComplete="new-password" placeholder={ui.modal !== 'user_create' ? '•••••••• (Leave blank to keep current)' : 'Enter password'} className="lms-input-premium" required={ui.modal === 'user_create'} />
             </div>
 
             {((isSuperAdmin || hasPermission('USER_ROLE', 'USER_ROLE_ADD')) && !isCurrentUser) && (

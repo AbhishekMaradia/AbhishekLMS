@@ -254,7 +254,7 @@ export const useLmsCRUD = (user: any, isSuperAdmin: boolean, db: any, setDb: any
 
             if (extractData(res)) {
                 toast.success(`${entity.toUpperCase()} operation completed successfully.`);
-                setUi((prev: any) => ({ ...prev, modal: null }));
+                setUi((prev: any) => ({ ...prev, modal: null, target: null }));
                 syncAll();
             } else {
                 toast.error(res?.message || "Operation failed at server level.");

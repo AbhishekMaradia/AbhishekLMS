@@ -7,7 +7,7 @@ import { AttendanceLogs } from '../features/group/components/AttendanceLogs';
 import { groupApi } from '../features/group/api/groupApi';
 import { organizationApi } from '../features/organization/api/organizationApi';
 import '../features/group/components/GroupAttendance.css';
-import { Pagination, Button, GroupSwitcher, SearchInput, PerspectiveSwitcher } from '../shared/components/lms/LmsComponents';
+import { Pagination, Button, GroupSwitcher, SearchInput, PerspectiveSwitcher, CustomSelect } from '../shared/components/lms/LmsComponents';
 import '../features/group/Group.css';
 
 interface GroupsPageProps {
@@ -219,7 +219,7 @@ export const GroupsPage: React.FC<GroupsPageProps> = ({
                                     <Button
                                         className="lms-btn-primary lms-groups-add-btn"
                                         icon={Icons.Plus}
-                                        onClick={() => setUi({ ...ui, modal: 'group_create' })}
+                                        onClick={() => setUi({ ...ui, modal: 'group_create', target: null })}
                                     >
                                         ADD GROUP
                                     </Button>
@@ -237,48 +237,48 @@ export const GroupsPage: React.FC<GroupsPageProps> = ({
                                     {isSuperAdmin && (
                                         <div className="lms-att-field" style={{ flex: '1 1 200px' }}>
                                             <label className="lms-att-label">Organization</label>
-                                            <select 
-                                                className="lms-att-select"
+                                            <CustomSelect
+                                                options={[
+                                                    { value: '', label: '-- Choose Organization --' },
+                                                    ...(availableOrgs || []).map((o: any) => ({
+                                                        value: o.id || o.Id,
+                                                        label: o.orgName || o.OrgName || o.name || o.Name || 'Unknown Org'
+                                                    }))
+                                                ]}
                                                 value={attOrg}
-                                                onChange={(e) => {
-                                                    const val = e.target.value;
-                                                    setAttOrg(val === "" ? "" : Number(val));
-                                                }}
-                                            >
-                                                <option value="">-- Choose Organization --</option>
-                                                {(availableOrgs || []).map((o: any) => (
-                                                    <option key={o.id || o.Id} value={o.id || o.Id}>{o.orgName || o.OrgName || o.name || o.Name || 'Unknown Org'}</option>
-                                                ))}
-                                            </select>
+                                                onChange={(val) => setAttOrg(val === "" ? "" : Number(val))}
+                                            />
                                         </div>
                                     )}
                                     <div className="lms-att-field" style={{ flex: '1 1 180px' }}>
                                         <label className="lms-att-label">Select Group</label>
-                                        <select
-                                            className="lms-att-select"
+                                        <CustomSelect
+                                            options={[
+                                                { value: '', label: '-- Choose Group --' },
+                                                ...attGroups.map((g: any) => ({
+                                                    value: g.id || g.Id,
+                                                    label: g.groupName || g.GroupName
+                                                }))
+                                            ]}
                                             value={attGroup}
-                                            onChange={(e) => setAttGroup(Number(e.target.value))}
+                                            onChange={(val) => setAttGroup(val === "" ? "" : Number(val))}
                                             disabled={isSuperAdmin && !attOrg}
-                                        >
-                                            <option value="">-- Choose Group --</option>
-                                            {attGroups.map((g: any) => (
-                                                <option key={g.id || g.Id} value={g.id || g.Id}>{g.groupName || g.GroupName}</option>
-                                            ))}
-                                        </select>
+                                        />
                                     </div>
                                     <div className="lms-att-field" style={{ flex: '1 1 220px' }}>
                                         <label className="lms-att-label">Select Course</label>
-                                        <select
-                                            className="lms-att-select"
+                                        <CustomSelect
+                                            options={[
+                                                { value: '', label: '-- Choose Course --' },
+                                                ...attCourses.map((c: any) => ({
+                                                    value: c.courseId || c.id || c.Id,
+                                                    label: c.courseName || c.CourseName
+                                                }))
+                                            ]}
                                             value={attCourse}
-                                            onChange={(e) => setAttCourse(Number(e.target.value))}
+                                            onChange={(val) => setAttCourse(val === "" ? "" : Number(val))}
                                             disabled={!attGroup}
-                                        >
-                                            <option value="">-- Choose Course --</option>
-                                            {attCourses.map((c: any) => (
-                                                <option key={c.courseId || c.id || c.Id} value={c.courseId || c.id || c.Id}>{c.courseName || c.CourseName}</option>
-                                            ))}
-                                        </select>
+                                        />
                                     </div>
                                     <div className="lms-att-field" style={{ flex: '0 0 150px' }}>
                                         <label className="lms-att-label">Session Date</label>
@@ -302,49 +302,49 @@ export const GroupsPage: React.FC<GroupsPageProps> = ({
                             {groupTab === 'att_logs' && (
                                 <div style={{ display: 'flex', gap: '20px', alignItems: 'center', width: '100%', flexWrap: 'wrap' }}>
                                     {isSuperAdmin && (
-                                        <div className="lms-att-field" style={{ flex: '0 0 220px' }}>
-                                            <label className="lms-att-label">Organization</label>
-                                            <select 
-                                                className="lms-att-select"
-                                                value={attOrg}
-                                                onChange={(e) => {
-                                                    const val = e.target.value;
-                                                    setAttOrg(val === "" ? "" : Number(val));
-                                                }}
-                                            >
-                                                <option value="">All Organizations</option>
-                                                {(availableOrgs || []).map((o: any) => (
-                                                    <option key={o.id || o.Id} value={o.id || o.Id}>{o.orgName || o.OrgName || o.name || o.Name || 'Unknown Org'}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    )}
-                                    <div className="lms-att-field" style={{ flex: '0 0 180px' }}>
-                                        <label className="lms-att-label">Group</label>
-                                        <select
-                                            className="lms-att-select"
-                                            value={attGroup}
-                                            onChange={(e) => setAttGroup(Number(e.target.value))}
-                                        >
-                                            <option value="">All Groups</option>
-                                            {attGroups.map((g: any) => (
-                                                <option key={g.id || g.Id} value={g.id || g.Id}>{g.groupName || g.GroupName}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="lms-att-field" style={{ flex: '0 0 200px' }}>
-                                        <label className="lms-att-label">Course</label>
-                                        <select
-                                            className="lms-att-select"
-                                            value={attCourse}
-                                            onChange={(e) => setAttCourse(Number(e.target.value))}
-                                        >
-                                            <option value="">All Courses</option>
-                                            {attCourses.map((c: any) => (
-                                                <option key={c.courseId || c.id || c.Id} value={c.courseId || c.id || c.Id}>{c.courseName || c.CourseName}</option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                         <div className="lms-att-field" style={{ flex: '0 0 220px' }}>
+                                             <label className="lms-att-label">Organization</label>
+                                             <CustomSelect
+                                                 options={[
+                                                     { value: '', label: 'All Organizations' },
+                                                     ...(availableOrgs || []).map((o: any) => ({
+                                                         value: o.id || o.Id,
+                                                         label: o.orgName || o.OrgName || o.name || o.Name || 'Unknown Org'
+                                                     }))
+                                                 ]}
+                                                 value={attOrg}
+                                                 onChange={(val) => setAttOrg(val === "" ? "" : Number(val))}
+                                             />
+                                         </div>
+                                     )}
+                                     <div className="lms-att-field" style={{ flex: '0 0 180px' }}>
+                                         <label className="lms-att-label">Group</label>
+                                         <CustomSelect
+                                             options={[
+                                                 { value: '', label: 'All Groups' },
+                                                 ...attGroups.map((g: any) => ({
+                                                     value: g.id || g.Id,
+                                                     label: g.groupName || g.GroupName
+                                                 }))
+                                             ]}
+                                             value={attGroup}
+                                             onChange={(val) => setAttGroup(val === "" ? "" : Number(val))}
+                                         />
+                                     </div>
+                                     <div className="lms-att-field" style={{ flex: '0 0 200px' }}>
+                                         <label className="lms-att-label">Course</label>
+                                         <CustomSelect
+                                             options={[
+                                                 { value: '', label: 'All Courses' },
+                                                 ...attCourses.map((c: any) => ({
+                                                     value: c.courseId || c.id || c.Id,
+                                                     label: c.courseName || c.CourseName
+                                                 }))
+                                             ]}
+                                             value={attCourse}
+                                             onChange={(val) => setAttCourse(val === "" ? "" : Number(val))}
+                                         />
+                                     </div>
                                     <div className="lms-att-search-wrapper" style={{ flex: 1 }}>
                                         <label className="lms-att-label">Search Student</label>
                                         <SearchInput value={attSearch} onChange={setAttSearch} placeholder="Filter logs..." />

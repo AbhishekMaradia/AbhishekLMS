@@ -1,7 +1,7 @@
 import { apiClient } from '../../../core/api/apiClient';
 
 export const reportApi = {
-    list: (searchTerm: string = '', page: number = 1, size: number = 20, tenantId?: number, groupId?: number, generatedFrom?: string) => {
+    list: (searchTerm: string = '', page: number = 1, size: number = 5, tenantId?: number, groupId?: number, generatedFrom?: string) => {
         const params = {
             searchTerm,
             pageNumber: page,

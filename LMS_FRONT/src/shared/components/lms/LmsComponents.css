@@ -610,7 +610,7 @@
 
 @media (max-width: 480px) {
     .lms-main-header {
-        margin: 8px 8px 0;
+        margin: 8px 8px 8px;
         height: 60px;
         padding: 0 8px;
         border-radius: 14px;
@@ -655,7 +655,7 @@
     }
 
     .lms-content-scroll {
-        padding: 12px !important;
+        padding: 0 12px 12px !important;
     }
 
     .lms-container {

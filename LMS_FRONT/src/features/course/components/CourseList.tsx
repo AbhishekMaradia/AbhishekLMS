@@ -85,10 +85,7 @@ export const CourseList = ({
                         </td>
                         <td>
                             <span className="lms-tag info">
-                                {tab === 'cm'
-                                    ? (getOrgName(c) || 'SYSTEM').toUpperCase()
-                                    : ((cats || []).find((cat: any) => cat.categoryId === c.categoryId)?.categoryName || 'GENERAL').toUpperCase()
-                                }
+                                {((cats || []).find((cat: any) => (cat.categoryId ?? cat.CategoryId ?? cat.id ?? cat.Id) === (c.categoryId ?? c.CategoryId))?.categoryName || 'GENERAL').toUpperCase()}
                             </span>
                         </td>
                         {tab !== 'cm' && <td className="lms-hide-mobile">
@@ -156,7 +153,7 @@ export const CourseList = ({
                             <Icons.Org s={12} />
                             <span>{getOrgName(c)}</span>
                             <span className="lms-courselist-meta-dot">•</span>
-                            <span>{(cats || []).find((cat: any) => cat.categoryId === c.categoryId)?.categoryName || 'GENERAL'}</span>
+                            <span>{((cats || []).find((cat: any) => (cat.categoryId ?? cat.CategoryId ?? cat.id ?? cat.Id) === (c.categoryId ?? c.CategoryId))?.categoryName || 'GENERAL').toUpperCase()}</span>
                         </div>
 
                         <div className="lms-grid-description">

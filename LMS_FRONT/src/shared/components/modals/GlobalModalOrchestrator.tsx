@@ -182,13 +182,13 @@ export const GlobalModalOrchestrator: React.FC<GlobalModalOrchestratorProps> = (
                     >
                         <div className="lms-modal-header">
                             <div>
-                                <div className="lms-modal-header-tag">WORKSPACE WIZARD</div>
+                                <div className="lms-modal-header-tag">PLATFORM CONFIGURATOR</div>
                                 <h2 className="lms-modal-title">
                                     {(() => {
                                         const titles: any = {
                                             'mod_perm_assign': 'Map Module Permissions',
                                             'role_mod_assign': 'Map Role Permissions',
-                                            'role_mod_perm_assign': 'Role Security Wizard',
+                                            'role_mod_perm_assign': 'Role Security Configurator',
                                             'role_module_create': 'Add Module to Role',
                                             'student_course_player': 'Student Learning Studio'
                                         };
