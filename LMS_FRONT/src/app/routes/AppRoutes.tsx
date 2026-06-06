@@ -124,7 +124,7 @@ export const AppRoutes: React.FC<AppRoutesProps> = (props) => {
                     }
                 />
                 <Route path="/student/peers" element={<StudentPeerList peers={db.users} currentUser={user} loading={props.ui.loading} />} />
-                <Route path="/student/reports" element={<StudentReports user={user} subscriptions={subscriptions} courses={db.courses} />} />
+                <Route path="/student/reports" element={<StudentReports user={user} subscriptions={subscriptions} courses={db.courses} hasPermission={props.hasPermission} />} />
 
                 <Route path="/" element={<Navigate to="/student/dashboard" replace />} />
                 <Route path="*" element={<Navigate to="/student/dashboard" replace />} />

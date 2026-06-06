@@ -58,6 +58,7 @@ export const StudentLayout: React.FC<StudentLayoutProps> = ({
                     sidebarOpen={sidebarOpen}
                     setSidebarOpen={setSidebarOpen}
                     activeOrg={activeOrg}
+                    hasPermission={hasPermission}
                 />
             </div>
 

@@ -7,16 +7,22 @@ interface StudentReportsProps {
     user: any;
     subscriptions: number[];
     courses: any[];
+    hasPermission?: (m: string, a?: string) => boolean;
 }
 
 /**
  * Enterprise Academic Transcript - Detailed Edition
  * Now features granular module breakdown to see exactly which video is watched fully or half.
  */
-const StudentReports: React.FC<StudentReportsProps> = ({ user, subscriptions, courses }) => {
+const StudentReports: React.FC<StudentReportsProps> = ({ user, subscriptions, courses, hasPermission }) => {
     const [reports, setReports] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [expandedRows, setExpandedRows] = useState<number[]>([]);
+
+    const canSeeReport = useMemo(() => {
+        if (!hasPermission) return true; // Default to true if not provided (fallback)
+        return hasPermission('REPORT', 'REPORT_VIEW') || hasPermission('REPORT', 'REPORT_GENERATE');
+    }, [hasPermission]);
 
     const enrolled = useMemo(() => {
         return courses.filter(c => {
@@ -26,6 +32,10 @@ const StudentReports: React.FC<StudentReportsProps> = ({ user, subscriptions, co
     }, [courses, subscriptions]);
 
     useEffect(() => {
+        if (!canSeeReport) {
+            setLoading(false);
+            return;
+        }
         if (!user?.id || enrolled.length === 0) {
             setLoading(false);
             setReports([]);
@@ -73,6 +83,22 @@ const StudentReports: React.FC<StudentReportsProps> = ({ user, subscriptions, co
     };
 
     if (loading) return <div className="lms-reports-pro lms-fade-in"><TableSkeleton rows={5} /></div>;
+
+    if (!canSeeReport) {
+        return (
+            <div className="lms-reports-pro lms-fade-in theme-sync" style={{ padding: '40px', textAlign: 'center' }}>
+                <div style={{ maxWidth: '500px', margin: '40px auto', background: '#fff', padding: '40px', borderRadius: '24px', border: '1px solid #eee', boxShadow: '0 20px 40px rgba(0,0,0,0.02)' }}>
+                    <div style={{ color: 'var(--color-primary)', fontSize: '48px', marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
+                        <Icons.Shield s={48} />
+                    </div>
+                    <h2 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '16px', color: '#111' }}>Access Denied</h2>
+                    <p style={{ color: '#666', lineHeight: 1.6, marginBottom: '24px' }}>
+                        You do not have the required permissions to view academic progress reports. Please contact your administrator if you believe this is an error.
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="lms-reports-pro lms-fade-in theme-sync">

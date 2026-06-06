@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Icons } from '../../../shared/components/lms/Icons';
 import { CommonTable } from '../../../shared/components/lms/LmsComponents';
 import './Course.css';
@@ -50,6 +50,43 @@ export const CourseModal = ({
     hasPermission,
     cats
 }: any) => {
+
+    const [selectedOrgId, setSelectedOrgId] = useState<number>(() => {
+        return Number(ui.target?.tenantId ?? ui.target?.TenantId ?? 0);
+    });
+
+    const [selectedCategoryId, setSelectedCategoryId] = useState<string | number>(() => {
+        return ui.target?.categoryId ?? '';
+    });
+
+    useEffect(() => {
+        setSelectedOrgId(Number(ui.target?.tenantId ?? ui.target?.TenantId ?? 0));
+        setSelectedCategoryId(ui.target?.categoryId ?? '');
+    }, [ui.target, ui.modal]);
+
+    const orgId = isSuperAdmin ? selectedOrgId : Number(user?.tenantId ?? user?.TenantId ?? 0);
+
+    const filteredCats = (cats || db?.cat || []).filter((c: any) => {
+        const catTenantId = Number(c.tenantId ?? c.TenantId ?? 0);
+        return catTenantId === orgId || catTenantId === 0;
+    });
+
+    const handleOrgChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newOrgId = Number(e.target.value);
+        setSelectedOrgId(newOrgId);
+
+        // Check if the current category is valid under the new organization
+        const categoryList = cats || db?.cat || [];
+        const isCurrentCategoryValid = categoryList.some((c: any) => {
+            const catId = c.categoryId ?? c.Id;
+            const catTenantId = Number(c.tenantId ?? c.TenantId ?? 0);
+            return catId === Number(selectedCategoryId) && (catTenantId === newOrgId || catTenantId === 0);
+        });
+
+        if (!isCurrentCategoryValid) {
+            setSelectedCategoryId('');
+        }
+    };
 
     const renderMediaStudio = () => {
         if (courseMedia.loading) {
@@ -352,7 +389,8 @@ export const CourseModal = ({
                                         <div className="lms-modal-panel-premium">
                                             <select
                                                 name="TenantId"
-                                                defaultValue={ui.target?.tenantId ?? 0}
+                                                value={selectedOrgId}
+                                                onChange={handleOrgChange}
                                                 className="lms-input-premium lms-c-modal-select-org"
                                                 required
                                             >
@@ -417,9 +455,15 @@ export const CourseModal = ({
                                     <div>
                                         <label className="lms-label-premium required">Category</label>
                                         <div className="lms-modal-panel-premium">
-                                            <select name="CategoryId" defaultValue={ui.target?.categoryId || ''} className="lms-input-premium" required>
+                                            <select
+                                                name="CategoryId"
+                                                value={selectedCategoryId}
+                                                onChange={(e) => setSelectedCategoryId(e.target.value)}
+                                                className="lms-input-premium"
+                                                required
+                                            >
                                                 <option value="">-- Choose Category --</option>
-                                                {(cats || db?.cat || []).map((c: any) => <option key={c.categoryId || c.Id} value={c.categoryId || c.Id}>{c.categoryName || c.Name}</option>)}
+                                                {filteredCats.map((c: any) => <option key={c.categoryId || c.Id} value={c.categoryId || c.Id}>{c.categoryName || c.Name}</option>)}
                                             </select>
                                         </div>
                                     </div>

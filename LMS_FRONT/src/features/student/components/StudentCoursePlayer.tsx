@@ -91,13 +91,13 @@ const StudentCoursePlayer: React.FC<StudentCoursePlayerProps> = ({ course, media
 
         const initialPercentage = videoProgress?.watchedPercentage || 0;
         const wasCompleted = videoProgress?.isCompleted || initialPercentage >= 95;
-        
+
         // If already completed, do not send progress updates
         if (wasCompleted && !isCompleted) return;
 
         const v = videoRef.current;
         if (v.duration === 0 || isNaN(v.duration)) return;
-        
+
         // Progress calculation based on furthest point watched, not current time
         const watched = (furthestTimeRef.current / v.duration) * 100;
         const finalPercentage = isCompleted ? 100 : Math.min(100, Math.max(0, Math.floor(watched)));
@@ -143,7 +143,7 @@ const StudentCoursePlayer: React.FC<StudentCoursePlayerProps> = ({ course, media
                 // 1. Fetch user progress for this specific video
                 const progressRes = await api.get(`CourseVideo/progress/${selectedVideoId}`).catch(() => ({ data: { data: [] } }));
                 const progressData = progressRes.data?.data?.[0] || progressRes.data?.[0] || null;
-                
+
                 let initialPercentage = 0;
                 let isComp = false;
 
@@ -158,10 +158,10 @@ const StudentCoursePlayer: React.FC<StudentCoursePlayerProps> = ({ course, media
                 // 2. Fetch the video stream as Blob
                 const response = await fetch(getAuthUrl());
                 if (!response.ok) throw new Error("Failed to load secure stream");
-                
+
                 const blob = await response.blob();
                 if (!active) return;
-                
+
                 const localUrl = URL.createObjectURL(blob);
                 setVideoUrl(localUrl);
                 setVideoLoading(false);
@@ -196,12 +196,12 @@ const StudentCoursePlayer: React.FC<StudentCoursePlayerProps> = ({ course, media
         const interval = setInterval(() => saveProgress(), 15000);
         return () => {
             clearInterval(interval);
-            saveProgress(); 
+            saveProgress();
         };
     }, [selectedVideoId]);
 
     const isAlreadyCompleted = Boolean(
-        videoProgress?.isCompleted || 
+        videoProgress?.isCompleted ||
         (videoProgress?.watchedPercentage && videoProgress.watchedPercentage >= 95)
     );
 
@@ -215,7 +215,7 @@ const StudentCoursePlayer: React.FC<StudentCoursePlayerProps> = ({ course, media
     const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
         const v = e.currentTarget;
         if (v.duration === 0 || isNaN(v.duration)) return;
-        
+
         // Lazy initialize furthestTimeRef.current if needed
         if (furthestTimeRef.current === 0 && videoProgress) {
             const initialPercentage = videoProgress.watchedPercentage || 0;
@@ -245,7 +245,7 @@ const StudentCoursePlayer: React.FC<StudentCoursePlayerProps> = ({ course, media
     return (
         <div className="student-player-overlay lms-fade-in">
             <div className="student-player-container">
-                
+
                 {/* PREMIUM HEADER */}
                 <header className="student-player-header">
                     <div className="header-left-group">
@@ -254,7 +254,7 @@ const StudentCoursePlayer: React.FC<StudentCoursePlayerProps> = ({ course, media
                         </div>
                         <h3 className="player-course-title">{course.title || course.Title}</h3>
                     </div>
-                    
+
                     <div className="header-right-group">
                         <div className="tab-control-wrapper">
                             <button className={`lms-tab-mini ${activeTab === 'videos' ? 'active' : ''}`} onClick={() => setActiveTab('videos')}>Curriculum</button>
@@ -266,10 +266,10 @@ const StudentCoursePlayer: React.FC<StudentCoursePlayerProps> = ({ course, media
 
                 {/* CINEMATIC WORKSPACE */}
                 <div className="player-main-workspace">
-                    
+
                     {/* THEATRE AREA */}
                     <div className="player-theatre">
-                        
+
                         {/* SECURITY BLUR */}
                         <div id="secure-blur-overlay-student" className="player-security-blur">
                             <div className="blur-icon"><span>🔐</span></div>
@@ -294,12 +294,12 @@ const StudentCoursePlayer: React.FC<StudentCoursePlayerProps> = ({ course, media
                                 <div style={{ marginTop: 12 }}>DECRYPTING SECURE STREAM...</div>
                             </div>
                         ) : selectedVideo && videoUrl ? (
-                            <video 
-                                ref={videoRef} 
-                                src={videoUrl} 
-                                controls autoPlay 
+                            <video
+                                ref={videoRef}
+                                src={videoUrl}
+                                controls autoPlay
                                 className="player-media-content"
-                                onEnded={() => { console.log('[LMS_PLAYER] Video Ended'); saveProgress(true); }} 
+                                onEnded={() => { console.log('[LMS_PLAYER] Video Ended'); saveProgress(true); }}
                                 onPause={() => { console.log('[LMS_PLAYER] Video Paused'); saveProgress(); }}
                                 onTimeUpdate={handleTimeUpdate}
                                 onLoadedMetadata={handleLoadedMetadata}
@@ -321,13 +321,13 @@ const StudentCoursePlayer: React.FC<StudentCoursePlayerProps> = ({ course, media
                                 {activeTab === 'videos' ? `${media.vids.length} Lessons` : `${media.docs.length} Resources`}
                             </div>
                         </div>
-                        
+
                         <div className="sidebar-list lms-custom-scrollbar">
                             {(activeTab === 'videos' ? media.vids : media.docs).map((m, i) => {
                                 const isSel = (m.id || m.Id) === (activeTab === 'videos' ? selectedVideo?.id || selectedVideo?.Id : selectedDoc?.id || selectedDoc?.Id);
                                 return (
-                                    <div 
-                                        key={i} 
+                                    <div
+                                        key={i}
                                         onClick={() => activeTab === 'videos' ? setSelectedVideo(m) : setSelectedDoc(m)}
                                         className={`media-item ${isSel ? 'active' : ''}`}
                                     >
@@ -339,7 +339,7 @@ const StudentCoursePlayer: React.FC<StudentCoursePlayerProps> = ({ course, media
                                                 {m.title || m.Title || m.docName}
                                             </div>
                                             <div className="item-meta">
-                                                {activeTab === 'videos' ? 'MODULE ' + (i+1).toString().padStart(2, '0') : 'SECURE PDF'}
+                                                {activeTab === 'videos' ? 'MODULE ' + (i + 1).toString().padStart(2, '0') : 'SECURE PDF'}
                                             </div>
                                         </div>
                                     </div>

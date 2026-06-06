@@ -51,7 +51,9 @@ export const SecurityList: React.FC<SecurityListProps> = ({
     isSuperAdmin,
     pagination,
     changePage,
-    changePageSize
+    changePageSize,
+    searchTerm,
+    userRoleStatusFilter
 }) => {
 
     const getFilteredData = () => {

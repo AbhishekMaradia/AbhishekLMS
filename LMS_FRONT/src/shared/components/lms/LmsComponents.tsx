@@ -195,9 +195,9 @@ export const CustomSelect: React.FC<{
     const currentLabel = selectedOption ? selectedOption.label : (placeholder || 'Select...');
 
     return (
-        <div 
-            className={`lms-custom-select-container ${className} ${disabled ? 'disabled' : ''}`} 
-            style={{ ...style, pointerEvents: disabled ? 'none' : 'auto', opacity: disabled ? 0.6 : 1 }} 
+        <div
+            className={`lms-custom-select-container ${className} ${disabled ? 'disabled' : ''}`}
+            style={{ ...style, pointerEvents: disabled ? 'none' : 'auto', opacity: disabled ? 0.6 : 1 }}
             ref={containerRef}
         >
             <div
@@ -623,9 +623,9 @@ export const AuthGate = ({ onComplete, decryptor }: any) => {
                             </button>
 
                             <div className="lms-auth-simple-footer">
-                                <button type="button" onClick={() => setMode('register')} className="lms-auth-simple-footer-btn">Create account</button>
+                                <button type="button" onClick={() => setMode('register')} className="lms-auth-simple-footer-btn">Create New account</button>
                                 <div style={{ marginTop: '8px' }}>
-                                    <button type="button" onClick={() => setMode('org_register')} className="lms-auth-simple-footer-btn" style={{ opacity: 0.7, fontSize: '12px' }}>Enterprise Registration</button>
+                                    <button type="button" onClick={() => setMode('org_register')} className="lms-auth-simple-footer-btn" style={{ opacity: 0.7, fontSize: '12px' }}>Organization Registration</button>
                                 </div>
                             </div>
                         </form>

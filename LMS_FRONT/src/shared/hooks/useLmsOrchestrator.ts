@@ -58,11 +58,11 @@ export const useLmsOrchestrator = () => {
         if (target && location.pathname !== target) {
             navigate(target);
         }
-        
+
         // Ensure sub-tab sync when clicking from Sidebar
         if (id === 'att') setGroupTab('att_logs');
         if (id === 'group') setGroupTab('groups');
-        
+
         setTabState(id);
     }, [navigate, location.pathname]);
 
@@ -80,21 +80,21 @@ export const useLmsOrchestrator = () => {
 
         if (routeToTab[path]) {
             let targetTab = routeToTab[path];
-            
+
             // If we are on /groups and the sub-tab is 'att' or 'att_logs', keep sidebar on 'att'
             if (targetTab === 'group' && (groupTab === 'att' || groupTab === 'att_logs')) {
                 targetTab = 'att';
             }
 
             setTabState(targetTab);
-            
+
             // Reset groupTab ONLY if we are actually CHANGING the main route to /groups 
             // from a different section (not switching sub-tabs or coming from att/att_logs)
             if (pathChanged && targetTab === 'group' && groupTab !== 'att' && groupTab !== 'att_logs') {
                 setGroupTab('groups');
             }
         }
-    }, [location.pathname, groupTab]); 
+    }, [location.pathname, groupTab]);
 
     const [tab, setTabState] = useState<string>(() => {
         const path = window.location.pathname.replace('/', '');
@@ -488,11 +488,11 @@ export const useLmsOrchestrator = () => {
                     const resData = res.data as any;
                     const items = applyIsolation(extract(res));
                     // Smart totalCount extraction: check top-level AND nested data (for PagedApiResponse)
-                    const totalCount = resData?.totalCount || resData?.TotalCount || 
-                                     resData?.data?.totalCount || resData?.data?.TotalCount || 
-                                     resData?.totalRecords || resData?.TotalRecords ||
-                                     resData?.data?.totalRecords || resData?.data?.TotalRecords ||
-                                     items.length;
+                    const totalCount = resData?.totalCount || resData?.TotalCount ||
+                        resData?.data?.totalCount || resData?.data?.TotalCount ||
+                        resData?.totalRecords || resData?.TotalRecords ||
+                        resData?.data?.totalRecords || resData?.data?.TotalRecords ||
+                        items.length;
 
                     if (tab === 'sec') {
                         const st = ui.secTab || 'sec';

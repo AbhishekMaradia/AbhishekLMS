@@ -13,12 +13,12 @@ import { NavLink } from 'react-router-dom';
 import { Icons, SecureImage } from '../lms/LmsComponents';
 import './Layout.css';
 
-export const StudentSidebar = ({ sidebarOpen, activeTab: tab, setTab, user, activeOrg }: any) => {
+export const StudentSidebar = ({ sidebarOpen, activeTab: tab, setTab, user, activeOrg, hasPermission }: any) => {
 
     const brandName = activeOrg?.orgName || activeOrg?.OrgName || 'SoulCode';
     const brandLogo = activeOrg?.logoUrl || activeOrg?.LogoUrl;
 
-    const NavItem = ({ id, icon: Icon, label }: { id: string; icon: LucideIcon; label: string }) => {
+    const NavItem = ({ id, icon: Icon, label, disabled }: { id: string; icon: LucideIcon; label: string; disabled?: boolean }) => {
         const tabToRoute: Record<string, string> = {
             'student-dash': '/student/dashboard',
             'student-discover': '/student/discover',
@@ -26,6 +26,8 @@ export const StudentSidebar = ({ sidebarOpen, activeTab: tab, setTab, user, acti
             'student-peers': '/student/peers',
             'student-reports': '/student/reports',
         };
+
+        if (disabled) return null;
 
         return (
             <NavLink
@@ -68,7 +70,7 @@ export const StudentSidebar = ({ sidebarOpen, activeTab: tab, setTab, user, acti
                 <NavItem id="student-discover" icon={Compass} label="Discover" />
                 <NavItem id="student-my-courses" icon={Library} label="My Courses" />
                 <NavItem id="student-peers" icon={Users2} label="Peers" />
-                <NavItem id="student-reports" icon={FileText} label="Reports" />
+                <NavItem id="student-reports" icon={FileText} label="Reports" disabled={hasPermission ? !(hasPermission('REPORT', 'REPORT_VIEW') || hasPermission('REPORT', 'REPORT_GENERATE')) : false} />
             </nav>
 
             <div className="lms-sidebar-footer">
