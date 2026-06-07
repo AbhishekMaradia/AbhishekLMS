@@ -63,6 +63,8 @@ export const UserModal: React.FC<UserModalProps> = ({
         // Only include password if it's provided (don't overwrite with empty string)
         if (rawData.Password) {
             data.Password = rawData.Password;
+        } else if (ui.modal === 'user_create') {
+            data.Password = 'Password@123';
         }
 
         if (ui.modal === 'user_edit' || ui.modal === 'user_update') {
@@ -143,7 +145,7 @@ export const UserModal: React.FC<UserModalProps> = ({
 
             <label className="lms-label-premium">{ui.modal === 'user_create' ? 'Initial Password' : 'Change Password'}</label>
             <div className="lms-modal-panel-premium">
-                <input name="Password" type="password" autoComplete="new-password" placeholder={ui.modal !== 'user_create' ? '•••••••• (Leave blank to keep current)' : 'Enter password'} className="lms-input-premium" required={ui.modal === 'user_create'} />
+                <input name="Password" type="password" autoComplete="new-password" placeholder={ui.modal !== 'user_create' ? '•••••••• (Leave blank to keep current)' : 'Enter password (optional)'} className="lms-input-premium" />
             </div>
 
             {((isSuperAdmin || hasPermission('USER_ROLE', 'USER_ROLE_ADD')) && !isCurrentUser) && (
@@ -163,7 +165,7 @@ export const UserModal: React.FC<UserModalProps> = ({
                 </div>
             )}
 
-            {!isCurrentUser && (
+            {!isCurrentUser && ui.modal !== 'user_create' && (
                 <div className="lms-switch-premium lms-user-modal-switch-wrap">
                     <span className="lms-user-modal-status-label">Status</span>
                     <input type="checkbox" name="IsActive" defaultChecked={ui.target ? (ui.target.isActive !== false) : true} className="lms-user-modal-status-checkbox" />

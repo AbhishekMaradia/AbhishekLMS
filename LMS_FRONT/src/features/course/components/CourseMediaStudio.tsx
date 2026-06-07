@@ -109,7 +109,7 @@ export const CourseMediaStudio = ({
                                 WORKSPACE <span className="lms-cms-header-slash">/</span> MANAGEMENT
                             </div>
                             <div className="lms-flex-row lms-cms-header-title-row">
-                                <h1 className="lms-modal-title lms-cms-page-title">Media Center</h1>
+                                <h1 className="lms-modal-title lms-cms-page-title">Course Material</h1>
                                 <span className="lms-cms-page-badge">
                                     Video and document operations
                                 </span>

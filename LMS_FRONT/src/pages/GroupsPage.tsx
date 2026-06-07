@@ -101,23 +101,19 @@ export const GroupsPage: React.FC<GroupsPageProps> = ({
     const [attGroups, setAttGroups] = useState<any[]>([]);
     const [attLoading, setAttLoading] = useState(false);
 
-    // Fetch Groups based on Org (for SuperAdmin)
+    // Fetch Groups based on Org
     useEffect(() => {
         const fetchFilteredGroups = async () => {
             if (groupTab.startsWith('att')) {
                 setAttLoading(true);
                 try {
-                    // If SuperAdmin and Org selected, fetch for that org. Else fetch all if possible or use db.
-                    if (isSuperAdmin) {
-                        const res = await groupApi.getGroups('', 1, 100, attOrg ? Number(attOrg) : null);
-                        const raw = res.data?.data || res.data || [];
-                        const list = Array.isArray(raw) ? raw : (raw.items || raw.Items || raw.data || []);
-                        setAttGroups(list);
-                    } else {
-                        setAttGroups(db.groups || db.group || []);
-                    }
+                    const targetTenantId = isSuperAdmin ? (attOrg ? Number(attOrg) : null) : (user?.tenantId ?? user?.TenantId ?? null);
+                    const res = await groupApi.getGroups('', 1, 100, targetTenantId);
+                    const raw = res.data?.data || res.data || [];
+                    const list = Array.isArray(raw) ? raw : (raw.items || raw.Items || raw.data || []);
+                    setAttGroups(list);
                 } catch (err) {
-                    console.error("Failed to load groups");
+                    console.error("Failed to load groups", err);
                     setAttGroups([]);
                 } finally {
                     setAttLoading(false);
@@ -125,7 +121,7 @@ export const GroupsPage: React.FC<GroupsPageProps> = ({
             }
         };
         fetchFilteredGroups();
-    }, [attOrg, groupTab, isSuperAdmin, db.groups]);
+    }, [attOrg, groupTab, isSuperAdmin, user]);
 
     useEffect(() => {
         const fetchAttCourses = async () => {
@@ -369,7 +365,7 @@ export const GroupsPage: React.FC<GroupsPageProps> = ({
                 {groupTab === 'att' ? (
                     <GroupAttendance 
                         groups={db.groups} 
-                        tenantId={Number(attOrg) || undefined}
+                        tenantId={isSuperAdmin ? (Number(attOrg) || undefined) : (user?.tenantId ?? undefined)}
                         filters={{ 
                             group: attGroup, 
                             course: attCourse, 
@@ -385,7 +381,7 @@ export const GroupsPage: React.FC<GroupsPageProps> = ({
                 ) : groupTab === 'att_logs' ? (
                     <AttendanceLogs 
                         isSuperAdmin={isSuperAdmin} 
-                        tenantId={Number(attOrg) || undefined}
+                        tenantId={isSuperAdmin ? (Number(attOrg) || undefined) : (user?.tenantId ?? undefined)}
                         groupId={Number(attGroup) || undefined}
                         courseId={Number(attCourse) || undefined}
                         search={attSearch}

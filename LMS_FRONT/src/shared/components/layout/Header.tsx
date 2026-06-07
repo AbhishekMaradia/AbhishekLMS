@@ -19,14 +19,14 @@ export const Header = ({
     const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
     const getTabMeta = () => {
-        if (tab === 'dash') return { title: 'Overview', Icon: Icons.Dash };
+        if (tab === 'dash') return { title: 'Dashboard', Icon: Icons.Dash };
         if (tab === 'profile') return { title: 'My Profile', Icon: Icons.User };
         if (tab === 'orgs') return { title: 'Organizations', Icon: Icons.Org };
         if (tab === 'cat') return { title: 'Categories', Icon: Icons.Cat };
         if (tab === 'users') return { title: 'User Directory', Icon: Icons.Users };
         if (tab === 'curr') return { title: 'Curriculum', Icon: Icons.Book };
         if (tab === 'group') return { title: 'Groups', Icon: Icons.Groups };
-        if (tab === 'cm' || tab === 'media') return { title: 'Media Center', Icon: Icons.Video };
+        if (tab === 'cm' || tab === 'media') return { title: 'Course Material', Icon: Icons.Video };
         if (tab === 'enroll') return { title: 'Course Enrollments', Icon: Icons.Shield };
         if (tab === 'reports') return { title: 'Analytical Reports', Icon: Icons.BarChart };
         if (['sec', 'mods', 'perms', 'mod_perms', 'role_modules', 'role_mod_perms', 'user_roles'].includes(tab)) {

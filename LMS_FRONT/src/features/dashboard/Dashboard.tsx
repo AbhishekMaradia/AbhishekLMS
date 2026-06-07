@@ -15,10 +15,10 @@ export const Dashboard = ({
         { label: 'Active Users', value: Math.max(0, counts.users - 1), color: '#f59e0b', gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', Icon: StatIcons.Users, module: 'USER', tabId: 'users' },
         { label: 'Courses', value: counts.courses, color: '#ec4899', gradient: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)', Icon: StatIcons.Courses, module: 'COURSE', tabId: 'curr' },
         { label: 'Groups', value: counts.groups, color: '#06b6d4', gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)', Icon: StatIcons.Groups, module: 'GROUP', tabId: 'group' },
-        { label: 'Media Center', value: counts.courses || 0, color: '#8b5cf6', gradient: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)', Icon: StatIcons.Media, module: 'VIDEO', tabId: 'cm' },
+        { label: 'Course Material', value: counts.courses || 0, color: '#8b5cf6', gradient: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)', Icon: StatIcons.Media, module: 'VIDEO', tabId: 'cm' },
         { label: 'Enrollments', value: counts.enrollments || 0, color: '#6366f1', gradient: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', Icon: Icons.Shield, module: 'SUBSCRIPTION', tabId: 'enroll' },
         { label: 'Analytical Reports', value: counts.reports || 0, color: '#f43f5e', gradient: 'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)', Icon: Icons.BarChart, module: 'REPORT', tabId: 'reports' },
-        { label: 'Security Unit', value: counts.roles || 0, color: '#ef4444', gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', Icon: StatIcons.Security, module: 'ROLE', tabId: 'sec' },
+        { label: 'Access Control', value: counts.roles || 0, color: '#ef4444', gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', Icon: StatIcons.Security, module: 'ROLE', tabId: 'sec' },
     ].filter(s => {
         if (s.module === 'ORGANIZATION') return isSuperAdmin;
         if (s.module === 'ROLE') return isSuperAdmin || hasPermission('ROLE', 'ROLE_VIEW');
@@ -56,15 +56,7 @@ export const Dashboard = ({
 
                         <div className="lms-stat-label">{label}</div>
 
-                        <div className="lms-stat-footer">
-                            <div className="lms-stat-footer-text">
-                                <div className="lms-stat-footer-dot" />
-                                Active Units
-                            </div>
-                            <div className="lms-stat-arrow">
-                                <Icons.ChevronRight s={14} />
-                            </div>
-                        </div>
+
                     </div>
                 ))}
 

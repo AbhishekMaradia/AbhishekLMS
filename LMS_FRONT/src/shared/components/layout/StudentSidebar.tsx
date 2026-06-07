@@ -7,6 +7,8 @@ import {
     Settings,
     GraduationCap,
     FileText,
+    ChevronLeft,
+    ChevronRight,
     type LucideIcon
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
@@ -14,6 +16,18 @@ import { Icons, SecureImage } from '../lms/LmsComponents';
 import './Layout.css';
 
 export const StudentSidebar = ({ sidebarOpen, activeTab: tab, setTab, user, activeOrg, hasPermission }: any) => {
+
+    const [isCollapsed, setIsCollapsed] = React.useState(() => {
+        return localStorage.getItem('student-sidebar-collapsed') === 'true';
+    });
+
+    const toggleCollapse = () => {
+        setIsCollapsed(prev => {
+            const next = !prev;
+            localStorage.setItem('student-sidebar-collapsed', String(next));
+            return next;
+        });
+    };
 
     const brandName = activeOrg?.orgName || activeOrg?.OrgName || 'SoulCode';
     const brandLogo = activeOrg?.logoUrl || activeOrg?.LogoUrl;
@@ -46,7 +60,7 @@ export const StudentSidebar = ({ sidebarOpen, activeTab: tab, setTab, user, acti
     const hasLogo = !!brandLogo;
     
     return (
-        <aside className="lms-sidebar-modern lms-student-sidebar">
+        <aside className={`lms-sidebar-modern lms-student-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
             <div className="lms-sidebar-brand-wrapper">
                 <div className={`lms-sidebar-brand-card student-brand-card ${hasLogo ? 'has-logo' : ''}`}>
                     <div className={`lms-sidebar-logo-box student-logo-box ${hasLogo ? 'premium' : ''}`}>
@@ -71,6 +85,17 @@ export const StudentSidebar = ({ sidebarOpen, activeTab: tab, setTab, user, acti
                 <NavItem id="student-my-courses" icon={Library} label="My Courses" />
                 <NavItem id="student-peers" icon={Users2} label="Peers" />
                 <NavItem id="student-reports" icon={FileText} label="Reports" disabled={hasPermission ? !(hasPermission('REPORT', 'REPORT_VIEW') || hasPermission('REPORT', 'REPORT_GENERATE')) : false} />
+
+                <div 
+                    className="lms-nav-item lms-sidebar-collapse-btn" 
+                    onClick={toggleCollapse}
+                    style={{ cursor: 'pointer', marginTop: '30px' }}
+                >
+                    <div>
+                        {isCollapsed ? <ChevronRight size={20} strokeWidth={2.2} /> : <ChevronLeft size={20} strokeWidth={2.2} />}
+                    </div>
+                    <span>Collapse Sidebar</span>
+                </div>
             </nav>
 
             <div className="lms-sidebar-footer">

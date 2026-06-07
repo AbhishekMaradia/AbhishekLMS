@@ -411,7 +411,7 @@ h6,
 }
 
 .lms-sidebar-stack {
-    width: 240px;
+    width: auto;
     height: 100vh;
     flex-shrink: 0;
     z-index: 1000;

@@ -1,3 +1,4 @@
+import React from 'react';
 import {
     BarChart3,
     BookOpenText,
@@ -8,6 +9,8 @@ import {
     ShieldCheck,
     UsersRound,
     CheckSquare,
+    ChevronLeft,
+    ChevronRight,
     type LucideIcon
 } from 'lucide-react';
 import { Icons, SecureImage } from '../lms/LmsComponents';
@@ -16,6 +19,18 @@ import './Layout.css';
 
 
 export const Sidebar = ({ sidebarOpen, activeTab: tab, setTab, hasPermission, isSuperAdmin, user, activeOrg }: any) => {
+
+    const [isCollapsed, setIsCollapsed] = React.useState(() => {
+        return localStorage.getItem('sidebar-collapsed') === 'true';
+    });
+
+    const toggleCollapse = () => {
+        setIsCollapsed(prev => {
+            const next = !prev;
+            localStorage.setItem('sidebar-collapsed', String(next));
+            return next;
+        });
+    };
 
     // Fallback logic for Dynamic Branding
     const brandName = activeOrg?.orgName || activeOrg?.OrgName || user?.firstName || user?.FirstName;
@@ -61,7 +76,7 @@ export const Sidebar = ({ sidebarOpen, activeTab: tab, setTab, hasPermission, is
     const canSeeAttendance = isSuperAdmin || hasPermission('ATTENDANCE', 'ATTENDANCE_VIEW');
 
     return (
-        <aside className={`lms-sidebar-modern ${sidebarOpen ? 'open' : ''}`}>
+        <aside className={`lms-sidebar-modern ${sidebarOpen ? 'open' : ''} ${isCollapsed ? 'collapsed' : ''}`}>
             <div className="lms-sidebar-brand-wrapper">
                 <div className={`lms-sidebar-brand-card ${brandLogo ? 'has-logo' : ''}`}>
                     <div className="lms-sidebar-logo-box">
@@ -87,7 +102,7 @@ export const Sidebar = ({ sidebarOpen, activeTab: tab, setTab, hasPermission, is
                 <NavItem id="cat" icon={FolderTree} label="Categories" disabled={!canSeeCat} />
                 <NavItem id="users" icon={UsersRound} label="Users" disabled={!canSeeUser} />
                 <NavItem id="curr" icon={BookOpenText} label="Courses" disabled={!canSeeCourse} />
-                <NavItem id="cm" icon={Clapperboard} label="Media Center" disabled={!canSeeMedia} />
+                <NavItem id="cm" icon={Clapperboard} label="Course Material" disabled={!canSeeMedia} />
                 <NavItem id="group" icon={UsersRound} label="Groups" disabled={!canSeeGroup} />
                 <NavItem id="enroll" icon={ShieldCheck} label="Course Enrollments" disabled={!canSeeEnrollment} />
                 <NavItem id="reports" icon={BarChart3} label="Analytical Reports" disabled={!canSeeReport} />
@@ -96,6 +111,17 @@ export const Sidebar = ({ sidebarOpen, activeTab: tab, setTab, hasPermission, is
 
                 <div className="lms-sidebar-section-label">CORE</div>
                 <NavItem id="sec" icon={ShieldCheck} label="Access Control" disabled={!canSeeSecurity} />
+
+                <div 
+                    className="lms-nav-item lms-sidebar-collapse-btn" 
+                    onClick={toggleCollapse}
+                    style={{ cursor: 'pointer', marginTop: '30px' }}
+                >
+                    <div>
+                        {isCollapsed ? <ChevronRight size={20} strokeWidth={2.2} /> : <ChevronLeft size={20} strokeWidth={2.2} />}
+                    </div>
+                    <span>Collapse Sidebar</span>
+                </div>
             </nav>
 
             <div className="lms-sidebar-footer">

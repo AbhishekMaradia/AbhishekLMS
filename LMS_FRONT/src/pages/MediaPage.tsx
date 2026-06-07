@@ -71,7 +71,7 @@ export const MediaPage: React.FC<MediaPageProps> = (props) => {
             <div className="lms-premium-card lms-media-header-card">
                 <div className="lms-entity-header">
                     <div className="lms-section-heading">
-                        <h1 className="lms-card-title lms-media-title">Media Center</h1>
+                        <h1 className="lms-card-title lms-media-title">Course Material</h1>
                         <span className="lms-section-count">{p.total} Courses</span>
                     </div>
                     <div className="lms-card-actions">
