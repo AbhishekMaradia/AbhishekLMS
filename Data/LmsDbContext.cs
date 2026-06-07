@@ -55,6 +55,7 @@ namespace LMS_SoulCode.Data
         public DbSet<Organization> Organizations { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<GroupCourse> GroupCourses { get; set; }
+        public DbSet<UserGroup> UserGroups { get; set; }
         public DbSet<Attendance> Attendances { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -64,6 +65,10 @@ namespace LMS_SoulCode.Data
             // Configure UserCourse composite primary key
             modelBuilder.Entity<UserCourse>()
                 .HasKey(uc => new { uc.UserId, uc.CourseId });
+
+            // Configure UserGroup composite primary key
+            modelBuilder.Entity<UserGroup>()
+                .HasKey(ug => new { ug.UserId, ug.GroupId });
 
             // ---------------------------------------------------------
             // EXPLICIT GLOBAL QUERY FILTERS (Corretly Handles Multi-Tenancy per Request)
@@ -88,6 +93,7 @@ namespace LMS_SoulCode.Data
             modelBuilder.Entity<ModulePermission>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0 || e.TenantId == null) && !e.IsDeleted);
             modelBuilder.Entity<Group>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0 || e.TenantId == null) && !e.IsDeleted);
             modelBuilder.Entity<GroupCourse>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0 || e.TenantId == null) && !e.IsDeleted);
+            modelBuilder.Entity<UserGroup>().HasQueryFilter(e => (CurrentTenantId == null || e.TenantId == CurrentTenantId || e.TenantId == 0 || e.TenantId == null) && !e.IsDeleted);
 
             // 2. Entities with ONLY Soft-Delete (Has IsDeleted but NO TenantId)
             modelBuilder.Entity<Organization>().HasQueryFilter(e => !e.IsDeleted);

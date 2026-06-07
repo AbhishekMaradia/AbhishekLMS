@@ -6,6 +6,7 @@ using LMS_SoulCode.Features.Auth.DTOs;
 using LMS_SoulCode.Features.Common;
 using LMS_SoulCode.Features.Common.Repositories;
 using LMS_SoulCode.Features.UserPermissions.Models;
+using LMS_SoulCode.Features.Groups.Models;
 
 namespace LMS_SoulCode.Features.Auth.Repositories
 {
@@ -63,8 +64,19 @@ namespace LMS_SoulCode.Features.Auth.Repositories
                         .Take(3)) ?? "No Role",
                     TenantId = u.TenantId,
                     OrgName = u.Organization != null ? u.Organization.Name : null,
-                    GroupId = u.GroupId,
-                    GroupName = u.Group != null ? u.Group.GroupName : null,
+                    GroupId = _context.UserGroups.Where(ug => ug.UserId == u.Id && !ug.IsDeleted).Select(ug => (int?)ug.GroupId).FirstOrDefault(),
+                    GroupName = string.Join(", ", _context.UserGroups.Where(ug => ug.UserId == u.Id && !ug.IsDeleted).Select(ug => ug.Group.GroupName).Take(3)) ?? "No Group",
+                    GroupIds = _context.UserGroups.Where(ug => ug.UserId == u.Id && !ug.IsDeleted).Select(ug => ug.GroupId).ToList(),
+                    GroupCourseIds = _context.GroupCourses
+                        .Where(gc => _context.UserGroups.Where(ug => ug.UserId == u.Id && !ug.IsDeleted).Select(ug => ug.GroupId).Contains(gc.GroupId) && gc.IsEnable && !gc.IsDeleted)
+                        .Select(gc => gc.CourseId)
+                        .Distinct()
+                        .ToList(),
+                    GroupUserIds = _context.UserGroups
+                        .Where(ug => _context.UserGroups.Where(ug2 => ug2.UserId == u.Id && !ug2.IsDeleted).Select(ug2 => ug2.GroupId).Contains(ug.GroupId) && !ug.IsDeleted)
+                        .Select(ug => ug.UserId)
+                        .Distinct()
+                        .ToList(),
                     RoleId = _context.UserRoles.Where(ur => ur.UserId == u.Id && !ur.IsDeleted).Select(ur => (int?)ur.RoleId).FirstOrDefault(),
                     RoleIds = _context.UserRoles.Where(ur => ur.UserId == u.Id && !ur.IsDeleted).Select(ur => ur.RoleId).ToList(),
                     IsActive = u.IsActive,
@@ -179,8 +191,19 @@ namespace LMS_SoulCode.Features.Auth.Repositories
                         ?? "No Role", // Show all active roles, comma-separated
                     TenantId = u.TenantId,
                     OrgName = u.Organization != null ? u.Organization.Name : null,
-                    GroupId = u.GroupId,
-                    GroupName = u.Group != null ? u.Group.GroupName : null,
+                    GroupId = _context.UserGroups.Where(ug => ug.UserId == u.Id && !ug.IsDeleted).Select(ug => (int?)ug.GroupId).FirstOrDefault(),
+                    GroupName = string.Join(", ", _context.UserGroups.Where(ug => ug.UserId == u.Id && !ug.IsDeleted).Select(ug => ug.Group.GroupName).Take(3)) ?? "No Group",
+                    GroupIds = _context.UserGroups.Where(ug => ug.UserId == u.Id && !ug.IsDeleted).Select(ug => ug.GroupId).ToList(),
+                    GroupCourseIds = _context.GroupCourses
+                        .Where(gc => _context.UserGroups.Where(ug => ug.UserId == u.Id && !ug.IsDeleted).Select(ug => ug.GroupId).Contains(gc.GroupId) && gc.IsEnable && !gc.IsDeleted)
+                        .Select(gc => gc.CourseId)
+                        .Distinct()
+                        .ToList(),
+                    GroupUserIds = _context.UserGroups
+                        .Where(ug => _context.UserGroups.Where(ug2 => ug2.UserId == u.Id && !ug2.IsDeleted).Select(ug2 => ug2.GroupId).Contains(ug.GroupId) && !ug.IsDeleted)
+                        .Select(ug => ug.UserId)
+                        .Distinct()
+                        .ToList(),
                     RoleId = _context.UserRoles.Where(ur => ur.UserId == u.Id && !ur.IsDeleted).Select(ur => (int?)ur.RoleId).FirstOrDefault(),
                     RoleIds = _context.UserRoles.Where(ur => ur.UserId == u.Id && !ur.IsDeleted).Select(ur => ur.RoleId).ToList(),
                     IsActive = u.IsActive,
@@ -193,7 +216,6 @@ namespace LMS_SoulCode.Features.Auth.Repositories
         {
             var user = await _context.Users
                 .Include(u => u.Organization)
-                .Include(u => u.Group)
                 .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted, cancellationToken);
                 
             if (user == null || (tenantId.HasValue && tenantId.Value != 0 && user.TenantId != tenantId.Value)) return null;
@@ -205,10 +227,14 @@ namespace LMS_SoulCode.Features.Auth.Repositories
                  request.TenantId = tenantId.Value;
             }
 
-            // Relationship integrity: If Tenant changes, cleared GroupId to avoid cross-tenant orphaning
+            // Relationship integrity: If Tenant changes, clear user groups to avoid cross-tenant orphaning
             if (request.TenantId.HasValue && user.TenantId != request.TenantId.Value)
             {
-                user.GroupId = null; // Reset group as it's tenant-specific
+                var existingGroups = await _context.UserGroups.Where(ug => ug.UserId == user.Id).ToListAsync(cancellationToken);
+                if (existingGroups.Any())
+                {
+                    _context.UserGroups.RemoveRange(existingGroups);
+                }
             }
 
             // Use AutoMapper to update only non-null properties
@@ -246,6 +272,33 @@ namespace LMS_SoulCode.Features.Auth.Repositories
                 }
             }
 
+            if (request.GroupIds != null)
+            {
+                var uniqueGroupIds = request.GroupIds.Distinct().ToList();
+                var existingGroups = await _context.UserGroups.Where(ug => ug.UserId == user.Id && !ug.IsDeleted).ToListAsync(cancellationToken);
+                var existingGroupIds = existingGroups.Select(g => g.GroupId).ToList();
+
+                // 1. Remove groups no longer in the request
+                var groupsToRemove = existingGroups.Where(g => !uniqueGroupIds.Contains(g.GroupId)).ToList();
+                if (groupsToRemove.Any())
+                {
+                    _context.UserGroups.RemoveRange(groupsToRemove);
+                }
+
+                // 2. Add new groups
+                var groupsToAdd = uniqueGroupIds.Where(gId => !existingGroupIds.Contains(gId)).ToList();
+                foreach (var gId in groupsToAdd)
+                {
+                    await _context.UserGroups.AddAsync(new UserGroup
+                    {
+                        UserId = user.Id,
+                        GroupId = gId,
+                        TenantId = user.TenantId
+                    }, cancellationToken);
+                }
+
+            }
+
             _context.Users.Update(user);
             await _context.SaveChangesAsync(cancellationToken);
 
@@ -254,7 +307,32 @@ namespace LMS_SoulCode.Features.Auth.Repositories
             
             // Map OrgName and GroupName manually if needed or rely on mapping
             if (user.Organization != null) userDto.OrgName = user.Organization.Name;
-            if (user.Group != null) userDto.GroupName = user.Group.GroupName;
+            
+            var userGroupIds = await _context.UserGroups
+                .Where(ug => ug.UserId == user.Id && !ug.IsDeleted)
+                .Select(ug => ug.GroupId)
+                .ToListAsync(cancellationToken);
+
+            var userGroupNames = await _context.UserGroups
+                .Where(ug => ug.UserId == user.Id && !ug.IsDeleted)
+                .Select(ug => ug.Group.GroupName)
+                .ToListAsync(cancellationToken);
+
+            userDto.GroupId = userGroupIds.FirstOrDefault();
+            userDto.GroupIds = userGroupIds;
+            userDto.GroupName = string.Join(", ", userGroupNames);
+
+            userDto.GroupCourseIds = await _context.GroupCourses
+                .Where(gc => userGroupIds.Contains(gc.GroupId) && gc.IsEnable && !gc.IsDeleted)
+                .Select(gc => gc.CourseId)
+                .Distinct()
+                .ToListAsync(cancellationToken);
+
+            userDto.GroupUserIds = await _context.UserGroups
+                .Where(ug => userGroupIds.Contains(ug.GroupId) && !ug.IsDeleted)
+                .Select(ug => ug.UserId)
+                .Distinct()
+                .ToListAsync(cancellationToken);
             
             return userDto;
         }
@@ -379,25 +457,40 @@ namespace LMS_SoulCode.Features.Auth.Repositories
 
         public async Task BulkUpdateGroupAsync(int groupId, List<int> userIds, int? tenantId, CancellationToken cancellationToken = default)
         {
-            // 1. Clear GroupId for users who were in this group but are no longer in the list
-            var usersToClear = await _context.Users
-                .Where(u => u.GroupId == groupId && (!tenantId.HasValue || u.TenantId == tenantId.Value) && !userIds.Contains(u.Id))
+            // 1. Remove UserGroup mappings for users who were in this group but are no longer in the list
+            var linksToRemove = await _context.UserGroups
+                .Where(ug => ug.GroupId == groupId && (!tenantId.HasValue || ug.TenantId == tenantId.Value) && !userIds.Contains(ug.UserId))
                 .ToListAsync(cancellationToken);
 
-            foreach (var user in usersToClear)
+            if (linksToRemove.Any())
             {
-                user.GroupId = null;
+                _context.UserGroups.RemoveRange(linksToRemove);
             }
 
-            // 2. Set GroupId for users in the list
-            var usersToAssign = await _context.Users
-                .Where(u => userIds.Contains(u.Id) && (!tenantId.HasValue || u.TenantId == tenantId.Value))
+            // No fallback GroupId to clear
+
+            // 2. Add UserGroup mappings for users in the list
+            var existingLinks = await _context.UserGroups
+                .Where(ug => ug.GroupId == groupId && userIds.Contains(ug.UserId))
+                .Select(ug => ug.UserId)
                 .ToListAsync(cancellationToken);
 
-            foreach (var user in usersToAssign)
+            var usersToAddLinks = userIds.Except(existingLinks).ToList();
+            foreach (var uId in usersToAddLinks)
             {
-                user.GroupId = groupId;
+                var userExists = await _context.Users.AnyAsync(u => u.Id == uId && (!tenantId.HasValue || u.TenantId == tenantId.Value), cancellationToken);
+                if (userExists)
+                {
+                    await _context.UserGroups.AddAsync(new UserGroup
+                    {
+                        UserId = uId,
+                        GroupId = groupId,
+                        TenantId = tenantId
+                    }, cancellationToken);
+                }
             }
+
+            // No fallback GroupId to set
 
             await _context.SaveChangesAsync(cancellationToken);
         }
@@ -406,23 +499,25 @@ namespace LMS_SoulCode.Features.Auth.Repositories
         => await _context.Users.AnyAsync(u => u.TenantId == tenantId && !u.IsDeleted, cancellationToken);
 
         public async Task<bool> AnyUsersInGroupAsync(int groupId, CancellationToken cancellationToken = default)
-        => await _context.Users.AnyAsync(u => u.GroupId == groupId && !u.IsDeleted, cancellationToken);
+        => await _context.UserGroups.AnyAsync(ug => ug.GroupId == groupId && !ug.IsDeleted, cancellationToken);
         
         public async Task UnassignUsersFromGroupAsync(int groupId, CancellationToken cancellationToken = default)
         {
-            var users = await _context.Users.Where(u => u.GroupId == groupId).ToListAsync(cancellationToken);
-            foreach (var user in users)
+            var mappings = await _context.UserGroups.Where(ug => ug.GroupId == groupId).ToListAsync(cancellationToken);
+            if (mappings.Any())
             {
-                user.GroupId = null;
+                _context.UserGroups.RemoveRange(mappings);
             }
+
+            // No fallback GroupId to unassign
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task<bool> AddUserWithSecurityAsync(User user, List<int> roleIds, int? groupId, bool isActive = true, CancellationToken cancellationToken = default)
+        public async Task<bool> AddUserWithSecurityAsync(User user, List<int> roleIds, List<int> groupIds, bool isActive = true, CancellationToken cancellationToken = default)
         {
             try
             {
-                user.GroupId = groupId;
+                // No legacy GroupId property to assign on User entity
                 user.IsActive = isActive; 
                 await _context.Users.AddAsync(user, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
@@ -432,19 +527,31 @@ namespace LMS_SoulCode.Features.Auth.Repositories
                     var uniqueRoleIds = roleIds.Distinct().ToList();
                     foreach (var roleId in uniqueRoleIds)
                     {
-                        var userRole = new UserRole
+                        await _context.UserRoles.AddAsync(new UserRole
                         {
                             UserId = user.Id, 
                             RoleId = roleId,
                             TenantId = user.TenantId,
                             IsActive = true
-                        };
-                        await _context.UserRoles.AddAsync(userRole, cancellationToken);
+                        }, cancellationToken);
                     }
-                    await _context.SaveChangesAsync(cancellationToken);
                 }
 
-               
+                if (groupIds != null && groupIds.Any())
+                {
+                    var uniqueGroupIds = groupIds.Distinct().ToList();
+                    foreach (var gId in uniqueGroupIds)
+                    {
+                        await _context.UserGroups.AddAsync(new UserGroup
+                        {
+                            UserId = user.Id,
+                            GroupId = gId,
+                            TenantId = user.TenantId
+                        }, cancellationToken);
+                    }
+                }
+
+                await _context.SaveChangesAsync(cancellationToken);
                 return true;
             }
             catch (Exception ex)

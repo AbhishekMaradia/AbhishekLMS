@@ -12,7 +12,7 @@ namespace LMS_SoulCode.Features.Auth.Mappings
             CreateMap<User, UserDto>()
                 .ForMember(d => d.UserRole, o => o.MapFrom(_ => string.Empty)) // Default empty, can be populated separately
                 .ForMember(d => d.OrgName, o => o.MapFrom(s => s.Organization != null ? s.Organization.Name : null))
-                .ForMember(d => d.GroupName, o => o.MapFrom(s => s.Group != null ? s.Group.GroupName : null));
+                .ForMember(d => d.GroupName, o => o.Ignore());
 
             // RegisterRequest to User mapping
             CreateMap<RegisterRequest, User>()

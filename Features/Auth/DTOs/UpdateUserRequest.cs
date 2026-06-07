@@ -9,6 +9,7 @@ namespace LMS_SoulCode.Features.Auth.DTOs
         public string? Password { get; set; }
         public int? TenantId { get; set; }
         public int? GroupId { get; set; }
+        public List<int>? GroupIds { get; set; }
         public List<int>? RoleIds { get; set; }
         public bool? IsActive { get; set; }
     }

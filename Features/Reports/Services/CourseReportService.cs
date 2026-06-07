@@ -4,6 +4,7 @@ using LMS_SoulCode.Features.Reports.DTOs;
 using Microsoft.EntityFrameworkCore;
 using StatusCodes = LMS_SoulCode.Features.Common.StatusCodes;
 using Microsoft.AspNetCore.Http;
+using LMS_SoulCode.Features.SubscribedCourse.Models;
 
 namespace LMS_SoulCode.Features.Reports.Services
 {
@@ -80,7 +81,6 @@ namespace LMS_SoulCode.Features.Reports.Services
             
             var query = _context.UserCourses
                 .Include(uc => uc.User).ThenInclude(u => u.Organization)
-                .Include(uc => uc.User).ThenInclude(u => u.Group)
                 .Include(uc => uc.Course)
                 .Where(uc => uc.IsActive && uc.Course.IsActive && !uc.User.IsDeleted && !uc.Course.IsDeleted)
                 .AsNoTracking()
@@ -92,7 +92,10 @@ namespace LMS_SoulCode.Features.Reports.Services
             }
 
             if (request.UserId.HasValue) query = query.Where(x => x.UserId == request.UserId.Value);
-            if (request.GroupId.HasValue) query = query.Where(x => x.User.GroupId == request.GroupId.Value);
+            if (request.GroupId.HasValue)
+            {
+                query = query.Where(x => _context.UserGroups.Any(ug => ug.UserId == x.UserId && ug.GroupId == request.GroupId.Value && !ug.IsDeleted));
+            }
             if (request.CourseId.HasValue) query = query.Where(x => x.CourseId == request.CourseId.Value);
 
             var totalCount = await query.CountAsync(cancellationToken);
@@ -121,6 +124,13 @@ namespace LMS_SoulCode.Features.Reports.Services
             foreach (var item in userCourses)
             {
                 var report = _mapper.Map<ReportListDto>(item);
+                
+                var userGroupNames = await _context.UserGroups
+                    .Where(ug => ug.UserId == item.UserId && !ug.IsDeleted)
+                    .Select(ug => ug.Group.GroupName)
+                    .ToListAsync(cancellationToken);
+                report.GroupName = userGroupNames.Any() ? string.Join(", ", userGroupNames) : "General";
+
                 int totalVideos = videoCounts.ContainsKey(item.CourseId) ? videoCounts[item.CourseId] : 0;
                 
                 // Calculate progress for this user-course specifically

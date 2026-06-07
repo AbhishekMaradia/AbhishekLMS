@@ -68,6 +68,11 @@ namespace LMS_SoulCode.Features.Auth.Services
                  return ApiResponse<List<UserDto>>.Fail(Messages.SelfDeactivationError, StatusCodes.BadRequest);
             }
 
+            if (request.GroupIds == null && request.GroupId.HasValue)
+            {
+                request.GroupIds = new List<int> { request.GroupId.Value };
+            }
+
             var user = await _userRepo.UpdateUserAsync(id, request, tenantId, cancellationToken);
             if (user == null)
                 return ApiResponse<List<UserDto>>.Fail(Messages.NotFound, StatusCodes.NotFound);
@@ -104,7 +109,12 @@ namespace LMS_SoulCode.Features.Auth.Services
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
             user.TenantId = tenantId;
 
-            var success = await _userRepo.AddUserWithSecurityAsync(user, request.RoleIds, request.GroupId, request.IsActive, cancellationToken);
+            if ((request.GroupIds == null || !request.GroupIds.Any()) && request.GroupId.HasValue)
+            {
+                request.GroupIds = new List<int> { request.GroupId.Value };
+            }
+
+            var success = await _userRepo.AddUserWithSecurityAsync(user, request.RoleIds, request.GroupIds, request.IsActive, cancellationToken);
             if (!success)
                 return ApiResponse<List<UserDto>>.Fail("Failed to create user with security roles.", StatusCodes.ServerError);
 

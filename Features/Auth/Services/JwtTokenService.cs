@@ -7,6 +7,8 @@ using LMS_SoulCode.Features.Auth.Models;
 using LMS_SoulCode.Features.UserPermissions.Repositories;
 using Microsoft.Extensions.Caching.Memory;
 using System.Linq;
+using LMS_SoulCode.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS_SoulCode.Features.Auth.Services;
 
@@ -18,8 +20,9 @@ public class JwtTokenService
     private readonly int _expiryMinutes;
     private readonly IUserPermissionRepository _repo;
     private readonly IMemoryCache _cache;
+    private readonly LmsDbContext _context;
 
-    public JwtTokenService(IConfiguration config, IUserPermissionRepository repo, IMemoryCache cache)
+    public JwtTokenService(IConfiguration config, IUserPermissionRepository repo, IMemoryCache cache, LmsDbContext context)
     {
         _key = config["Jwt:Key"]!;
         _issuer = config["Jwt:Issuer"]!;
@@ -27,6 +30,7 @@ public class JwtTokenService
         _expiryMinutes = int.Parse(config["Jwt:ExpiryMinutes"] ?? "60");
         _repo = repo;
         _cache = cache;
+        _context = context;
     }
 
     public async Task<(string Token, DateTime ExpiresAt)> CreateTokenAsync(User user, CancellationToken cancellationToken = default)
@@ -56,9 +60,18 @@ public class JwtTokenService
         // Add TenantId (always pass, default to '0' if null)
         claims.Add(new Claim("TenantId", (user.TenantId ?? 0).ToString()));
 
-        if (user.GroupId.HasValue)
+        var groupIds = await _context.UserGroups
+            .Where(ug => ug.UserId == user.Id && !ug.IsDeleted)
+            .Select(ug => ug.GroupId)
+            .ToListAsync(cancellationToken);
+
+        if (groupIds.Any())
         {
-            claims.Add(new Claim("GroupId", user.GroupId.Value.ToString()));
+            claims.Add(new Claim("GroupId", groupIds.First().ToString()));
+            foreach (var gId in groupIds)
+            {
+                claims.Add(new Claim("GroupIds", gId.ToString()));
+            }
         }
 
         // Add User Roles to Claims (using cached method)
