@@ -11,7 +11,7 @@ namespace LMS_SoulCode.Features.Reports.Mappings
                 .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.User.Email))
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => (src.User.FirstName ?? "") + " " + (src.User.LastName ?? "")))
                 .ForMember(dest => dest.OrgName, opt => opt.MapFrom(src => src.User.Organization != null ? src.User.Organization.Name : "Platform"))
-                .ForMember(dest => dest.GroupName, opt => opt.MapFrom(src => src.User.Group != null ? src.User.Group.GroupName : "General"))
+                .ForMember(dest => dest.GroupName, opt => opt.Ignore())
                 .ForMember(dest => dest.CourseTitle, opt => opt.MapFrom(src => src.Course.Title))
                 .ForMember(dest => dest.CourseInstructor, opt => opt.MapFrom(src => src.Course.Instructor))
                 .ForMember(dest => dest.EnrolledAt, opt => opt.MapFrom(src => src.CreatedAt))

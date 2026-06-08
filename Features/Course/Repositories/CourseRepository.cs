@@ -5,6 +5,7 @@ using LMS_SoulCode.Features.CourseVideos.Models;
 using Microsoft.EntityFrameworkCore;
 using CourseEntity = LMS_SoulCode.Features.Course.Models.Course;
 using LMS_SoulCode.Features.Course.DTOs;
+using LMS_SoulCode.Features.Groups.Models;
 
 namespace LMS_SoulCode.Features.Course.Repositories
 {
@@ -62,10 +63,17 @@ namespace LMS_SoulCode.Features.Course.Repositories
                                    gc.CourseId == c.Id && 
                                    gc.IsEnable == true &&
                                    !gc.IsDeleted)) ||
-                    (userId.HasValue && _context.Set<LMS_SoulCode.Features.SubscribedCourse.Models.UserCourse>()
+                    (userId.HasValue && (_context.Set<LMS_SoulCode.Features.SubscribedCourse.Models.UserCourse>()
                         .Any(uc => uc.UserId == userId.Value && 
                                    uc.CourseId == c.Id && 
-                                   !uc.IsDeleted))
+                                   !uc.IsDeleted) ||
+                         _context.UserGroups
+                        .Any(ug => ug.UserId == userId.Value &&
+                                   !ug.IsDeleted &&
+                                   _context.GroupCourses.Any(gc => gc.GroupId == ug.GroupId &&
+                                                                   gc.CourseId == c.Id &&
+                                                                   gc.IsEnable == true &&
+                                                                   !gc.IsDeleted))))
                 );
             }
             else

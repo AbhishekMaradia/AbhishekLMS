@@ -18,13 +18,7 @@ namespace LMS_SoulCode.Features.Auth.Models
         public DateTime? RefreshTokenExpiry { get; set; } 
         public bool IsActive { get; set; } = true;
         
-        // Group Assignment (optional - organization will assign users to groups)
-        public int? GroupId { get; set; }
-        
         [ForeignKey("TenantId")]
         public Organization? Organization { get; set; } // Navigation Property
-        
-        [ForeignKey("GroupId")]
-        public Group? Group { get; set; } // Navigation Property
     }
 }

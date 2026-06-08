@@ -226,8 +226,8 @@ namespace LMS_SoulCode.Features.Groups.Services
                 FirstName = u.FirstName,
                 LastName = u.LastName,
                 Email = u.Email,
-                IsAssigned = u.GroupId == groupId,
-                GroupId = u.GroupId,
+                IsAssigned = u.GroupIds.Contains(groupId),
+                GroupId = u.GroupIds.Contains(groupId) ? groupId : u.GroupId,
                 GroupName = u.GroupName,
                 OrgName = u.OrgName,
                 TenantId = u.TenantId

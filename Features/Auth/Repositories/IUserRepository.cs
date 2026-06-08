@@ -30,7 +30,7 @@ namespace LMS_SoulCode.Features.Auth.Repositories
         Task<bool> AnyUsersInTenantAsync(int tenantId, CancellationToken cancellationToken = default);
         Task<bool> AnyUsersInGroupAsync(int groupId, CancellationToken cancellationToken = default);
         Task UnassignUsersFromGroupAsync(int groupId, CancellationToken cancellationToken = default);
-        Task<bool> AddUserWithSecurityAsync(User user, List<int> roleIds, int? groupId, bool isActive = true, CancellationToken cancellationToken = default);
+        Task<bool> AddUserWithSecurityAsync(User user, List<int> roleIds, List<int> groupIds, bool isActive = true, CancellationToken cancellationToken = default);
         Task SaveAsync(CancellationToken cancellationToken = default);
     }
 }
