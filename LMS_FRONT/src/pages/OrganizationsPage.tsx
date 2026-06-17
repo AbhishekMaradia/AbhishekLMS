@@ -26,7 +26,7 @@ export const OrganizationsPage: React.FC<OrganizationsPageProps> = ({
     pagination, changePage, changePageSize, hasPermission, handleCrud, user, isSuperAdmin
 }) => {
     const p = pagination['orgs'] || { page: 1, size: 50, total: 0 };
-    
+
     // Filter organizations client-side for correct counts/pagination when filtered by status
     const filteredOrgs = (db.orgs || []).filter((o: any) => {
         const activeVal = o.isActive ?? o.IsActive;
@@ -67,7 +67,7 @@ export const OrganizationsPage: React.FC<OrganizationsPageProps> = ({
 
                 <div className="lms-entity-filters">
                     <div className="lms-entity-search">
-                        <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Filter by organization name or code..." />
+                        <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Filter by organization name..." />
                     </div>
                     <StatusFilter
                         value={ui.statusFilter}

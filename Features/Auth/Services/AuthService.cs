@@ -83,13 +83,16 @@ namespace LMS_SoulCode.Features.Auth.Services
             int? tenantId = request.TenantId;
 
             // If TenantId is missing but OrganizationCode is provided, look it up
-            if ((!tenantId.HasValue || tenantId.Value == 0) && !string.IsNullOrEmpty(request.OrganizationCode))
+            if ((!tenantId.HasValue || tenantId.Value == 0) && !string.IsNullOrWhiteSpace(request.OrganizationCode))
             {
-                var org = await _orgRepo.GetByCodeAsync(request.OrganizationCode, cancellationToken);
-                if (org != null)
+                var organizationCode = request.OrganizationCode.Trim().ToUpperInvariant();
+                var org = await _orgRepo.GetByCodeAsync(organizationCode, cancellationToken);
+                if (org == null)
                 {
-                    tenantId = org.Id;
+                    return ApiResponse<List<LoginResponse>>.Fail(Messages.InvalidOrganizationCode, StatusCodes.BadRequest);
                 }
+
+                tenantId = org.Id;
             }
 
             // check uniqueness within the tenant

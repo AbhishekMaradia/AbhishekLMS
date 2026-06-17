@@ -65,15 +65,9 @@ export const OrganizationRegister: React.FC<OrganizationRegisterProps> = ({ onBa
                             <input name="OrgName" required placeholder="Organization Name" className="lms-auth-simple-input" />
                         </div>
 
-                        <div className="lms-form-row-2col">
-                            <div className="lms-auth-simple-field">
-                                <label>Org Code <span style={{ color: 'var(--color-primary)' }}>*</span></label>
-                                <input name="OrgCode" required placeholder="Org Code" className="lms-auth-simple-input" />
-                            </div>
-                            <div className="lms-auth-simple-field">
-                                <label>Website</label>
-                                <input name="Website" placeholder="Website" className="lms-auth-simple-input" />
-                            </div>
+                        <div className="lms-auth-simple-field">
+                            <label>Website</label>
+                            <input name="Website" placeholder="Website" className="lms-auth-simple-input" />
                         </div>
 
                         <div className="lms-auth-simple-field">

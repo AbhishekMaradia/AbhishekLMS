@@ -7,6 +7,7 @@ namespace LMS_SoulCode.Features.Organizations.Repositories
     {
         Task<(IEnumerable<Organization> Items, int TotalCount)> GetOrganizationsAsync(string? searchTerm, int pageNumber, int pageSize, bool? isActive, int? tenantId, CancellationToken cancellationToken);
         Task<Organization?> GetByCodeAsync(string code, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<string>> GetCodesByPrefixAsync(string prefix, CancellationToken cancellationToken = default);
         Task<bool> ExistsAsync(string code, CancellationToken cancellationToken = default);
         Task SaveAsync(CancellationToken cancellationToken = default);
     }

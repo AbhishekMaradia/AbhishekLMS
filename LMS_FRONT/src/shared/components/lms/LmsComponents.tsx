@@ -529,8 +529,16 @@ import { OrganizationRegister } from '../../../features/organization/components/
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+const resolveOrganizationCodeFromLocation = () => {
+    const segments = window.location.pathname.split('/').filter(Boolean);
+    const registerIndex = segments.findIndex(segment => ['register', 'signup'].includes(segment.toLowerCase()));
+    const pathCode = registerIndex >= 0 ? segments[registerIndex + 1] : undefined;
+    return pathCode ? pathCode.trim().toUpperCase() : '';
+};
+
 export const AuthGate = ({ onComplete, decryptor }: any) => {
     const navigate = useNavigate();
+    const [organizationCode] = useState(resolveOrganizationCodeFromLocation);
     const [mode, setMode] = useState<'login' | 'register' | 'org_register'>(() => {
         if (window.location.pathname === '/organization/register') return 'org_register';
         return 'login';
@@ -571,13 +579,19 @@ export const AuthGate = ({ onComplete, decryptor }: any) => {
     const handleRegister = async (e: any) => {
         e.preventDefault();
         setLoading(true);
+        if (!organizationCode) {
+            toast.error('Organization context not found. Please use your organization registration link.');
+            setLoading(false);
+            return;
+        }
+
         const data = {
             firstName: e.target.firstName.value,
             lastName: e.target.lastName.value,
             mobile: e.target.mobile.value,
             email: e.target.email.value,
             password: e.target.password.value,
-            organizationCode: e.target.orgCode.value
+            organizationCode
         };
         try {
             const res = await authApi.register(data);
@@ -623,7 +637,9 @@ export const AuthGate = ({ onComplete, decryptor }: any) => {
                             </button>
 
                             <div className="lms-auth-simple-footer">
-                                <button type="button" onClick={() => setMode('register')} className="lms-auth-simple-footer-btn">Create New account</button>
+                                {organizationCode && (
+                                    <button type="button" onClick={() => setMode('register')} className="lms-auth-simple-footer-btn">Create New account</button>
+                                )}
                                 <div style={{ marginTop: '8px' }}>
                                     <button type="button" onClick={() => setMode('org_register')} className="lms-auth-simple-footer-btn" style={{ opacity: 0.7, fontSize: '12px' }}>Organization Registration</button>
                                 </div>
@@ -652,10 +668,6 @@ export const AuthGate = ({ onComplete, decryptor }: any) => {
                             <div className="lms-auth-simple-field">
                                 <label>Email <span style={{ color: 'var(--color-primary)' }}>*</span></label>
                                 <input name="email" type="email" placeholder="Email" className="lms-auth-simple-input" required autoComplete="email" />
-                            </div>
-                            <div className="lms-auth-simple-field">
-                                <label>Org Code <span style={{ color: 'var(--color-primary)' }}>*</span></label>
-                                <input name="orgCode" placeholder="Organization Code" className="lms-auth-simple-input" required />
                             </div>
                             <div className="lms-auth-simple-field">
                                 <label>Mobile <span style={{ color: 'var(--color-primary)' }}>*</span></label>

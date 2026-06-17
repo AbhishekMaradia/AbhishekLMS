@@ -88,12 +88,6 @@ export const OrganizationModal: React.FC<OrganizationModalProps> = ({
 
                 <div className="lms-form-grid lms-org-modal-form-grid">
                     <div>
-                        <label className="lms-label-premium required">Code</label>
-                        <div className="lms-modal-panel-premium">
-                            <input name="OrgCode" defaultValue={ui.target?.orgCode || ui.target?.OrgCode} placeholder="Code" className="lms-input-premium" required={!isEdit || orgEditTab === 'org'} />
-                        </div>
-                    </div>
-                    <div>
                         <label className="lms-label-premium">Website</label>
                         <div className="lms-modal-panel-premium">
                             <input name="Website" defaultValue={ui.target?.website || ui.target?.Website} placeholder="https://domain.com" className="lms-input-premium" />

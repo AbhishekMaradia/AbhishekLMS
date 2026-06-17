@@ -35,7 +35,6 @@ export const OrganizationList: React.FC<OrganizationListProps> = ({
 
     const headers = [
         { header: 'Organization Name', key: 'name' },
-        { header: 'Org Code', key: 'code', hideOnMobile: true },
         { header: 'Status', key: 'status' },
         { header: 'Actions', key: 'actions', className: 'lms-text-right' }
     ];
@@ -60,9 +59,6 @@ export const OrganizationList: React.FC<OrganizationListProps> = ({
                                 </div>
                                 <div className="lms-cell-bold">{o.orgName}</div>
                             </div>
-                        </td>
-                        <td className="lms-hide-mobile">
-                            <span className="lms-tag info">{o.orgCode}</span>
                         </td>
                         <td>
                             <div className={`lms-status-dot ${o.isActive !== false ? 'active' : 'inactive'}`}>
@@ -121,7 +117,6 @@ export const OrganizationList: React.FC<OrganizationListProps> = ({
                         <div className="lms-grid-body lms-org-list-body">
                             <h3 className="lms-grid-title lms-org-list-title">{o.orgName}</h3>
                             <div className="lms-flex-row lms-org-list-code-row">
-                                <span className="lms-tag info lms-org-list-code-tag">{o.orgCode}</span>
                                 <div className="lms-flex-row lms-org-list-colors-row">
                                     <div className="lms-org-list-color-swatch" style={{ '--swatch-color': o.primaryColor || '#763121' } as any} />
                                     <div className="lms-org-list-color-swatch" style={{ '--swatch-color': o.secondaryColor || '#4a2118' } as any} />

@@ -78,11 +78,59 @@ namespace LMS_SoulCode.Features.Organizations.Services
             return $"{request.Scheme}://{request.Host}";
         }
 
+        private async Task<string> GenerateOrgCodeAsync(string orgName, CancellationToken cancellationToken)
+        {
+            var prefix = GetOrgCodePrefix(orgName);
+            var existingCodes = await _orgRepo.GetCodesByPrefixAsync(prefix, cancellationToken);
+            var nextNumber = 1;
+
+            foreach (var code in existingCodes)
+            {
+                var sequence = TryGetOrgCodeSequence(prefix, code);
+                if (sequence.HasValue && sequence.Value >= nextNumber)
+                {
+                    nextNumber = sequence.Value + 1;
+                }
+            }
+
+            if (nextNumber > 9999)
+            {
+                throw new InvalidOperationException($"Organization code sequence exceeded for prefix {prefix}.");
+            }
+
+            return $"{prefix}{nextNumber:0000}";
+        }
+
+        private static string GetOrgCodePrefix(string orgName)
+        {
+            var letters = orgName
+                .ToUpperInvariant()
+                .Where(c => c is >= 'A' and <= 'Z')
+                .Take(3)
+                .ToArray();
+
+            var prefix = new string(letters);
+            return prefix.Length < 3 ? prefix.PadRight(3, 'X') : prefix;
+        }
+
+        private static int? TryGetOrgCodeSequence(string prefix, string code)
+        {
+            if (!code.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            var numberPart = code[prefix.Length..];
+            if (numberPart.Length != 4 || numberPart.Any(c => c < '0' || c > '9'))
+            {
+                return null;
+            }
+
+            return int.TryParse(numberPart, out var sequence) ? sequence : null;
+        }
+
         public async Task<ApiResponse<List<string>>> RegisterOrganizationAsync(OrgRegisterRequest request, CancellationToken cancellationToken = default)
         {
-            if (await _orgRepo.ExistsAsync(request.OrgCode, cancellationToken))
-                return ApiResponse<List<string>>.Fail(Messages.OrgAlreadyExists, StatusCodes.BadRequest);
-
             if (await _userRepo.IsEmailTakenAsync(request.Email, null, cancellationToken))
                 return ApiResponse<List<string>>.Fail(Messages.AlreadyExists, StatusCodes.BadRequest);
 
@@ -92,6 +140,7 @@ namespace LMS_SoulCode.Features.Organizations.Services
             return await _orgRepo.ExecuteInTransactionAsync(async () =>
             {
                 var org = _mapper.Map<Organization>(request);
+                org.Code = await GenerateOrgCodeAsync(request.OrgName, cancellationToken);
                 
                 if (request.Logo != null && request.Logo.Length > 0)
                 {

@@ -4,7 +4,6 @@ import type { ApiResponse } from '../../../core/types/api.types';
 export interface OrganizationDto {
     id: number;
     orgName: string;
-    orgCode: string;
     logoUrl?: string;
     description?: string;
     primaryColor?: string;

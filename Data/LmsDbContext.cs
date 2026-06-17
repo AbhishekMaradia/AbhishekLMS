@@ -97,6 +97,13 @@ namespace LMS_SoulCode.Data
 
             // 2. Entities with ONLY Soft-Delete (Has IsDeleted but NO TenantId)
             modelBuilder.Entity<Organization>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Organization>()
+                .Property(o => o.Code)
+                .HasMaxLength(64)
+                .IsRequired();
+            modelBuilder.Entity<Organization>()
+                .HasIndex(o => o.Code)
+                .IsUnique();
             modelBuilder.Entity<Module>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Permission>().HasQueryFilter(e => !e.IsDeleted);
         }

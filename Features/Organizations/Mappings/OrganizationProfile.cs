@@ -18,7 +18,7 @@ namespace LMS_SoulCode.Features.Organizations.Mappings
             // OrgRegisterRequest to Organization mapping
             CreateMap<OrgRegisterRequest, Organization>()
                 .ForMember(d => d.Name, o => o.MapFrom(s => s.OrgName))
-                .ForMember(d => d.Code, o => o.MapFrom(s => s.OrgCode))
+                .ForMember(d => d.Code, o => o.Ignore())
                 .ForMember(d => d.PrimaryColor, o => o.MapFrom(s => s.PrimaryColor))
                 .ForMember(d => d.SecondaryColor, o => o.MapFrom(s => s.SecondaryColor))
                 .ForMember(d => d.IsActive, o => o.MapFrom(_ => true))
@@ -28,7 +28,7 @@ namespace LMS_SoulCode.Features.Organizations.Mappings
             // UpdateOrganizationRequest to Organization mapping
             CreateMap<UpdateOrganizationRequest, Organization>()
                 .ForMember(d => d.Name, o => o.MapFrom(s => s.OrgName))
-                .ForMember(d => d.Code, o => o.MapFrom(s => s.OrgCode))
+                .ForMember(d => d.Code, o => o.Ignore())
                 .ForMember(d => d.PrimaryColor, o => o.MapFrom(s => s.PrimaryColor))
                 .ForMember(d => d.SecondaryColor, o => o.MapFrom(s => s.SecondaryColor))
                 .ForMember(d => d.IsActive, o => o.Condition(s => s.IsActive.HasValue))

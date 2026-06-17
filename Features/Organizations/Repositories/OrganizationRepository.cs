@@ -29,10 +29,17 @@ namespace LMS_SoulCode.Features.Organizations.Repositories
         public async Task<Organization?> GetByCodeAsync(string code, CancellationToken cancellationToken = default)
         => await _context.Organizations
                 .FirstOrDefaultAsync(o => o.Code == code && !o.IsDeleted, cancellationToken);
+
+        public async Task<IReadOnlyList<string>> GetCodesByPrefixAsync(string prefix, CancellationToken cancellationToken = default)
+        => await _context.Organizations
+                .IgnoreQueryFilters()
+                .Where(o => o.Code.StartsWith(prefix))
+                .Select(o => o.Code)
+                .ToListAsync(cancellationToken);
         
 
         public async Task<bool> ExistsAsync(string code, CancellationToken cancellationToken = default)
-        => await _context.Organizations.AnyAsync(o => o.Code == code && !o.IsDeleted, cancellationToken);
+        => await _context.Organizations.IgnoreQueryFilters().AnyAsync(o => o.Code == code, cancellationToken);
         
 
         public async Task SaveAsync(CancellationToken cancellationToken = default)

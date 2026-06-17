@@ -1,7 +1,6 @@
 export interface OrganizationDto {
     id: number;
     orgName: string;
-    orgCode: string;
     logoUrl?: string;
     logoThumbUrl?: string;
     primaryColor?: string;
@@ -13,7 +12,6 @@ export interface OrganizationDto {
 
 export interface OrgRegisterRequest {
     orgName: string;
-    orgCode: string;
     website?: string;
     logo?: File;
     firstName: string;

@@ -19,6 +19,7 @@ namespace LMS_SoulCode.Features.Common
         public const string TokenGenerated = "Reset token generated";
         public const string PasswordUpdated = "Password updated successfully";
         public const string OrgAlreadyExists = "Organization code already exists";
+        public const string InvalidOrganizationCode = "Invalid organization code";
         
         // Auth Specific
         public const string LoginSuccess = "Login successful";

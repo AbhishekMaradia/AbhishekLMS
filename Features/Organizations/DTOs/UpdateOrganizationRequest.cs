@@ -6,7 +6,6 @@ namespace LMS_SoulCode.Features.Organizations.DTOs
     {
         // Org Details
         public string? OrgName { get; set; }
-        public string? OrgCode { get; set; }
         public string? Website { get; set; }
         public IFormFile? Logo { get; set; }
         public string? PrimaryColor { get; set; }

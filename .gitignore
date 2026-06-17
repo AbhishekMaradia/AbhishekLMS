@@ -13,3 +13,5 @@ publish/
 wwwroot/uploads/ 
 Logs/
 wwwroot/certificates/
+appsettings.json
+Migrations/

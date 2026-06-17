@@ -5,7 +5,6 @@ namespace LMS_SoulCode.Features.Organizations.DTOs
     public record OrgRegisterRequest(
         // Org Details
         string OrgName,
-        string OrgCode,
         string? Website,
         IFormFile? Logo,
         string? PrimaryColor,
