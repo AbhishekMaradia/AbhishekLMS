@@ -16,7 +16,7 @@ export const ReportsPage: React.FC<any> = ({
     const headers = [
         { header: '', key: 'exp', className: 'lms-col-chevron' },
         { header: 'Student Identity', key: 'user', className: 'lms-col-student' },
-        ...(isSuperAdmin ? [{ header: 'Organization', key: 'org', className: 'lms-col-org', hideOnMobile: false }] : []),
+        ...(isSuperAdmin ? [{ header: 'Organization', key: 'org', className: 'lms-col-org', hideOnMobile: true }] : []),
         { header: 'Cohort / Group', key: 'group', className: 'lms-col-group', hideOnMobile: true },
         { header: 'Knowledge Domain', key: 'course', className: 'lms-col-course' },
         { header: 'Progress', key: 'progress', className: 'lms-col-progress' },
@@ -153,9 +153,17 @@ export const ReportsPage: React.FC<any> = ({
                                         </td>
                                     )}
                                     <td className="lms-col-group lms-hide-mobile">
-                                        <div className="lms-report-group-name">
-                                            <Icons.Users s={12} className="lms-report-group-icon" />
-                                            {item.groupName || 'General'}
+                                        <div className="lms-report-group-name" title={item.groupName || 'General'}>
+                                            <Icons.Users s={12} className="lms-report-group-icon" style={{ flexShrink: 0 }} />
+                                            <span style={{
+                                                textOverflow: 'ellipsis',
+                                                overflow: 'hidden',
+                                                whiteSpace: 'nowrap',
+                                                display: 'inline-block',
+                                                width: '100%'
+                                            }}>
+                                                {item.groupName || 'General'}
+                                            </span>
                                         </div>
                                     </td>
                                     <td className="lms-col-course">
@@ -320,15 +328,15 @@ export const ReportsPage: React.FC<any> = ({
                 .lms-page .lms-table-main {
                     table-layout: fixed;
                     width: 100%;
-                    min-width: 100%;
+                    min-width: 1100px;
                 }
                 .lms-col-chevron { width: 45px; text-align: center; }
-                .lms-col-student { width: 25%; }
-                .lms-col-org { width: 12%; }
+                .lms-col-student { width: 22%; }
+                .lms-col-org { width: 11%; }
                 .lms-col-group { width: 15%; }
-                .lms-col-course { width: 25%; }
-                .lms-col-progress { width: 13%; }
-                .lms-col-activity { width: 10%; }
+                .lms-col-course { width: 22%; }
+                .lms-col-progress { width: 16%; }
+                .lms-col-activity { width: 14%; }
                 .lms-col-actions { width: 65px; text-align: right; }
 
                 .lms-col-student div, .lms-col-course div, .lms-col-group div {

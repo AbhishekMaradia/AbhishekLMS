@@ -125,10 +125,7 @@
 
 @media (max-width: 768px) {
     .lms-hide-mobile {
-        display: inline-flex !important;
-        align-items: center;
-        margin-right: 8px;
-        opacity: 0.8;
+        display: none !important;
     }
 
     .lms-table-main {

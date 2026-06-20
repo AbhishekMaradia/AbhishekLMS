@@ -12,7 +12,7 @@ interface DashboardPageProps {
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({ 
-    db, ui, counts, setTab, isSuperAdmin, hasPermission 
+    db, ui, counts, setTab, isSuperAdmin, hasPermission, ...rest 
 }) => {
     return (
         <div className="lms-dashboard-page lms-fade-in">
@@ -23,6 +23,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 setTab={setTab}
                 isSuperAdmin={isSuperAdmin}
                 hasPermission={hasPermission}
+                tab={(rest as any).tab}
             />
         </div>
     );

@@ -118,8 +118,8 @@ export const OrganizationList: React.FC<OrganizationListProps> = ({
                             <h3 className="lms-grid-title lms-org-list-title">{o.orgName}</h3>
                             <div className="lms-flex-row lms-org-list-code-row">
                                 <div className="lms-flex-row lms-org-list-colors-row">
-                                    <div className="lms-org-list-color-swatch" style={{ '--swatch-color': o.primaryColor || '#763121' } as any} />
-                                    <div className="lms-org-list-color-swatch" style={{ '--swatch-color': o.secondaryColor || '#4a2118' } as any} />
+                                    <div className="lms-org-list-color-swatch" style={{ '--swatch-color': o.primaryColor || '#2f65f6' } as any} />
+                                    <div className="lms-org-list-color-swatch" style={{ '--swatch-color': o.secondaryColor || '#1e40af' } as any} />
                                 </div>
                             </div>
 

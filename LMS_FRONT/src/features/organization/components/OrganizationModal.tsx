@@ -24,8 +24,8 @@ export const OrganizationModal: React.FC<OrganizationModalProps> = ({
     fetchOrgAdmin
 }) => {
     const [preview, setPreview] = React.useState<string | null>(ui.target?.logoUrl || ui.target?.LogoUrl || null);
-    const [pColor, setPColor] = React.useState(ui.target?.primaryColor || ui.target?.PrimaryColor || '#763121');
-    const [sColor, setSColor] = React.useState(ui.target?.secondaryColor || ui.target?.SecondaryColor || '#4a2118');
+    const [pColor, setPColor] = React.useState(ui.target?.primaryColor || ui.target?.PrimaryColor || '#2f65f6');
+    const [sColor, setSColor] = React.useState(ui.target?.secondaryColor || ui.target?.SecondaryColor || '#1e40af');
 
 
     if (ui.modal !== 'org_create' && ui.modal !== 'org_edit') return null;

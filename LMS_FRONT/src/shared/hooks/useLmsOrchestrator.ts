@@ -989,8 +989,17 @@ export const useLmsOrchestrator = () => {
     useEffect(() => {
         const root = document.documentElement;
         if (activeOrg && theme !== 'dark') {
-            const p = activeOrg.primaryColor || activeOrg.PrimaryColor || '#763121';
-            const s = activeOrg.secondaryColor || activeOrg.SecondaryColor || '#4a2118';
+            let p = activeOrg.primaryColor || activeOrg.PrimaryColor || '#2f65f6';
+            let s = activeOrg.secondaryColor || activeOrg.SecondaryColor || '#1e40af';
+
+            // Clean up database-side brown fallbacks dynamically to guarantee the premium blue theme
+            if (p === '#763121' || p.toLowerCase() === '#763121') {
+                p = '#2f65f6';
+            }
+            if (s === '#4a2118' || s.toLowerCase() === '#4a2118') {
+                s = '#1e40af';
+            }
+
             const rgb = hexToRgb(p);
 
             root.style.setProperty('--color-primary', p);
