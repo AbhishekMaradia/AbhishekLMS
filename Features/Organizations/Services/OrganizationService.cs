@@ -211,6 +211,15 @@ namespace LMS_SoulCode.Features.Organizations.Services
             
             if (!string.IsNullOrEmpty(org.LogoThumbUrl))
                 dto.LogoThumbUrl = $"{baseUrl}{gateway}{Uri.EscapeDataString(org.LogoThumbUrl)}";
+
+            if (!string.IsNullOrEmpty(org.Code))
+            {
+                try
+                {
+                    dto.RegistrationToken = _cryptoService.EncryptBytes(System.Text.Encoding.UTF8.GetBytes(org.Code));
+                }
+                catch { }
+            }
         }
 
         public async Task<ApiResponse<List<LoginResponse>>> OrgLoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
@@ -384,6 +393,57 @@ namespace LMS_SoulCode.Features.Organizations.Services
 
             await _orgRepo.DeleteAsync(id, cancellationToken);
             return ApiResponse<List<string>>.Success(new List<string>(), Messages.Deleted);
+        }
+
+        // Generate a registration link with optional expiry
+        public async Task<ApiResponse<GenerateLinkResponse>> GenerateRegistrationLinkAsync(GenerateLinkRequest request, int? currentTenantId, bool isSuperAdmin, CancellationToken cancellationToken = default)
+        {
+            Organization? org = null;
+
+            if (!string.IsNullOrWhiteSpace(request.OrgCode))
+            {
+                org = await _orgRepo.GetByCodeAsync(request.OrgCode.Trim().ToUpperInvariant(), cancellationToken);
+                if (org == null)
+                    return ApiResponse<GenerateLinkResponse>.Fail(Messages.NotFound, StatusCodes.NotFound);
+
+                // If not super admin, check if this matches their tenant ID
+                if (!isSuperAdmin && currentTenantId.HasValue && org.Id != currentTenantId.Value)
+                    return ApiResponse<GenerateLinkResponse>.Fail(Messages.Forbidden, StatusCodes.Forbidden);
+            }
+            else
+            {
+                if (isSuperAdmin)
+                {
+                    return ApiResponse<GenerateLinkResponse>.Fail("Organization code is required for superadmin.", StatusCodes.BadRequest);
+                }
+
+                if (!currentTenantId.HasValue || currentTenantId.Value <= 0)
+                {
+                    return ApiResponse<GenerateLinkResponse>.Fail("Organization context not found.", StatusCodes.BadRequest);
+                }
+
+                org = await _orgRepo.GetByIdAsync(currentTenantId.Value, cancellationToken);
+                if (org == null)
+                    return ApiResponse<GenerateLinkResponse>.Fail(Messages.NotFound, StatusCodes.NotFound);
+            }
+
+            // Compute expiry (UTC). Use provided datetime or default 30 days.
+            var expiryUtc = request.Expiry?.UtcDateTime ?? DateTime.UtcNow.AddDays(30);
+            org.LinkExpiredAt = expiryUtc;
+            await _orgRepo.UpdateAsync(org, cancellationToken);
+
+            // Build registration link pointing to the frontend registration page
+            var frontendRegisterUrl = _config["AppSettings:FrontendRegisterUrl"] ?? "http://localhost:5173/register";
+            var token = _cryptoService.EncryptBytes(System.Text.Encoding.UTF8.GetBytes(org.Code));
+            var link = $"{frontendRegisterUrl}?token={Uri.EscapeDataString(token)}";
+
+            var response = new GenerateLinkResponse
+            {
+                Url = link,
+                Expiry = expiryUtc
+            };
+
+            return ApiResponse<GenerateLinkResponse>.Success(response, "Link generated successfully.");
         }
 
         public async Task<ApiResponse<UserDto>> GetOrganizationAdminAsync(int tenantId, CancellationToken cancellationToken = default)

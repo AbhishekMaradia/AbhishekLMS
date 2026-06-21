@@ -1,6 +1,9 @@
+using System;
 using LMS_SoulCode.Features.Common.Models;
 using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations.Schema;
+
+using System;
 
 namespace LMS_SoulCode.Features.Organizations.Models
 {
@@ -16,5 +19,7 @@ namespace LMS_SoulCode.Features.Organizations.Models
         public string? PrimaryColor { get; set; }
         public string? SecondaryColor { get; set; }
         public bool IsActive { get; set; } = true;
+        // New field to store link expiration timestamp
+        public DateTime? LinkExpiredAt { get; set; }
     }
 }

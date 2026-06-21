@@ -13,8 +13,8 @@ namespace LMS_SoulCode.Features.Organizations.Mappings
                 .ForMember(d => d.OrgName, o => o.MapFrom(s => s.Name))
                 .ForMember(d => d.OrgCode, o => o.MapFrom(s => s.Code))
                 .ForMember(d => d.PrimaryColor, o => o.MapFrom(s => s.PrimaryColor))
-                .ForMember(d => d.SecondaryColor, o => o.MapFrom(s => s.SecondaryColor));
-
+                .ForMember(d => d.SecondaryColor, o => o.MapFrom(s => s.SecondaryColor))
+                .ForMember(d => d.LinkExpiredAt, o => o.MapFrom(s => s.LinkExpiredAt));
             // OrgRegisterRequest to Organization mapping
             CreateMap<OrgRegisterRequest, Organization>()
                 .ForMember(d => d.Name, o => o.MapFrom(s => s.OrgName))

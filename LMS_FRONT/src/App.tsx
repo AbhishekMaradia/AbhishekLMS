@@ -95,6 +95,7 @@ const AppContent: React.FC = () => {
                 <Routes>
                     <Route path="/login" element={<AuthGate onComplete={onAuthComplete} decryptor={decryptPermissions} />} />
                     <Route path="/register" element={<AuthGate onComplete={onAuthComplete} decryptor={decryptPermissions} />} />
+                    <Route path="/register/:code" element={<AuthGate onComplete={onAuthComplete} decryptor={decryptPermissions} />} />
                     <Route path="/organization/register" element={<AuthGate onComplete={onAuthComplete} decryptor={decryptPermissions} />} />
                     <Route path="*" element={<Navigate to="/login" replace />} />
                 </Routes>
