@@ -6,7 +6,9 @@ export interface OrganizationDto {
     primaryColor?: string;
     secondaryColor?: string;
     website?: string;
+    orgCode?: string;
     isActive: boolean;
+    linkExpiredAt?: string;
     createdAt: string;
 }
 

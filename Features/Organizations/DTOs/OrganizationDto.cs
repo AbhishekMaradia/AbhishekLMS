@@ -11,6 +11,8 @@ namespace LMS_SoulCode.Features.Organizations.DTOs
         public string? PrimaryColor { get; set; }
         public string? SecondaryColor { get; set; }
         public bool IsActive { get; set; }
+        public string? RegistrationToken { get; set; }
+        public DateTime? LinkExpiredAt { get; set; }
         public DateTime CreatedAt { get; set; }
 
     }

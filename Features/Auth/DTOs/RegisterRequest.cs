@@ -9,5 +9,7 @@ namespace LMS_SoulCode.Features.Auth.DTOs
         public string Password { get; set; } = null!;
         public int? TenantId { get; set; }
         public string? OrganizationCode { get; set; }
+        // Optional registration token used in registration link when organization code is not available
+        public string? RegistrationToken { get; set; }
     }
 }

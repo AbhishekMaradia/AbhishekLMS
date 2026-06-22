@@ -4,11 +4,16 @@ import type { ApiResponse } from '../../../core/types/api.types';
 export interface OrganizationDto {
     id: number;
     orgName: string;
+    orgCode: string;
     logoUrl?: string;
+    logoThumbUrl?: string;
+    website?: string;
     description?: string;
     primaryColor?: string;
     secondaryColor?: string;
     isActive: boolean;
+    linkExpiredAt?: string;
+    createdAt: string;
 }
 
 export const organizationApi = {
@@ -31,6 +36,11 @@ export const organizationApi = {
     register: (data: FormData) =>
         apiClient.post<ApiResponse<OrganizationDto>>('Organization/register', data, {
             headers: { 'Content-Type': 'multipart/form-data' }
+        }),
+
+    generateLink: (orgCode?: string, expiry?: string) =>
+        apiClient.post<ApiResponse<{ url: string; expiry: string }>>('Organization/generate-link', { orgCode, expiry }, {
+            headers: { 'Content-Type': 'application/json' }
         }),
 
     // UPDATE: Resource-specific put

@@ -92,5 +92,13 @@ namespace LMS_SoulCode.Features.Organizations.Controllers
             var result = await _orgService.GetOrganizationAdminAsync(id, cancellationToken);
             return StatusCode(result.Code, result);
         }
+
+        [HttpPost("generate-link")]
+        [BackOfficePermission(ModuleCodes.ORGANIZATION, PermissionCodes.ORGANIZATION_EDIT)]
+        public async Task<IActionResult> GenerateLink([FromBody] GenerateLinkRequest request, CancellationToken cancellationToken)
+        {
+            var result = await _orgService.GenerateRegistrationLinkAsync(request, CurrentTenantId, CurrentIsSuperAdmin, cancellationToken);
+            return StatusCode(result.Code, result);
+        }
     }
 }
