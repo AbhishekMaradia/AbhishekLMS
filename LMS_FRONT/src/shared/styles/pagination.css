@@ -1,0 +1,167 @@
+/* --- LMS CLEAN PAGINATION --- */
+/* Simplified and standard design */
+
+.lms-pagination-orchestrator {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 0;
+    margin-top: 32px;
+    border-top: 1px solid var(--color-border);
+    gap: 20px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.lms-pagination-info {
+    font-size: 13px;
+    color: var(--color-text-dim);
+    font-weight: 600;
+}
+
+.lms-pagination-count {
+    color: var(--color-primary);
+    font-weight: 800;
+}
+
+.lms-pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.lms-page-numbers {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.lms-page-btn {
+    height: 40px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    border: 1px solid var(--color-border-bright);
+    background: var(--color-glass-bright);
+    color: var(--color-text-muted);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0 14px;
+    backdrop-filter: blur(4px);
+}
+
+
+.lms-page-btn:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.lms-page-btn.active {
+    background: var(--accent-gradient);
+    color: var(--color-btn-text);
+    border-color: transparent;
+    box-shadow: 0 8px 20px rgba(var(--color-primary-rgb), 0.3);
+    transform: scale(1.05);
+}
+
+
+.lms-page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.lms-page-btn.nav {
+    border: 1px solid var(--color-border);
+}
+
+.lms-page-ellipsis {
+    padding: 0 8px;
+    color: var(--color-text-dim);
+    font-weight: 800;
+    opacity: 0.5;
+}
+
+.lms-pagination-size {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.lms-pagination-size label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-text-dim);
+}
+
+.lms-pagination-select {
+    height: 38px;
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 0 32px 0 12px;
+    color: var(--color-text);
+    font-size: 13px;
+    font-weight: 700;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A67C52' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+
+.lms-pagination-select:focus {
+    border-color: var(--color-primary);
+}
+
+/* Responsive Adjustments */
+.lms-show-mobile { display: none; }
+
+@media (max-width: 768px) {
+    .lms-show-mobile { display: block; }
+    
+    .lms-pagination-orchestrator {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        gap: 12px !important;
+        padding: 16px 0 !important;
+        margin-top: 16px !important;
+    }
+
+    .lms-page-numbers {
+        display: none !important; 
+    }
+    
+    .lms-pagination-controls {
+        width: 100% !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+    }
+    
+    .lms-page-btn.nav {
+        flex: 1 !important;
+        height: 44px !important;
+    }
+
+    .lms-pagination-size {
+        width: 100% !important;
+        justify-content: center !important;
+        margin-top: 4px !important;
+        display: flex !important;
+    }
+
+    .lms-pagination-select {
+        height: 44px !important;
+        flex: 1 !important;
+        max-width: 200px !important;
+    }
+}

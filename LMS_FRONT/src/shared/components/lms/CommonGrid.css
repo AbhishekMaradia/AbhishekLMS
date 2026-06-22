@@ -1,0 +1,14 @@
+@import '../../styles/grid.css';
+
+.lms-grid-container {
+    position: relative;
+}
+
+.lms-grid-empty {
+    grid-column: 1 / -1;
+    padding: 60px 24px;
+    text-align: center;
+    background: var(--color-bg-alt);
+    border-radius: 24px;
+    border: 1px dashed var(--color-border);
+}

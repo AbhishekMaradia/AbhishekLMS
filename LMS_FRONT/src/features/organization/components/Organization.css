@@ -1,0 +1,395 @@
+.lms-org-list-cell-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.lms-org-list-logo-box {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: white;
+    border: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.lms-org-list-logo-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.lms-org-list-logo-icon {
+    opacity: 0.5;
+}
+
+.lms-org-list-banner {
+    background: var(--color-bg-alt);
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lms-org-list-banner-img {
+    height: 60%;
+    width: 60%;
+    object-fit: contain;
+}
+
+.lms-org-list-body {
+    padding-top: 16px !important;
+}
+
+.lms-org-list-title {
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+.lms-org-list-code-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.lms-org-list-code-tag {
+    font-size: 10px !important;
+}
+
+.lms-org-list-colors-row {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.lms-org-list-color-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    background: var(--swatch-color, var(--color-primary));
+}
+
+.lms-org-list-footer {
+    margin-top: 16px !important;
+}
+
+.lms-org-modal-view-toggle {
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.lms-org-modal-view-btn {
+    flex: 1;
+}
+
+.lms-org-modal-hide {
+    display: none !important;
+}
+
+.lms-org-modal-flex {
+    display: flex;
+}
+
+.lms-org-modal-form-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.lms-org-modal-color-wrap {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+.lms-org-modal-color-input {
+    flex: 1;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    font-family: monospace !important;
+    padding-left: 12px !important;
+}
+
+.lms-org-modal-logo-wrap {
+    flex-direction: row !important;
+    gap: 20px !important;
+    align-items: center;
+}
+
+.lms-org-modal-logo-inner {
+    flex: 1;
+}
+
+.lms-org-modal-logo-input {
+    font-size: 12px !important;
+    padding: 8px 0 !important;
+}
+
+.lms-org-modal-logo-msg {
+    font-size: 10px !important;
+    margin-top: 4px;
+}
+
+.lms-org-modal-preview-box {
+    width: 60px;
+    height: 60px;
+    padding: 8px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lms-org-modal-preview-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.lms-org-modal-admin-section {
+    border-top: 1px solid #eed9c4;
+    padding-top: 24px;
+    margin-top: 8px;
+}
+
+.lms-org-modal-section-title-wrap {
+    margin-bottom: 8px;
+}
+
+.lms-org-modal-admin-title {
+    color: var(--color-primary) !important;
+    font-weight: 900 !important;
+    font-size: 14px !important;
+    letter-spacing: 1px !important;
+}
+
+.lms-org-modal-admin-msg {
+    font-size: 11px !important;
+    color: var(--color-text-muted) !important;
+}
+
+.lms-org-modal-status-label {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--color-primary);
+}
+
+.lms-org-modal-status-check {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--color-primary);
+    cursor: pointer;
+}
+
+.lms-org-modal-loader-wrap {
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.lms-org-modal-loader-text {
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    color: var(--color-primary) !important;
+    letter-spacing: 1px !important;
+}
+
+.lms-org-modal-ro-wrap {
+    opacity: 0.8;
+}
+
+.lms-org-modal-ro-input {
+    cursor: not-allowed !important;
+}
+
+.lms-org-modal-ro-msg {
+    text-align: center;
+    margin-top: 12px;
+}
+
+.lms-org-modal-ro-bold {
+    font-weight: 800;
+}
+
+.lms-org-reg-wrap {
+    max-width: 420px;
+    width: 90%;
+    margin: 0 auto;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.lms-org-reg-header {
+    margin-bottom: 12px;
+}
+
+.lms-org-reg-back-btn {
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 0;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #8B0000;
+}
+
+.lms-org-reg-title {
+    font-size: 26px;
+    font-weight: 950;
+    margin-bottom: 4px;
+    color: #763121;
+}
+
+.lms-org-reg-subtitle {
+    color: #526484;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.lms-org-reg-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.lms-org-reg-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.lms-org-reg-section-title {
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--color-accent-r);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.lms-org-reg-input-wrap {
+    position: relative;
+}
+
+.lms-org-reg-input-icon {
+    position: absolute;
+    left: 14px;
+    top: 15px;
+}
+
+.lms-org-reg-icon-colored {
+    color: #94A3B8;
+}
+
+.lms-org-reg-icon-muted {
+    color: var(--color-text-s);
+}
+
+.lms-org-reg-input-icon-padded {
+    padding-left: 42px !important;
+    height: 48px !important;
+}
+
+.lms-org-reg-input-h48 {
+    height: 48px !important;
+}
+
+.lms-org-reg-grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.lms-org-reg-file-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: #526484;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.lms-org-reg-file-input {
+    padding: 10px !important;
+    height: auto !important;
+    font-size: 13px !important;
+    background: #F1F5F9 !important;
+    border-style: dashed !important;
+}
+
+.lms-org-reg-admin-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+    border-top: 1px solid var(--color-border);
+    padding-top: 20px;
+}
+
+.lms-org-reg-error-box {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.lms-org-reg-submit-btn {
+    height: 56px !important;
+    border-radius: 16px !important;
+    margin-top: 12px !important;
+    transition: all 0.3s !important;
+    box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.2) !important;
+    font-size: 16px !important;
+    font-weight: 950 !important;
+    letter-spacing: 0.5px !important;
+}
+
+.lms-orgs-page {
+    padding: 0 20px;
+}
+
+.lms-orgs-loader {
+    padding: 80px 40px;
+    text-align: center;
+}
+
+.lms-orgs-loader-spinner {
+    margin: 0 auto 24px;
+}
+
+.lms-orgs-loader-text {
+    font-size: 18px;
+    font-weight: 800;
+    opacity: 0.6;
+}
+
+.lms-orgs-add-btn {
+    height: 44px;
+    padding: 0 32px;
+}

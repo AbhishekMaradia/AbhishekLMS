@@ -1,0 +1,140 @@
+/* --- LMS STANDARDIZED BUTTONS --- */
+.lms-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: 10px 20px;
+    height: 42px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transit);
+    border: 1px solid transparent;
+    white-space: nowrap;
+    text-decoration: none;
+    outline: none;
+    user-select: none;
+}
+
+.lms-btn-primary {
+    background: var(--accent-gradient);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.2);
+}
+
+.lms-btn-secondary {
+    background: var(--color-glass-bright);
+    border: 1px solid var(--color-border-bright);
+    color: var(--color-text);
+}
+
+.lms-btn-danger {
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.lms-btn-success {
+    background: var(--color-success-bg);
+    color: var(--color-success);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.lms-btn-info {
+    background: var(--color-info-bg);
+    color: var(--color-info);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.lms-btn-accent {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary-soft);
+}
+
+.lms-btn-ghost {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--color-text-muted);
+}
+
+.lms-btn-ghost:hover {
+    background: var(--color-nav-hover);
+    color: var(--color-primary);
+}
+
+.lms-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    filter: brightness(1.1);
+}
+
+.lms-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.lms-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(1);
+}
+
+.lms-btn.loading {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.lms-icon-btn-sm {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-glass-bright);
+    color: var(--color-text-muted);
+    transition: all var(--transit);
+    cursor: pointer;
+}
+
+.lms-icon-btn-sm:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+    background: var(--color-primary-soft);
+    transform: scale(1.05);
+}
+
+.lms-btn-pill-sm {
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    background: var(--color-glass-bright);
+    color: var(--color-text-muted);
+}
+
+.lms-btn-icon {
+    margin-right: 8px;
+}
+
+/* Spinner for loading state */
+.lms-loader-spinner {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 2px solid #fff;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

@@ -1,0 +1,461 @@
+/* --- Professional Attendance Dashboard --- */
+.lms-attendance-listing-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #eef0f2;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
+    padding: 24px;
+    margin-top: 20px;
+}
+
+/* Filters Section in GroupsPage Header */
+.lms-att-filters-wrapper {
+    margin-top: 8px;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.lms-att-fields-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    width: 100%;
+    align-items: flex-end;
+}
+
+.lms-att-field {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 140px; /* Slimmer base */
+}
+
+/* Dates should be compact and not stretch */
+.lms-att-field.is-date {
+    flex: 0 0 120px;
+}
+
+.lms-att-search-container {
+    flex: 1 1 300px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- MEDIA QUERIES FOR ALL RESPONSIVENESS */
+@media (max-width: 1024px) {
+    .lms-att-filter-row {
+        gap: 10px;
+    }
+    .lms-att-field {
+        flex: 1 1 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .lms-att-header-new {
+        padding: 12px;
+    }
+    .lms-att-filter-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .lms-att-field {
+        max-width: 100% !important;
+        flex: none;
+    }
+    .lms-att-actions-row {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+    .lms-att-details-container {
+        flex-direction: column;
+        gap: 15px !important;
+    }
+    .lms-att-checkbox-group {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .lms-att-checkbox-item {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .lms-att-user-info {
+        gap: 8px;
+    }
+    .lms-att-avatar {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 640px) {
+    .lms-att-fields-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .lms-att-field, .lms-att-field.is-date, .lms-att-search-container {
+        flex: 1 1 100% !important;
+    }
+    .lms-att-stats-bar {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+    }
+    .lms-att-footer {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+}
+
+.lms-att-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 4px;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.lms-att-input {
+    width: 100%;
+    height: 34px;
+    border: 1px solid #eef0f2;
+    border-radius: 8px;
+    padding: 0 8px;
+    background: #ffffff;
+    font-size: 11px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.01);
+    color: #1e293b;
+    transition: all 0.2s ease;
+}
+
+.lms-att-input:focus {
+    outline: none;
+    border-color: #8c7f75;
+    box-shadow: 0 0 0 3px rgba(140, 127, 117, 0.1);
+}
+
+.lms-att-search-container {
+    width: 100%;
+    max-width: 450px;
+}
+
+/* Premium Select Styling */
+.lms-att-select {
+    width: 100%;
+    height: 34px;
+    border: 1px solid #eef0f2;
+    border-radius: 8px;
+    padding: 0 8px;
+    background: #ffffff;
+    font-size: 11px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.01);
+    cursor: pointer;
+    color: #1e293b;
+    font-weight: 500;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    transition: all 0.2s ease;
+}
+
+.lms-att-select:focus {
+    outline: none;
+    border-color: #8c7f75;
+    box-shadow: 0 0 0 3px rgba(140, 127, 117, 0.1);
+}
+
+.lms-att-select:disabled {
+    background-color: #f1f5f9;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Stats Overview Bar - Responsive Grid */
+.lms-att-stats-bar {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #edf2f7;
+}
+
+.lms-att-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    text-align: center;
+}
+
+.lms-att-stat-value {
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.lms-att-stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+    color: #64748b;
+}
+
+/* Color Tokens */
+.p-color { color: #10b981; } .p-bg { background: rgba(16, 185, 129, 0.08); }
+.l-color { color: #f59e0b; } .l-bg { background: rgba(245, 158, 11, 0.08); }
+.e-color { color: #3b82f6; } .e-bg { background: rgba(59, 130, 246, 0.08); }
+.a-color { color: #ef4444; } .a-bg { background: rgba(239, 68, 68, 0.08); }
+
+/* Table Info */
+.lms-att-user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.lms-att-avatar {
+    width: 36px;
+    height: 36px;
+    background: #f1f5f9;
+    color: #475569;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    border: 1px solid #e2e8f0;
+    flex-shrink: 0;
+}
+
+/* Checkbox Style */
+.lms-att-checkbox-group {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+}
+
+.lms-att-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.lms-label-p { color: #10b981; }
+.lms-label-l { color: #f59e0b; }
+.lms-label-e { color: #3b82f6; }
+.lms-label-a { color: #ef4444; }
+
+.lms-att-checkbox-item input[type="checkbox"] {
+    accent-color: #8c7f75;
+    width: 17px;
+    height: 17px;
+}
+
+/* Footer Actions */
+.lms-att-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px dashed #e2e8f0;
+    gap: 16px;
+}
+
+/* --- MEDIA QUERIES (ALL DEVICE RESPONSIVENESS) --- */
+
+@media (max-width: 1024px) {
+    .lms-att-stats-bar {
+        grid-template-columns: repeat(3, 1fr); /* 3 in first row, 2 in second */
+    }
+}
+
+@media (max-width: 768px) {
+    .lms-attendance-listing-card {
+        padding: 16px;
+    }
+    
+    .lms-att-stats-bar {
+        grid-template-columns: repeat(2, 1fr); /* 2x2x1 layout */
+    }
+    
+    .lms-att-footer {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .lms-att-footer div {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .lms-att-stats-bar {
+        grid-template-columns: 1fr; /* Single column on very small phones */
+    }
+    
+    .lms-att-checkbox-group {
+        gap: 10px;
+    }
+    
+    .lms-att-checkbox-item {
+        font-size: 12px;
+    }
+}
+
+/* Sub Tabs Styling - Light/Brown Theme Alignment */
+.lms-sub-tabs-container {
+    padding: 3px;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.lms-sub-tabs {
+    display: flex;
+    gap: 4px;
+}
+
+.lms-sub-tab {
+    padding: 8px 22px;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.4);
+    background: transparent;
+    border: none;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.lms-sub-tab:hover {
+    color: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.lms-sub-tab.active {
+    color: #fff;
+    background: #5d4037; /* Warm Brown to match theme */
+    box-shadow: 0 4px 12px rgba(93, 64, 55, 0.25);
+}
+
+/* Filters Layout - Theme Aligned */
+.lms-att-filters-wrapper {
+    background: #fff;
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid rgba(93, 64, 55, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    margin-bottom: 24px;
+}
+
+.lms-att-fields-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.lms-att-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.lms-att-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #8d6e63; /* Muted Brown */
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding-left: 2px;
+}
+
+.lms-att-select, .lms-att-input {
+    background: #fafafa !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 10px !important;
+    color: #3e2723 !important; /* Deep Brown */
+    height: 44px !important;
+    padding: 0 16px !important;
+    font-size: 13px !important;
+    transition: all 0.2s ease;
+}
+
+.lms-att-select:focus, .lms-att-input:focus {
+    border-color: #8d6e63 !important;
+    background: #fff !important;
+    box-shadow: 0 0 0 4px rgba(141, 110, 99, 0.1);
+}
+
+/* Standardized Search Bar for Attendance */
+.lms-att-search-wrapper {
+    max-width: 500px;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .lms-card-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 15px;
+    }
+    
+    .lms-sub-tabs-container {
+        width: 100%;
+    }
+    
+    .lms-sub-tabs {
+        width: 100%;
+    }
+    
+    .lms-sub-tab {
+        flex: 1;
+        text-align: center;
+        padding: 10px 5px;
+    }
+}
+
+/* Theme-consistent Buttons for Attendance */
+.lms-att-actions-row .lms-btn-secondary {
+    border-color: rgba(141, 110, 99, 0.3) !important;
+    color: #5d4037 !important;
+}
+
+.lms-att-actions-row .lms-btn-secondary:hover {
+    background: rgba(141, 110, 99, 0.05) !important;
+    border-color: #5d4037 !important;
+}
+
+.lms-att-footer .lms-btn-primary {
+    background: #5d4037 !important;
+    box-shadow: 0 4px 15px rgba(93, 64, 55, 0.2) !important;
+}
+
+.lms-att-footer .lms-btn-primary:hover {
+    background: #3e2723 !important;
+}

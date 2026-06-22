@@ -1,0 +1,19 @@
+namespace LMS_SoulCode.Features.Organizations.DTOs
+{
+    public class OrganizationDto
+    {
+        public int Id { get; set; }
+        public string OrgName { get; set; } = null!;
+        public string OrgCode { get; set; } = null!;
+        public string? LogoUrl { get; set; }
+        public string? LogoThumbUrl { get; set; }
+        public string? Website { get; set; }
+        public string? PrimaryColor { get; set; }
+        public string? SecondaryColor { get; set; }
+        public bool IsActive { get; set; }
+        public string? RegistrationToken { get; set; }
+        public DateTime? LinkExpiredAt { get; set; }
+        public DateTime CreatedAt { get; set; }
+
+    }
+}
