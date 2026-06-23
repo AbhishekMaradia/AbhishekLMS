@@ -135,8 +135,8 @@ export const OrganizationRegister: React.FC<OrganizationRegisterProps> = ({ onBa
                     </div>
                 </div>
 
-                <input type="hidden" name="PrimaryColor" value="#2f65f6" />
-                <input type="hidden" name="SecondaryColor" value="#1e40af" />
+                <input type="hidden" name="PrimaryColor" value="#0d9488" />
+                <input type="hidden" name="SecondaryColor" value="#4f46e5" />
 
                 {error && (
                     <div className="lms-auth-error-box" style={{ marginTop: '12px' }}>

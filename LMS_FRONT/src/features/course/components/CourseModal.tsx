@@ -51,6 +51,18 @@ export const CourseModal = ({
     cats
 }: any) => {
 
+    const [selectedVidFile, setSelectedVidFile] = useState<File | null>(null);
+    const [isVidDragActive, setIsVidDragActive] = useState(false);
+    const [selectedDocFile, setSelectedDocFile] = useState<File | null>(null);
+    const [isDocDragActive, setIsDocDragActive] = useState(false);
+
+    useEffect(() => {
+        setSelectedVidFile(null);
+        setSelectedDocFile(null);
+        setIsVidDragActive(false);
+        setIsDocDragActive(false);
+    }, [mediaStudioTab]);
+
     const [selectedOrgId, setSelectedOrgId] = useState<number>(() => {
         return Number(ui.target?.tenantId ?? ui.target?.TenantId ?? 0);
     });
@@ -151,7 +163,10 @@ export const CourseModal = ({
                                         </div>
                                     </form>
                                 ) : (
-                                    <form onSubmit={e => handleMediaUpload(e, 'vid')} className="lms-col-gap-md">
+                                    <form onSubmit={e => {
+                                        handleMediaUpload(e, 'vid');
+                                        setSelectedVidFile(null);
+                                    }} className="lms-col-gap-md">
                                         <div className="lms-form-grid lms-c-modal-form-grid">
                                             <div>
                                                 <label className="lms-label-premium lms-c-modal-form-label">TITLE</label>
@@ -168,8 +183,109 @@ export const CourseModal = ({
                                         </div>
                                         <div>
                                             <label className="lms-label-premium lms-c-modal-form-label">SOURCE FILE</label>
-                                            <div className="lms-modal-panel-premium lms-c-modal-file-panel">
-                                                <input name="file" type="file" accept="video/*" className="lms-input-premium lms-c-modal-file-input" required />
+                                            <div 
+                                                className={`lms-modal-panel-premium lms-c-modal-file-panel ${isVidDragActive ? 'drag-active' : ''}`}
+                                                onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsVidDragActive(true); }}
+                                                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsVidDragActive(true); }}
+                                                onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsVidDragActive(false); }}
+                                                onDrop={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    setIsVidDragActive(false);
+                                                    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                                                        const file = e.dataTransfer.files[0];
+                                                        setSelectedVidFile(file);
+                                                        const input = document.getElementById('modal-vid-file-input') as HTMLInputElement;
+                                                        if (input) {
+                                                            const dataTransfer = new DataTransfer();
+                                                            dataTransfer.items.add(file);
+                                                            input.files = dataTransfer.files;
+                                                        }
+                                                    }
+                                                }}
+                                                style={{
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    height: '130px',
+                                                    border: isVidDragActive ? '2px dashed var(--color-primary)' : '2px dashed var(--color-border)',
+                                                    borderRadius: '16px',
+                                                    backgroundColor: isVidDragActive ? 'var(--color-primary-soft)' : 'var(--color-glass-bright)',
+                                                    transition: 'all 0.2s ease',
+                                                    position: 'relative',
+                                                    cursor: 'pointer',
+                                                    padding: '16px',
+                                                    textAlign: 'center'
+                                                }}
+                                            >
+                                                <input 
+                                                    id="modal-vid-file-input"
+                                                    name="file" 
+                                                    type="file" 
+                                                    required={!selectedVidFile}
+                                                    className="lms-c-modal-file-input" 
+                                                    accept="video/*"
+                                                    onChange={(e) => {
+                                                        if (e.target.files && e.target.files[0]) {
+                                                            setSelectedVidFile(e.target.files[0]);
+                                                        }
+                                                    }}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        inset: 0,
+                                                        opacity: 0,
+                                                        cursor: 'pointer',
+                                                        zIndex: 2
+                                                    }}
+                                                />
+                                                
+                                                {selectedVidFile ? (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', zIndex: 3, pointerEvents: 'auto' }}>
+                                                        <div style={{ color: 'var(--color-primary)' }}>
+                                                            <Icons.Video s={28} />
+                                                        </div>
+                                                        <div style={{ fontSize: '12px', fontWeight: '900', color: 'var(--color-primary)', wordBreak: 'break-all', maxWidth: '280px' }}>
+                                                            {selectedVidFile.name}
+                                                        </div>
+                                                        <div style={{ fontSize: '10px', color: 'var(--color-primary)', opacity: 0.6 }}>
+                                                            {(selectedVidFile.size / (1024 * 1024)).toFixed(2)} MB
+                                                        </div>
+                                                        <button 
+                                                            type="button" 
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                setSelectedVidFile(null);
+                                                                const input = document.getElementById('modal-vid-file-input') as HTMLInputElement;
+                                                                if (input) input.value = '';
+                                                            }}
+                                                            className="lms-btn danger" 
+                                                            style={{ 
+                                                                height: '24px', 
+                                                                fontSize: '10px', 
+                                                                padding: '0 8px',
+                                                                borderRadius: '6px',
+                                                                marginTop: '2px',
+                                                                zIndex: 4
+                                                            }}
+                                                        >
+                                                            Remove File
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ pointerEvents: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                                                        <div style={{ color: 'var(--color-primary)', opacity: 0.4 }}>
+                                                            <Icons.Video s={24} />
+                                                        </div>
+                                                        <div style={{ fontSize: '12px', fontWeight: '900', color: 'var(--color-primary)' }}>
+                                                            Drag & Drop or Click to Upload
+                                                        </div>
+                                                        <div style={{ fontSize: '10px', color: 'var(--color-primary)', opacity: 0.6 }}>
+                                                            Supports video formats
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                         <button type="submit" className="lms-btn-commit lms-c-modal-submit-btn">Upload</button>
@@ -277,7 +393,10 @@ export const CourseModal = ({
                                         </div>
                                     </form>
                                 ) : (
-                                    <form onSubmit={e => handleMediaUpload(e, 'doc')} className="lms-col-gap-md">
+                                    <form onSubmit={e => {
+                                        handleMediaUpload(e, 'doc');
+                                        setSelectedDocFile(null);
+                                    }} className="lms-col-gap-md">
                                         <div className="lms-form-grid lms-c-modal-form-grid">
                                             <div>
                                                 <label className="lms-label-premium lms-c-modal-form-label">TITLE</label>
@@ -294,8 +413,109 @@ export const CourseModal = ({
                                         </div>
                                         <div>
                                             <label className="lms-label-premium lms-c-modal-form-label">SOURCE FILE</label>
-                                            <div className="lms-modal-panel-premium lms-c-modal-file-panel">
-                                                <input name="file" type="file" accept=".pdf,.docx,.xlsx,.ppt,.pptx,.txt" className="lms-input-premium lms-c-modal-file-input" required />
+                                            <div 
+                                                className={`lms-modal-panel-premium lms-c-modal-file-panel ${isDocDragActive ? 'drag-active' : ''}`}
+                                                onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDocDragActive(true); }}
+                                                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDocDragActive(true); }}
+                                                onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDocDragActive(false); }}
+                                                onDrop={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    setIsDocDragActive(false);
+                                                    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                                                        const file = e.dataTransfer.files[0];
+                                                        setSelectedDocFile(file);
+                                                        const input = document.getElementById('modal-doc-file-input') as HTMLInputElement;
+                                                        if (input) {
+                                                            const dataTransfer = new DataTransfer();
+                                                            dataTransfer.items.add(file);
+                                                            input.files = dataTransfer.files;
+                                                        }
+                                                    }
+                                                }}
+                                                style={{
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    height: '130px',
+                                                    border: isDocDragActive ? '2px dashed var(--color-primary)' : '2px dashed var(--color-border)',
+                                                    borderRadius: '16px',
+                                                    backgroundColor: isDocDragActive ? 'var(--color-primary-soft)' : 'var(--color-glass-bright)',
+                                                    transition: 'all 0.2s ease',
+                                                    position: 'relative',
+                                                    cursor: 'pointer',
+                                                    padding: '16px',
+                                                    textAlign: 'center'
+                                                }}
+                                            >
+                                                <input 
+                                                    id="modal-doc-file-input"
+                                                    name="file" 
+                                                    type="file" 
+                                                    required={!selectedDocFile}
+                                                    className="lms-c-modal-file-input" 
+                                                    accept=".pdf,.docx,.xlsx,.ppt,.pptx,.txt"
+                                                    onChange={(e) => {
+                                                        if (e.target.files && e.target.files[0]) {
+                                                            setSelectedDocFile(e.target.files[0]);
+                                                        }
+                                                    }}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        inset: 0,
+                                                        opacity: 0,
+                                                        cursor: 'pointer',
+                                                        zIndex: 2
+                                                    }}
+                                                />
+                                                
+                                                {selectedDocFile ? (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', zIndex: 3, pointerEvents: 'auto' }}>
+                                                        <div style={{ color: 'var(--color-primary)' }}>
+                                                            <Icons.Doc s={28} />
+                                                        </div>
+                                                        <div style={{ fontSize: '12px', fontWeight: '900', color: 'var(--color-primary)', wordBreak: 'break-all', maxWidth: '280px' }}>
+                                                            {selectedDocFile.name}
+                                                        </div>
+                                                        <div style={{ fontSize: '10px', color: 'var(--color-primary)', opacity: 0.6 }}>
+                                                            {(selectedDocFile.size / (1024 * 1024)).toFixed(2)} MB
+                                                        </div>
+                                                        <button 
+                                                            type="button" 
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                setSelectedDocFile(null);
+                                                                const input = document.getElementById('modal-doc-file-input') as HTMLInputElement;
+                                                                if (input) input.value = '';
+                                                            }}
+                                                            className="lms-btn danger" 
+                                                            style={{ 
+                                                                height: '24px', 
+                                                                fontSize: '10px', 
+                                                                padding: '0 8px',
+                                                                borderRadius: '6px',
+                                                                marginTop: '2px',
+                                                                zIndex: 4
+                                                            }}
+                                                        >
+                                                            Remove File
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ pointerEvents: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                                                        <div style={{ color: 'var(--color-primary)', opacity: 0.4 }}>
+                                                            <Icons.Doc s={24} />
+                                                        </div>
+                                                        <div style={{ fontSize: '12px', fontWeight: '900', color: 'var(--color-primary)' }}>
+                                                            Drag & Drop or Click to Upload
+                                                        </div>
+                                                        <div style={{ fontSize: '10px', color: 'var(--color-primary)', opacity: 0.6 }}>
+                                                            Supports document formats
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                         <button type="submit" className="lms-btn-commit lms-c-modal-submit-btn">Upload</button>

@@ -534,6 +534,7 @@
 
 .lms-security-header-card {
     margin-bottom: 24px;
+    padding-bottom: 24px !important;
 }
 
 .lms-security-create-btn {

@@ -24,6 +24,14 @@ export const CourseMediaStudio = ({
     isModalView = false
 }: any) => {
     const [showUpload, setShowUpload] = React.useState(false);
+    const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
+    const [isDragActive, setIsDragActive] = React.useState(false);
+
+    React.useEffect(() => {
+        setSelectedFile(null);
+        setIsDragActive(false);
+    }, [cmStudioTab]);
+
     if (!course) return null;
 
     const Table = ({ headers, children }: any) => (
@@ -172,7 +180,10 @@ export const CourseMediaStudio = ({
                                 </div>
 
                                 {showUpload && (
-                                    <form onSubmit={e => handleCmUpload(e, cmStudioTab === 'videos' ? 'vid' : 'doc')} className="lms-col-gap-md lms-fade-in">
+                                    <form onSubmit={e => {
+                                        handleCmUpload(e, cmStudioTab === 'videos' ? 'vid' : 'doc');
+                                        setSelectedFile(null);
+                                    }} className="lms-col-gap-md lms-fade-in">
                                         <div className="lms-form-grid lms-cms-upload-grid">
                                             <div>
                                                 <label className="lms-label-premium required lms-cms-upload-label">{cmStudioTab === 'videos' ? 'VIDEO TITLE' : 'DOCUMENT NAME'} *</label>
@@ -191,10 +202,109 @@ export const CourseMediaStudio = ({
                                         </div>
                                         <div>
                                             <label className="lms-label-premium required lms-cms-upload-label">{cmStudioTab === 'videos' ? 'VIDEO FILE' : 'DOCUMENT FILE'} *</label>
-                                            <div className="lms-modal-panel-premium lms-cms-upload-panel lms-cms-file-panel">
-                                                <div className="lms-cms-upload-zone-icon"><Icons.Plus s={24} /></div>
-                                                <input name="file" type="file" required className="lms-input-premium lms-cms-file-input" accept={cmStudioTab === 'videos' ? 'video/*' : undefined} />
-                                                <div className="lms-cms-file-hint">Click to select or drag assets here</div>
+                                            <div 
+                                                className={`lms-modal-panel-premium lms-cms-upload-panel lms-cms-file-panel ${isDragActive ? 'drag-active' : ''}`}
+                                                onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
+                                                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(true); }}
+                                                onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragActive(false); }}
+                                                onDrop={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    setIsDragActive(false);
+                                                    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                                                        const file = e.dataTransfer.files[0];
+                                                        setSelectedFile(file);
+                                                        const input = document.getElementById(cmStudioTab === 'videos' ? 'vid-file-input' : 'doc-file-input') as HTMLInputElement;
+                                                        if (input) {
+                                                            const dataTransfer = new DataTransfer();
+                                                            dataTransfer.items.add(file);
+                                                            input.files = dataTransfer.files;
+                                                        }
+                                                    }
+                                                }}
+                                                style={{
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    height: '140px',
+                                                    border: isDragActive ? '2px dashed var(--color-primary)' : '2px dashed var(--color-border)',
+                                                    borderRadius: '16px',
+                                                    backgroundColor: isDragActive ? 'var(--color-primary-soft)' : 'var(--color-glass-bright)',
+                                                    transition: 'all 0.2s ease',
+                                                    position: 'relative',
+                                                    cursor: 'pointer',
+                                                    padding: '20px',
+                                                    textAlign: 'center'
+                                                }}
+                                            >
+                                                <input 
+                                                    id={cmStudioTab === 'videos' ? 'vid-file-input' : 'doc-file-input'}
+                                                    name="file" 
+                                                    type="file" 
+                                                    required={!selectedFile}
+                                                    className="lms-input-premium lms-cms-file-input" 
+                                                    accept={cmStudioTab === 'videos' ? 'video/*' : '.pdf,.docx,.xlsx,.ppt,.pptx,.txt'}
+                                                    onChange={(e) => {
+                                                        if (e.target.files && e.target.files[0]) {
+                                                            setSelectedFile(e.target.files[0]);
+                                                        }
+                                                    }}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        inset: 0,
+                                                        opacity: 0,
+                                                        cursor: 'pointer',
+                                                        zIndex: 2
+                                                    }}
+                                                />
+                                                
+                                                {selectedFile ? (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', zIndex: 3, pointerEvents: 'auto' }}>
+                                                        <div style={{ color: 'var(--color-primary)' }}>
+                                                            {cmStudioTab === 'videos' ? <Icons.Video s={36} /> : <Icons.Doc s={36} />}
+                                                        </div>
+                                                        <div style={{ fontSize: '13px', fontWeight: '900', color: 'var(--color-primary)', wordBreak: 'break-all', maxWidth: '300px' }}>
+                                                            {selectedFile.name}
+                                                        </div>
+                                                        <div style={{ fontSize: '11px', color: 'var(--color-primary)', opacity: 0.6 }}>
+                                                            {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
+                                                        </div>
+                                                        <button 
+                                                            type="button" 
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                setSelectedFile(null);
+                                                                const input = document.getElementById(cmStudioTab === 'videos' ? 'vid-file-input' : 'doc-file-input') as HTMLInputElement;
+                                                                if (input) input.value = '';
+                                                            }}
+                                                            className="lms-btn danger" 
+                                                            style={{ 
+                                                                height: '28px', 
+                                                                fontSize: '11px', 
+                                                                padding: '0 12px',
+                                                                borderRadius: '8px',
+                                                                marginTop: '4px',
+                                                                zIndex: 4
+                                                            }}
+                                                        >
+                                                            Remove File
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ pointerEvents: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                                                        <div className="lms-cms-upload-zone-icon" style={{ color: 'var(--color-primary)', opacity: 0.4 }}>
+                                                            {cmStudioTab === 'videos' ? <Icons.Video s={28} /> : <Icons.Doc s={28} />}
+                                                        </div>
+                                                        <div style={{ fontSize: '13px', fontWeight: '900', color: 'var(--color-primary)' }}>
+                                                            Drag & Drop or Click to Upload
+                                                        </div>
+                                                        <div style={{ fontSize: '11px', color: 'var(--color-primary)', opacity: 0.6 }}>
+                                                            {cmStudioTab === 'videos' ? 'Supports video formats (MP4, MKV, AVI, etc.)' : 'Supports documents (PDF, DOCX, XLSX, etc.)'}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                         <button type="submit" className="lms-btn-commit lms-cms-upload-btn">

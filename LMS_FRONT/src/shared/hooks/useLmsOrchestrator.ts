@@ -15,7 +15,7 @@ import { setCredentials } from '../../features/auth/store/authSlice';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const hexToRgb = (hex: string) => {
-    if (!hex) return "118, 49, 33";
+    if (!hex) return "13, 148, 136";
     let r = 0, g = 0, b = 0;
     if (hex.length === 4) {
         r = parseInt(hex[1] + hex[1], 16);
@@ -379,6 +379,11 @@ export const useLmsOrchestrator = () => {
                 const page = ctx.page;
                 const size = ctx.size;
 
+                // Client-side pagination logic for non-superadmin users because of client-side filtration
+                const isClientPaginated = !isSuperAdmin;
+                const fetchPage = isClientPaginated ? 1 : page;
+                const fetchSize = isClientPaginated ? 1000 : size;
+
                 if (['users', 'cat', 'group', 'curr', 'cm', 'sec', 'reports'].includes(tab)) {
                     if (isSuperAdmin) {
                         organizationApi.list('', 1, 1000).then(meta => {
@@ -397,17 +402,17 @@ export const useLmsOrchestrator = () => {
                 }
 
                 let res;
-                if (tab === 'orgs') res = await organizationApi.list(searchTerm, page, size);
+                if (tab === 'orgs') res = await organizationApi.list(searchTerm, fetchPage, fetchSize);
                 else if (tab === 'enroll') {
-                    res = await subscriptionApi.getList(searchTerm, page, size, tid);
+                    res = await subscriptionApi.getList(searchTerm, fetchPage, fetchSize, tid);
                     console.log('ENROLL_FETCH_RESULT:', res.data);
                 }
                 else if (tab === 'reports') {
-                    res = await reportApi.list(searchTerm, page, size, filters.tenantId || tid, filters.groupId, filters.dateFrom);
+                    res = await reportApi.list(searchTerm, fetchPage, fetchSize, filters.tenantId || tid, filters.groupId, filters.dateFrom);
                 }
                 else if (tab === 'users') {
                     const [uRes, rRes, gRes] = await Promise.all([
-                        userApi.list({ SearchTerm: searchTerm, PageNumber: page, PageSize: size, TenantId: tid }),
+                        userApi.list({ SearchTerm: searchTerm, PageNumber: fetchPage, PageSize: fetchSize, TenantId: tid }),
                         securityApi.getRoles('', 1, 1000, undefined, tid),
                         groupApi.list('', 1, 1000, tid)
                     ]);
@@ -422,13 +427,13 @@ export const useLmsOrchestrator = () => {
                     const st = ui.secTab || 'sec';
                     const activeParam = ui.statusFilter === 'all' ? undefined : ui.statusFilter === 'active';
 
-                    if (st === 'sec') res = await securityApi.getRoles(searchTerm, page, size, activeParam, tid);
-                    else if (st === 'mod') res = await securityApi.getModules(searchTerm, page, size, activeParam);
-                    else if (st === 'perm') res = await securityApi.getPermissions(searchTerm, page, size, activeParam);
-                    else if (st === 'user_roles') res = await securityApi.getUserRolesList(searchTerm, page, size, tid, activeParam);
-                    else if (st === 'mod_perms') res = await securityApi.getModulePermissionsList(searchTerm, page, size, undefined, undefined, tid);
-                    else if (st === 'role_modules') res = await securityApi.getRoleModulesList(searchTerm, page, size, undefined, tid);
-                    else if (st === 'role_mod_perms') res = await securityApi.getRoleModulePermissionsList(searchTerm, page, size, tid);
+                    if (st === 'sec') res = await securityApi.getRoles(searchTerm, fetchPage, fetchSize, activeParam, tid);
+                    else if (st === 'mod') res = await securityApi.getModules(searchTerm, fetchPage, fetchSize, activeParam);
+                    else if (st === 'perm') res = await securityApi.getPermissions(searchTerm, fetchPage, fetchSize, activeParam);
+                    else if (st === 'user_roles') res = await securityApi.getUserRolesList(searchTerm, fetchPage, fetchSize, tid, activeParam);
+                    else if (st === 'mod_perms') res = await securityApi.getModulePermissionsList(searchTerm, fetchPage, fetchSize, undefined, undefined, tid);
+                    else if (st === 'role_modules') res = await securityApi.getRoleModulesList(searchTerm, fetchPage, fetchSize, undefined, tid);
+                    else if (st === 'role_mod_perms') res = await securityApi.getRoleModulePermissionsList(searchTerm, fetchPage, fetchSize, tid);
 
                     const [uMeta, rMeta, mMeta, pMeta] = await Promise.all([
                         userApi.list({ PageNumber: 1, PageSize: 1000, TenantId: tid }),
@@ -444,11 +449,11 @@ export const useLmsOrchestrator = () => {
                         perms: extract(pMeta) // Permissions are global
                     }));
                 }
-                else if (tab === 'cat') res = await categoryApi.list(searchTerm, page, size, tid);
-                else if (tab === 'group') res = await groupApi.list(searchTerm, page, size, tid);
+                else if (tab === 'cat') res = await categoryApi.list(searchTerm, fetchPage, fetchSize, tid);
+                else if (tab === 'group') res = await groupApi.list(searchTerm, fetchPage, fetchSize, tid);
                 else if (tab === 'curr' || tab === 'cm' || tab === 'media') {
                     const [cRes, catMeta] = await Promise.all([
-                        courseApi.list(searchTerm, page, size, tid),
+                        courseApi.list(searchTerm, fetchPage, fetchSize, tid),
                         (isSuperAdmin || hasPermission('CATEGORY', 'CATEGORY_VIEW'))
                             ? categoryApi.list('', 1, 1000, tid).catch(e => { console.warn('Failed to fetch categories list for courses', e); return { data: { data: [] } }; })
                             : Promise.resolve({ data: { data: [] } })
@@ -459,7 +464,7 @@ export const useLmsOrchestrator = () => {
 
                 else if (tab === 'student-discover' || tab === 'student-dash') {
                     if (user?.groupId) {
-                        const gcRes = await groupApi.getGroupCourses(user.groupId, page, size);
+                        const gcRes = await groupApi.getGroupCourses(user.groupId, fetchPage, fetchSize);
                         const raw = extract(gcRes);
                         const items = raw.filter(Boolean).map((it: any) => {
                             if (it.course || it.Course) return { ...(it.course || it.Course), ...it };
@@ -487,12 +492,21 @@ export const useLmsOrchestrator = () => {
                 if (res) {
                     const resData = res.data as any;
                     const items = applyIsolation(extract(res));
-                    // Smart totalCount extraction: check top-level AND nested data (for PagedApiResponse)
-                    const totalCount = resData?.totalCount || resData?.TotalCount ||
-                        resData?.data?.totalCount || resData?.data?.TotalCount ||
-                        resData?.totalRecords || resData?.TotalRecords ||
-                        resData?.data?.totalRecords || resData?.data?.TotalRecords ||
-                        items.length;
+                    
+                    const totalCount = isClientPaginated 
+                        ? items.length 
+                        : (resData?.totalCount || resData?.TotalCount ||
+                           resData?.data?.totalCount || resData?.data?.TotalCount ||
+                           resData?.totalRecords || resData?.TotalRecords ||
+                           resData?.data?.totalRecords || resData?.data?.TotalRecords ||
+                           items.length);
+
+                    const maxPage = Math.ceil(totalCount / size) || 1;
+                    const actualPage = page > maxPage ? maxPage : page;
+
+                    const displayItems = isClientPaginated
+                        ? items.slice((actualPage - 1) * size, (actualPage - 1) * size + size)
+                        : items;
 
                     if (tab === 'sec') {
                         const st = ui.secTab || 'sec';
@@ -502,7 +516,7 @@ export const useLmsOrchestrator = () => {
                             'role_modules': 'roleModules', 'role_mod_perms': 'roleModPerms'
                         };
                         const key = keyMap[st] || 'sec';
-                        setDb((prev: any) => ({ ...prev, [key]: items, sec: items }));
+                        setDb((prev: any) => ({ ...prev, [key]: displayItems, sec: displayItems }));
                     } else {
                         const dbKeyMap: any = {
                             'curr': 'courses', 'cat': 'cats', 'group': 'groups',
@@ -511,13 +525,17 @@ export const useLmsOrchestrator = () => {
                             'student-peers': 'users', 'enroll': 'enrollments', 'reports': 'reports'
                         };
                         const dbKey = dbKeyMap[tab] || tab;
-                        setDb((prev: any) => ({ ...prev, [dbKey]: items, [tab]: items }));
+                        setDb((prev: any) => ({ ...prev, [dbKey]: displayItems, [tab]: displayItems }));
                     }
 
-                    if (pagination[pageKey]?.total !== totalCount) {
+                    if (pagination[pageKey]?.page !== actualPage || pagination[pageKey]?.total !== totalCount) {
                         setPagination((prev: any) => ({
                             ...prev,
-                            [pageKey]: { ...(prev[pageKey] || { page: 1, size: 10 }), total: totalCount }
+                            [pageKey]: { 
+                                ...(prev[pageKey] || { page: 1, size: 10 }), 
+                                page: actualPage, 
+                                total: totalCount 
+                            }
                         }));
                     }
                 }
@@ -988,16 +1006,16 @@ export const useLmsOrchestrator = () => {
 
     useEffect(() => {
         const root = document.documentElement;
-        if (activeOrg && theme !== 'dark') {
-            let p = activeOrg.primaryColor || activeOrg.PrimaryColor || '#2f65f6';
-            let s = activeOrg.secondaryColor || activeOrg.SecondaryColor || '#1e40af';
+        if (activeOrg) {
+            let p = activeOrg.primaryColor || activeOrg.PrimaryColor || (theme === 'dark' ? '#00dfb4' : '#0d9488');
+            let s = activeOrg.secondaryColor || activeOrg.SecondaryColor || (theme === 'dark' ? '#6366f1' : '#4f46e5');
 
-            // Clean up database-side brown fallbacks dynamically to guarantee the premium blue theme
-            if (p === '#763121' || p.toLowerCase() === '#763121') {
-                p = '#2f65f6';
+            // Clean up database-side brown fallbacks dynamically to guarantee the premium theme
+            if (p === '#763121' || p.toLowerCase() === '#763121' || p === '#2f65f6' || p.toLowerCase() === '#2f65f6' || p === '#0d9488' || p.toLowerCase() === '#0d9488' || p === '#14b8a6' || p.toLowerCase() === '#14b8a6') {
+                p = theme === 'dark' ? '#00dfb4' : '#0d9488';
             }
-            if (s === '#4a2118' || s.toLowerCase() === '#4a2118') {
-                s = '#1e40af';
+            if (s === '#4a2118' || s.toLowerCase() === '#4a2118' || s === '#1e40af' || s.toLowerCase() === '#1e40af' || s === '#4f46e5' || s.toLowerCase() === '#4f46e5' || s === '#6366f1' || s.toLowerCase() === '#6366f1') {
+                s = theme === 'dark' ? '#6366f1' : '#4f46e5';
             }
 
             const rgb = hexToRgb(p);
@@ -1007,12 +1025,18 @@ export const useLmsOrchestrator = () => {
             root.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${p} 0%, ${s} 100%)`);
             root.style.setProperty('--color-primary-soft', `rgba(${rgb}, 0.1)`);
 
-            // Apply Dynamic Background only for Tenants
-            root.style.setProperty('--color-bg', `rgba(${rgb}, 0.02)`);
-            root.style.setProperty('--color-bg-gradient', `linear-gradient(180deg, #ffffff 0%, rgba(${rgb}, 0.04) 100%)`);
-            root.style.setProperty('--mesh-bg', `radial-gradient(at 0% 0%, rgba(${rgb}, 0.03) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(${rgb}, 0.02) 0px, transparent 50%)`);
+            // Apply Dynamic Background only for Tenants in light theme
+            if (theme !== 'dark') {
+                root.style.setProperty('--color-bg', `rgba(${rgb}, 0.02)`);
+                root.style.setProperty('--color-bg-gradient', `linear-gradient(180deg, #ffffff 0%, rgba(${rgb}, 0.04) 100%)`);
+                root.style.setProperty('--mesh-bg', `radial-gradient(at 0% 0%, rgba(${rgb}, 0.03) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(${rgb}, 0.02) 0px, transparent 50%)`);
+            } else {
+                root.style.removeProperty('--color-bg');
+                root.style.removeProperty('--color-bg-gradient');
+                root.style.removeProperty('--mesh-bg');
+            }
         } else {
-            // Reset to defaults if no org (super admin) or if in DARK MODE (keep common aesthetic)
+            // Reset to defaults if no org (super admin)
             root.style.removeProperty('--color-primary');
             root.style.removeProperty('--color-primary-rgb');
             root.style.removeProperty('--accent-gradient');

@@ -240,7 +240,63 @@ const StudentCoursePlayer: React.FC<StudentCoursePlayerProps> = ({ course, media
         }
     };
 
-    // (getAuthUrl moved to top)
+    // KEYBOARD CONTROLS (YOUTUBE UX SHORTS)
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            const activeEl = document.activeElement;
+            if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) {
+                return;
+            }
+
+            const video = videoRef.current;
+            if (!video || activeTab !== 'videos') return;
+
+            switch (e.key.toLowerCase()) {
+                case ' ':
+                case 'k':
+                    e.preventDefault();
+                    if (video.paused) {
+                        video.play().catch(() => {});
+                    } else {
+                        video.pause();
+                    }
+                    break;
+                case 'm':
+                    e.preventDefault();
+                    video.muted = !video.muted;
+                    break;
+                case 'f':
+                    e.preventDefault();
+                    if (!document.fullscreenElement) {
+                        video.requestFullscreen?.().catch(() => {});
+                    } else {
+                        document.exitFullscreen?.().catch(() => {});
+                    }
+                    break;
+                case 'arrowleft':
+                    e.preventDefault();
+                    video.currentTime = Math.max(0, video.currentTime - 5);
+                    break;
+                case 'arrowright':
+                    e.preventDefault();
+                    video.currentTime = Math.min(video.duration, video.currentTime + 5);
+                    break;
+                case 'arrowup':
+                    e.preventDefault();
+                    video.volume = Math.min(1, video.volume + 0.1);
+                    break;
+                case 'arrowdown':
+                    e.preventDefault();
+                    video.volume = Math.max(0, video.volume - 0.1);
+                    break;
+                default:
+                    break;
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [activeTab]);
 
     return (
         <div className="student-player-overlay lms-fade-in">
@@ -267,48 +323,96 @@ const StudentCoursePlayer: React.FC<StudentCoursePlayerProps> = ({ course, media
                 {/* CINEMATIC WORKSPACE */}
                 <div className="player-main-workspace">
 
-                    {/* THEATRE AREA */}
-                    <div className="player-theatre">
-
-                        {/* SECURITY BLUR */}
-                        <div id="secure-blur-overlay-student" className="player-security-blur">
-                            <div className="blur-icon"><span>🔐</span></div>
-                            <h2 className="blur-title">SECURE ENVIRONMENT</h2>
-                            <p className="blur-text">Content protection is active. Please refocus the window to continue your learning session.</p>
-                        </div>
-
-                        {/* WATERMARK */}
-                        <div className="lms-secure-media-watermark">
-                            <div className="lms-watermark-segment">{user?.email}</div>
-                            <div className="lms-watermark-segment">{new Date().toLocaleDateString()}</div>
-                            <div className="lms-watermark-segment">SOULCODE PROPERTY</div>
-                        </div>
-
-                        {activeTab === 'docs' ? (
-                            selectedDoc ? (
-                                <iframe src={getAuthUrl(true)} className="player-media-content" title="Document Viewer" />
-                            ) : <div className="empty-state">Select a resource file</div>
-                        ) : videoLoading ? (
-                            <div className="empty-state">
-                                <div className="lms-loader-spinner"></div>
-                                <div style={{ marginTop: 12 }}>DECRYPTING SECURE STREAM...</div>
+                    {/* Left Column: Player & Metadata (YouTube Layout) */}
+                    <div className="player-content-col">
+                        
+                        {/* Video / Document Theatre Wrapper */}
+                        <div className="player-theatre-wrapper">
+                            {/* SECURITY BLUR */}
+                            <div id="secure-blur-overlay-student" className="player-security-blur">
+                                <div className="blur-icon"><span>🔐</span></div>
+                                <h2 className="blur-title">SECURE ENVIRONMENT</h2>
+                                <p className="blur-text">Content protection is active. Please refocus the window to continue your learning session.</p>
                             </div>
-                        ) : selectedVideo && videoUrl ? (
-                            <video
-                                ref={videoRef}
-                                src={videoUrl}
-                                controls autoPlay
-                                className="player-media-content"
-                                onEnded={() => { console.log('[LMS_PLAYER] Video Ended'); saveProgress(true); }}
-                                onPause={() => { console.log('[LMS_PLAYER] Video Paused'); saveProgress(); }}
-                                onTimeUpdate={handleTimeUpdate}
-                                onLoadedMetadata={handleLoadedMetadata}
-                                onStalled={() => console.warn('[LMS_PLAYER] Video Stalled - Network or Buffer issue')}
-                                onError={(e) => console.error('[LMS_PLAYER] Video Error:', e)}
-                                onWaiting={() => console.log('[LMS_PLAYER] Video Waiting/Buffering...')}
-                                onLoadedData={() => console.log('[LMS_PLAYER] Video Data Loaded')}
-                            />
-                        ) : <div className="empty-state">Select a module to begin</div>}
+
+                            {/* WATERMARK */}
+                            <div className="lms-secure-media-watermark">
+                                <div className="lms-watermark-segment">{user?.email}</div>
+                                <div className="lms-watermark-segment">{new Date().toLocaleDateString()}</div>
+                                <div className="lms-secure-media-watermark-org" style={{ position: 'absolute', bottom: '16px', right: '16px', fontSize: '10px', color: 'rgba(255, 255, 255, 0.15)', fontWeight: 'bold', zIndex: 10 }}>SOULCODE PROPERTY</div>
+                            </div>
+
+                            {activeTab === 'docs' ? (
+                                selectedDoc ? (
+                                    <iframe src={getAuthUrl(true)} className="player-media-content" title="Document Viewer" />
+                                ) : <div className="empty-state">Select a resource file</div>
+                            ) : videoLoading ? (
+                                <div className="empty-state">
+                                    <div className="lms-loader-spinner"></div>
+                                    <div style={{ marginTop: 12 }}>DECRYPTING SECURE STREAM...</div>
+                                </div>
+                            ) : selectedVideo && videoUrl ? (
+                                <video
+                                    ref={videoRef}
+                                    src={videoUrl}
+                                    controls autoPlay
+                                    className="player-media-content"
+                                    onEnded={() => { console.log('[LMS_PLAYER] Video Ended'); saveProgress(true); }}
+                                    onPause={() => { console.log('[LMS_PLAYER] Video Paused'); saveProgress(); }}
+                                    onTimeUpdate={handleTimeUpdate}
+                                    onLoadedMetadata={handleLoadedMetadata}
+                                    onStalled={() => console.warn('[LMS_PLAYER] Video Stalled - Network or Buffer issue')}
+                                    onError={(e) => console.error('[LMS_PLAYER] Video Error:', e)}
+                                    onWaiting={() => console.log('[LMS_PLAYER] Video Waiting/Buffering...')}
+                                    onLoadedData={() => console.log('[LMS_PLAYER] Video Data Loaded')}
+                                />
+                            ) : <div className="empty-state">Select a module to begin</div>}
+                        </div>
+
+                        {/* YouTube Details Row */}
+                        {activeTab === 'videos' && selectedVideo && (
+                            <div className="player-video-details">
+                                <h1 className="player-video-title">{selectedVideo.title || selectedVideo.Title}</h1>
+                                
+                                <div className="player-creator-row">
+                                    <div className="player-progress-info">
+                                        <span className="progress-label">Your Progress:</span>
+                                        <div className="progress-bar-container">
+                                            <div 
+                                                className="progress-bar-fill" 
+                                                style={{ width: `${videoProgress?.watchedPercentage || 0}%` }}
+                                            />
+                                        </div>
+                                        <span className="progress-text">{videoProgress?.watchedPercentage || 0}%</span>
+                                        {isAlreadyCompleted && <span className="completion-badge">Completed</span>}
+                                    </div>
+                                </div>
+                                
+                                <div className="player-description-box">
+                                    <div className="description-meta">
+                                        <span>Instructor: {course.instructor || 'Instructor'}</span>
+                                        <span>•</span>
+                                        <span>{videoProgress?.isCompleted ? 'Finished watching' : 'In Progress'}</span>
+                                        <span>•</span>
+                                        <span>{course.difficulty || 'All Levels'}</span>
+                                    </div>
+                                    <p className="description-text">
+                                        {selectedVideo.description || 'No description provided for this lesson.'}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'docs' && selectedDoc && (
+                            <div className="player-doc-details">
+                                <h1 className="player-video-title">{selectedDoc.title || selectedDoc.docName}</h1>
+                                <div className="player-description-box">
+                                    <p className="description-text">
+                                        {selectedDoc.description || 'Study material and curriculum resources for this module.'}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* SIDEBAR */}
