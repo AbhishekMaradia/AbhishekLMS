@@ -21,7 +21,7 @@
 .lms-cl-grid-footer {
     margin-top: auto !important;
     background: transparent !important;
-    border-top: 1px solid rgba(166, 124, 82, 0.1) !important;
+    border-top: 1px solid var(--color-border) !important;
     padding: 16px 0 0 0 !important;
 }
 
@@ -76,7 +76,7 @@
 .lms-courselist-grid-footer {
     margin-top: auto !important;
     background: transparent !important;
-    border-top: 1px solid rgba(166, 124, 82, 0.1) !important;
+    border-top: 1px solid var(--color-border) !important;
     padding: 16px 0 0 0 !important;
 }
 
@@ -182,7 +182,7 @@
 }
 
 .lms-c-modal-form-label {
-    color: #763121 !important;
+    color: var(--color-primary) !important;
     font-size: 10px !important;
 }
 
@@ -411,7 +411,7 @@
 }
 
 .lms-c-modal-select-org {
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23763121' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right center !important;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right center !important;
     appearance: none !important;
     padding-right: 24px !important;
     cursor: pointer !important;
@@ -434,13 +434,13 @@
 .lms-c-modal-status-label {
     font-size: 14px;
     font-weight: 800;
-    color: #763121;
+    color: var(--color-primary);
 }
 
 .lms-c-modal-status-checkbox {
     width: 22px;
     height: 22px;
-    accent-color: #763121;
+    accent-color: var(--color-primary);
     cursor: pointer;
 }
 

@@ -7,7 +7,8 @@ export const Dashboard = ({
     counts,
     setTab,
     isSuperAdmin,
-    hasPermission
+    hasPermission,
+    tab
 }: any) => {
     const stats = [
         { label: 'Organizations', value: counts.orgs, color: 'var(--color-primary)', gradient: 'var(--accent-gradient)', Icon: StatIcons.Orgs, module: 'ORGANIZATION', tabId: 'orgs' },
@@ -41,24 +42,25 @@ export const Dashboard = ({
     return (
         <div className="lms-fade-in lms-dashboard-wrapper">
             <div className="lms-stat-grid">
-                {stats.map(({ label, value, color, gradient, Icon, tabId }) => (
-                    <div
-                        key={label}
-                        className={`lms-stat-card lms-stat-theme-${tabId}`}
-                        onClick={() => setTab(tabId)}
-                    >
-                        <div className="lms-stat-header">
-                            <div className="lms-stat-icon-box">
-                                <Icon s={24} />
+                {stats.map(({ label, value, Icon, tabId }) => {
+                    const isActive = tab === tabId;
+                    return (
+                        <div
+                            key={label}
+                            className={`lms-stat-card lms-stat-theme-${tabId} ${isActive ? 'active' : ''}`}
+                            onClick={() => setTab(tabId)}
+                        >
+                            <div className="lms-stat-header">
+                                <div className="lms-stat-icon-box">
+                                    <Icon s={24} />
+                                </div>
+                                <div className="lms-stat-value">{value}</div>
                             </div>
-                            <div className="lms-stat-value">{value}</div>
+
+                            <div className="lms-stat-label">{label}</div>
                         </div>
-
-                        <div className="lms-stat-label">{label}</div>
-
-
-                    </div>
-                ))}
+                    );
+                })}
 
             </div>
         </div>

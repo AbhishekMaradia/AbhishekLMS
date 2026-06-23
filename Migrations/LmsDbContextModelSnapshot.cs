@@ -630,6 +630,9 @@ namespace LMS_SoulCode.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("LinkExpiredAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("LogoThumbUrl")
                         .HasColumnType("nvarchar(max)");
 

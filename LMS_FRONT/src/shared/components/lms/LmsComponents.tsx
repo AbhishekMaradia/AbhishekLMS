@@ -538,9 +538,33 @@ const resolveOrganizationCodeFromLocation = () => {
 
 export const AuthGate = ({ onComplete, decryptor }: any) => {
     const navigate = useNavigate();
-    const [organizationCode] = useState(resolveOrganizationCodeFromLocation);
+    const [organizationCode] = useState(() => {
+        const pathCode = resolveOrganizationCodeFromLocation();
+        if (pathCode) return pathCode;
+        const searchParams = new URLSearchParams(window.location.search);
+        return searchParams.get('orgCode')?.toUpperCase() || '';
+    });
+    const [tenantId] = useState(() => {
+        const searchParams = new URLSearchParams(window.location.search);
+        const tId = searchParams.get('tenantId');
+        return tId ? Number(tId) : null;
+    });
+    const [registrationToken] = useState(() => {
+        const searchParams = new URLSearchParams(window.location.search);
+        const qToken = searchParams.get('token');
+        if (qToken) return qToken;
+        const pathCode = resolveOrganizationCodeFromLocation();
+        if (pathCode && (pathCode.length > 10 || pathCode.includes('-'))) {
+            return pathCode;
+        }
+        return '';
+    });
     const [mode, setMode] = useState<'login' | 'register' | 'org_register'>(() => {
         if (window.location.pathname === '/organization/register') return 'org_register';
+        // Auto-switch to register mode if we have tenant context and route is /register or /register/:code
+        if ((resolveOrganizationCodeFromLocation() || new URLSearchParams(window.location.search).get('orgCode') || new URLSearchParams(window.location.search).get('tenantId') || new URLSearchParams(window.location.search).get('token')) && window.location.pathname.startsWith('/register')) {
+            return 'register';
+        }
         return 'login';
     });
 
@@ -579,20 +603,31 @@ export const AuthGate = ({ onComplete, decryptor }: any) => {
     const handleRegister = async (e: any) => {
         e.preventDefault();
         setLoading(true);
-        if (!organizationCode) {
+        if (!organizationCode && !tenantId && !registrationToken) {
             toast.error('Organization context not found. Please use your organization registration link.');
             setLoading(false);
             return;
         }
 
-        const data = {
+        const data: any = {
             firstName: e.target.firstName.value,
             lastName: e.target.lastName.value,
             mobile: e.target.mobile.value,
             email: e.target.email.value,
-            password: e.target.password.value,
-            organizationCode
+            password: e.target.password.value
         };
+
+        if (organizationCode) {
+            data.organizationCode = organizationCode;
+        }
+        if (tenantId) {
+            data.tenantId = tenantId;
+        }
+        if (registrationToken) {
+            data.registrationToken = registrationToken;
+            data.organizationCode = registrationToken; // Send as both properties for backend validation compatibility
+        }
+
         try {
             const res = await authApi.register(data);
             if (res.data.success) {
@@ -637,7 +672,7 @@ export const AuthGate = ({ onComplete, decryptor }: any) => {
                             </button>
 
                             <div className="lms-auth-simple-footer">
-                                {organizationCode && (
+                                {(organizationCode || tenantId) && (
                                     <button type="button" onClick={() => setMode('register')} className="lms-auth-simple-footer-btn">Create New account</button>
                                 )}
                                 <div style={{ marginTop: '8px' }}>

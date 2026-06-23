@@ -79,8 +79,10 @@ export const StatIcons: Record<string, React.FC<any>> = {
 
 export const BarChart = (p: any) => <BaseSvg {...p}><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></BaseSvg>;
 export const Maximize = (p: any) => <BaseSvg {...p}><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" /></BaseSvg>;
+export const Copy = (p: any) => <BaseSvg {...p}><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" /></BaseSvg>;
+export const Link = (p: any) => <BaseSvg {...p}><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" /></BaseSvg>;
 
 // Summary object for convenience
 export const Icons = {
-    Logo, Menu, Close, Dash, Org, User, Book, Lock, Cat, Grid, Table, Trash, Logout, Users, Groups, Plus, Video, Doc, Pdf, Word, Excel, Sun, Moon, Play, Shield, Check, Eye, EyeOff, Edit, Mail, Next, Prev, Clock, Phone, Loader, Search, ChevronDown, ChevronLeft, ChevronRight, Settings, Globe, UserPlus, Alert, Maximize, BarChart, X, Message
+    Logo, Menu, Close, Dash, Org, User, Book, Lock, Cat, Grid, Table, Trash, Logout, Users, Groups, Plus, Video, Doc, Pdf, Word, Excel, Sun, Moon, Play, Shield, Check, Eye, EyeOff, Edit, Mail, Next, Prev, Clock, Phone, Loader, Search, ChevronDown, ChevronLeft, ChevronRight, Settings, Globe, UserPlus, Alert, Maximize, BarChart, X, Message, Copy, Link
 };

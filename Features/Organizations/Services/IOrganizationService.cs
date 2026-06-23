@@ -18,5 +18,6 @@ namespace LMS_SoulCode.Features.Organizations.Services
         Task<ApiResponse<List<OrganizationDto>>> UpdateOrganizationProfileAsync(int id, UpdateOrganizationRequest request, int? tenantId, int? userId, CancellationToken cancellationToken = default);
         
         Task<ApiResponse<UserDto>> GetOrganizationAdminAsync(int tenantId, CancellationToken cancellationToken = default);
+        Task<ApiResponse<GenerateLinkResponse>> GenerateRegistrationLinkAsync(GenerateLinkRequest request, int? currentTenantId, bool isSuperAdmin, CancellationToken cancellationToken = default);
     }
 }
