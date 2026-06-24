@@ -15,7 +15,7 @@ import { setCredentials } from '../../features/auth/store/authSlice';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const hexToRgb = (hex: string) => {
-    if (!hex) return "13, 148, 136";
+    if (!hex) return "15, 118, 110";
     let r = 0, g = 0, b = 0;
     if (hex.length === 4) {
         r = parseInt(hex[1] + hex[1], 16);
@@ -1007,12 +1007,12 @@ export const useLmsOrchestrator = () => {
     useEffect(() => {
         const root = document.documentElement;
         if (activeOrg) {
-            let p = activeOrg.primaryColor || activeOrg.PrimaryColor || (theme === 'dark' ? '#00dfb4' : '#0d9488');
+            let p = activeOrg.primaryColor || activeOrg.PrimaryColor || (theme === 'dark' ? '#00dfb4' : '#0f766e');
             let s = activeOrg.secondaryColor || activeOrg.SecondaryColor || (theme === 'dark' ? '#6366f1' : '#4f46e5');
 
             // Clean up database-side brown fallbacks dynamically to guarantee the premium theme
-            if (p === '#763121' || p.toLowerCase() === '#763121' || p === '#2f65f6' || p.toLowerCase() === '#2f65f6' || p === '#0d9488' || p.toLowerCase() === '#0d9488' || p === '#14b8a6' || p.toLowerCase() === '#14b8a6') {
-                p = theme === 'dark' ? '#00dfb4' : '#0d9488';
+            if (p === '#763121' || p.toLowerCase() === '#763121' || p === '#2f65f6' || p.toLowerCase() === '#2f65f6' || p === '#0f766e' || p.toLowerCase() === '#0f766e' || p === '#14b8a6' || p.toLowerCase() === '#14b8a6') {
+                p = theme === 'dark' ? '#00dfb4' : '#0f766e';
             }
             if (s === '#4a2118' || s.toLowerCase() === '#4a2118' || s === '#1e40af' || s.toLowerCase() === '#1e40af' || s === '#4f46e5' || s.toLowerCase() === '#4f46e5' || s === '#6366f1' || s.toLowerCase() === '#6366f1') {
                 s = theme === 'dark' ? '#6366f1' : '#4f46e5';

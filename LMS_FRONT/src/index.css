@@ -39,9 +39,9 @@
     --color-sidebar: #ffffff;
     --color-sidebar-bg: #ffffff;
     --color-sidebar-border: #e2e8f0;
-    --color-nav-hover: rgba(13, 148, 136, 0.08);
-    --color-primary: #0d9488;
-    --color-primary-rgb: 13, 148, 136;
+    --color-nav-hover: rgba(15, 118, 110, 0.08);
+    --color-primary: #0f766e;
+    --color-primary-rgb: 15, 118, 110;
     --color-success: #10b981;
     --color-success-bg: rgba(16, 185, 129, 0.1);
     --color-warning: #f59e0b;
@@ -50,8 +50,8 @@
     --color-info: #475569;
     --color-info-bg: #e2e8f0;
     --color-btn-text: #ffffff;
-    --accent-gradient: linear-gradient(135deg, #0d9488 0%, #4f46e5 100%);
-    --color-primary-soft: rgba(13, 148, 136, 0.1);
+    --accent-gradient: linear-gradient(135deg, #0f766e 0%, #4f46e5 100%);
+    --color-primary-soft: rgba(15, 118, 110, 0.1);
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
