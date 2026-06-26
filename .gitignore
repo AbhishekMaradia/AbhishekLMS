@@ -15,3 +15,4 @@ Logs/
 wwwroot/certificates/
 appsettings.json
 Migrations/
+/appsettings.json
