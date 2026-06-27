@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Icons } from '../lms/Icons';
 import { useTheme } from '../../../app/providers/ThemeProvider';
 import './Layout.css';
@@ -12,11 +12,43 @@ export const Header = ({
     activeOrg,
     setActiveOrg,
     activeCategory,
-    setActiveCategory
+    setActiveCategory,
+    fetchData,
+    lastSyncedAt
 }: any) => {
 
     const { toggleTheme } = useTheme();
     const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+    const [isOnline, setIsOnline] = useState(navigator.onLine);
+    const [isSyncing, setIsSyncing] = useState(false);
+
+    useEffect(() => {
+        const handleOnline = () => setIsOnline(true);
+        const handleOffline = () => setIsOnline(false);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
+
+    const handleSync = async () => {
+        if (isSyncing) return;
+        setIsSyncing(true);
+        if (fetchData) {
+            try {
+                await fetchData();
+            } catch (e) {}
+        }
+        setTimeout(() => setIsSyncing(false), 800);
+    };
+
+    const getSyncTimeStr = () => {
+        if (!lastSyncedAt) return 'Sync: Just now';
+        const d = new Date(lastSyncedAt);
+        return `Sync: ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+    };
 
     const getTabMeta = () => {
         if (tab === 'dash') return { title: 'Dashboard', Icon: Icons.Dash };
@@ -53,7 +85,7 @@ export const Header = ({
                         <Icon s={20} />
                     </div>
                     <div>
-                        <h1 className="lms-header-title-text">{title}</h1>
+                        <h1 className="lms-header-title-text">{tab === 'dash' ? 'System Dashboard' : title}</h1>
                         <div className="lms-flex-row" style={{ gap: '8px', alignItems: 'center' }}>
                             <div className="lms-header-unit-label lms-hide-mobile">
                                 {(activeCategory?.categoryName || activeOrg?.orgName || activeOrg?.OrgName || 'SYSTEM').toUpperCase()}
@@ -61,9 +93,85 @@ export const Header = ({
                         </div>
                     </div>
                 </div>
+
+                {tab === 'dash' && (
+                    <div className="lms-header-status-container lms-hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: '24px' }}>
+                        <div 
+                            className="lms-header-status-pill" 
+                            style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '6px', 
+                                background: isOnline ? 'var(--color-success-bg)' : 'var(--color-danger-bg)', 
+                                color: isOnline ? 'var(--color-success)' : 'var(--color-danger)', 
+                                padding: '6px 14px', 
+                                borderRadius: '100px', 
+                                fontSize: '11px', 
+                                fontWeight: 800,
+                                transition: 'all 0.3s ease'
+                            }}
+                        >
+                            <span 
+                                className="lms-status-dot-green" 
+                                style={{ 
+                                    width: '8px', 
+                                    height: '8px', 
+                                    borderRadius: '50%', 
+                                    background: isOnline ? '#10b981' : '#ef4444', 
+                                    display: 'inline-block', 
+                                    boxShadow: isOnline ? '0 0 8px #10b981' : '0 0 8px #ef4444'
+                                }}
+                            />
+                            {isOnline ? 'Connected' : 'Offline'}
+                        </div>
+                        <div 
+                            className="lms-header-status-pill" 
+                            style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '8px', 
+                                background: 'var(--color-border)', 
+                                color: 'var(--color-text)', 
+                                padding: '6px 14px', 
+                                borderRadius: '100px', 
+                                fontSize: '11px', 
+                                fontWeight: 600 
+                            }}
+                        >
+                            <span>{getSyncTimeStr()}</span>
+                            <button 
+                                onClick={handleSync}
+                                title="Sync Database Now"
+                                style={{
+                                    background: 'transparent',
+                                    border: 'none',
+                                    padding: 0,
+                                    margin: 0,
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    color: 'var(--color-primary)',
+                                    animation: isSyncing ? 'spin 0.8s linear infinite' : 'none'
+                                }}
+                            >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" style={{ pointerEvents: 'none' }}>
+                                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <div className="lms-flex-row lms-header-actions">
+                <button className="lms-icon-btn" title="Notifications" style={{ position: 'relative' }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" style={{ pointerEvents: 'none' }}>
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
+                    <span className="lms-notification-badge" style={{ position: 'absolute', top: '10px', right: '10px', width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444', border: '1.5px solid var(--color-bg-alt)' }} />
+                </button>
+
                 <button className="lms-icon-btn" onClick={toggleTheme} title="Toggle Appearance">
                     <Icons.Moon s={20} />
                 </button>

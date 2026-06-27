@@ -14,11 +14,13 @@ interface StudioLayoutProps {
     isSuperAdmin: boolean;
     setUi: (u: any | ((prev: any) => any)) => void;
     activeOrg?: any;
+    fetchData?: () => void;
+    lastSyncedAt?: Date | null;
 }
 
 
 export const StudioLayout: React.FC<StudioLayoutProps> = ({
-    children, user, ui, setUi, tab, setTab, hasPermission, isSuperAdmin, activeOrg
+    children, user, ui, setUi, tab, setTab, hasPermission, isSuperAdmin, activeOrg, fetchData, lastSyncedAt
 }) => {
 
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
@@ -68,6 +70,8 @@ export const StudioLayout: React.FC<StudioLayoutProps> = ({
                         sidebarOpen={sidebarOpen}
                         setSidebarOpen={setSidebarOpen}
                         activeOrg={activeOrg}
+                        fetchData={fetchData}
+                        lastSyncedAt={lastSyncedAt}
                     />
 
 

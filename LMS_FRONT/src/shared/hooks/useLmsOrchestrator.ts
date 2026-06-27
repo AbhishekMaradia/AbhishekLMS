@@ -183,6 +183,7 @@ export const useLmsOrchestrator = () => {
     });
 
     const [counts, setCounts] = useState({ orgs: 0, users: 0, cats: 0, groups: 0, courses: 0, roles: 0, enrollments: 0, reports: 0 });
+    const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(new Date());
 
     const [ui, setUi] = useState<any>({
         modal: null, target: null, loading: false, statusFilter: 'all', secTab: 'sec'
@@ -352,7 +353,7 @@ export const useLmsOrchestrator = () => {
                         (isSuperAdmin || hasPermission('GROUP', 'GROUP_VIEW')) ? groupApi.list('', 1, 100, tid) : Promise.resolve({ data: { data: [] } }),
                         (isSuperAdmin || hasPermission('COURSE', 'COURSE_VIEW')) ? courseApi.list('', 1, 100, tid) : Promise.resolve({ data: { data: [] } }),
                         (isSuperAdmin || hasPermission('ROLE', 'ROLE_VIEW')) ? securityApi.getRoles('', 1, 100, undefined, tid) : Promise.resolve({ data: { data: [] } }),
-                        (isSuperAdmin || hasPermission('SUBSCRIPTION', 'SUBSCRIPTION_VIEW')) ? subscriptionApi.getList('', 1, 1, tid) : Promise.resolve({ data: { totalCount: 0 } }),
+                        (isSuperAdmin || hasPermission('SUBSCRIPTION', 'SUBSCRIPTION_VIEW')) ? subscriptionApi.getList('', 1, 100, tid) : Promise.resolve({ data: { totalCount: 0 } }),
                         (isSuperAdmin || hasPermission('REPORT', 'REPORT_VIEW')) ? reportApi.list('', 1, 1, tid) : Promise.resolve({ data: { totalCount: 0 } })
                     ]);
 
@@ -361,6 +362,18 @@ export const useLmsOrchestrator = () => {
                     const g_iso = applyIsolation(extract(g));
                     const cs_iso = applyIsolation(extract(cs));
                     const r_iso = applyIsolation(extract(r));
+                    const enr_list = extract(enr);
+
+                    setDb((prev: any) => ({
+                        ...prev,
+                        users: u_iso,
+                        cats: c_iso,
+                        cat: c_iso,
+                        groups: g_iso,
+                        courses: cs_iso,
+                        roles: r_iso,
+                        enrollments: enr_list
+                    }));
 
                     setCounts({
                         orgs: isSuperAdmin ? ((o.data as any)?.totalCount || 0) : 0,
@@ -369,7 +382,7 @@ export const useLmsOrchestrator = () => {
                         groups: g_iso.length,
                         courses: cs_iso.length,
                         roles: r_iso.length,
-                        enrollments: (enr.data as any)?.totalCount || 0,
+                        enrollments: (enr.data as any)?.totalCount || enr_list.length || 0,
                         reports: (rep.data as any)?.totalCount || 0
                     });
                 }
@@ -540,6 +553,7 @@ export const useLmsOrchestrator = () => {
                     }
                 }
             }
+            setLastSyncedAt(new Date());
         } catch (err: any) {
             toast.error(`Sync Failure: ${err.message}`);
         } finally {
@@ -1172,7 +1186,7 @@ export const useLmsOrchestrator = () => {
         setDb, pm, setPm, pmSearch, setPmSearch, togglePermission, openModPM, savePermissions,
         activeOrg, filters, setFilters,
         isStudent, isUnauthorized, subscriptions, toggleSubscription,
-        revokeEnrollment
+        revokeEnrollment, lastSyncedAt
     };
 };
 
