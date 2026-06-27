@@ -56,8 +56,8 @@ export const StudentCourseGrid: React.FC<StudentCourseGridProps> = ({
                         >
                             <div className="lms-grid-banner">
                                 <div className="lms-grid-overlay" />
-                                {course.imageUrl || course.courseMainImageUrl ? (
-                                    <SecureImage src={course.imageUrl || course.courseMainImageUrl} className="lms-grid-banner-img" />
+                                {(course.imageUrl || course.courseMainImageUrl || course.thumbnailUrl || course.ImageUrl || course.CourseMainImageUrl || course.ThumbnailUrl) ? (
+                                    <SecureImage src={course.imageUrl || course.courseMainImageUrl || course.thumbnailUrl || course.ImageUrl || course.CourseMainImageUrl || course.ThumbnailUrl} className="lms-grid-banner-img" />
                                 ) : (
                                     <div className="lms-status-icon-bg"><Icons.Book s={28} /></div>
                                 )}
@@ -70,19 +70,19 @@ export const StudentCourseGrid: React.FC<StudentCourseGridProps> = ({
                             </div>
 
                             <div className="lms-grid-body">
-                                <div className="lms-grid-tag">{course.categoryName || 'General Curriculum'}</div>
-                                <h3 className="lms-grid-title">{course.title || course.courseName}</h3>
+                                <div className="lms-grid-tag">{course.categoryName || course.CategoryName || 'General Curriculum'}</div>
+                                <h3 className="lms-grid-title">{course.title || course.courseName || course.Title || course.CourseName}</h3>
 
                                 <div className="lms-grid-meta">
                                     <Icons.Video s={12} />
-                                    <span>{course.videoCount || 0} Lessons</span>
+                                    <span>{course.videoUrls?.length || course.lectures || course.Lectures || course.videoCount || course.VideoCount || 0} Lessons</span>
                                     <span className="lms-dot-sep" />
                                     <Icons.Doc s={12} />
-                                    <span>{course.docCount || 0} Docs</span>
+                                    <span>{course.docCount || course.DocCount || 0} Docs</span>
                                 </div>
 
                                 <div className="lms-grid-description">
-                                    {course.description || "Start your learning journey with this comprehensive course module."}
+                                    {course.description || course.Description || course.courseDescription || course.CourseDescription || "Start your learning journey with this comprehensive course module."}
                                 </div>
 
                                 <div className="lms-grid-footer">

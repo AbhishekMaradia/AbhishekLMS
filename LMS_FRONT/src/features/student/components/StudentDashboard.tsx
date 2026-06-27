@@ -261,13 +261,13 @@ export const StudentDashboard = ({ user, db, subscriptions, onShowPreview, loadi
                                     return (
                                         <div key={id} className="lms-luminous-card curated-card" onClick={() => onShowPreview?.(course)}>
                                             <div className="c-banner">
-                                                <SecureImage src={course.imageUrl || course.courseMainImageUrl} className="c-img" />
+                                                <SecureImage src={course.imageUrl || course.courseMainImageUrl || course.thumbnailUrl || course.ImageUrl || course.CourseMainImageUrl || course.ThumbnailUrl} className="c-img" />
                                                 <div className="c-overlay" />
                                                 <div className="c-badge">{pct === 100 ? 'COMPLETED' : pct === 0 ? 'not started' : 'IN PROGRESS'}</div>
                                             </div>
                                             <div className="c-content">
-                                                <span className="c-tag">{course.categoryName || 'CORE CATEGORY'}</span>
-                                                <h3 className="c-title">{course.title || course.courseName}</h3>
+                                                <span className="c-tag">{course.categoryName || course.CategoryName || 'CORE CATEGORY'}</span>
+                                                <h3 className="c-title">{course.title || course.courseName || course.Title || course.CourseName}</h3>
                                                 <div className="c-footer">
                                                     <div className="c-prog-wrap">
                                                         <div className="c-prog-bar"><div className="fill" style={{ width: `${pct}%` }} /></div>
@@ -286,13 +286,13 @@ export const StudentDashboard = ({ user, db, subscriptions, onShowPreview, loadi
                                     return (
                                         <div key={id} className="lms-luminous-card curated-card disabled-card" onClick={() => onShowPreview?.(course)}>
                                             <div className="c-banner">
-                                                <SecureImage src={course.imageUrl || course.courseMainImageUrl} className="c-img" />
+                                                <SecureImage src={course.imageUrl || course.courseMainImageUrl || course.thumbnailUrl || course.ImageUrl || course.CourseMainImageUrl || course.ThumbnailUrl} className="c-img" />
                                                 <div className="c-overlay" />
                                                 <div className="c-badge">not started</div>
                                             </div>
                                             <div className="c-content">
-                                                <span className="c-tag">{course.categoryName || 'CATALOG'}</span>
-                                                <h3 className="c-title">{course.title || course.courseName}</h3>
+                                                <span className="c-tag">{course.categoryName || course.CategoryName || 'CATALOG'}</span>
+                                                <h3 className="c-title">{course.title || course.courseName || course.Title || course.CourseName}</h3>
                                                 <div className="c-footer">
                                                     <span className="catalog-action-text" style={{ fontSize: '11px', fontWeight: 850, color: 'var(--color-primary)' }}>Enrol</span>
                                                     <div className="c-action secondary" style={{ background: 'var(--color-border)', color: 'var(--color-text)' }}><Icons.Next s={14} /></div>
@@ -341,7 +341,7 @@ export const StudentDashboard = ({ user, db, subscriptions, onShowPreview, loadi
                 .lms-elite-dashboard { padding: 20px 24px; max-width: 1450px; margin: 0 auto; font-family: var(--font-elite); }
                 
                 /* Elite Greeting & Command Header */
-                .lms-command-header { padding: 30px 48px; background: linear-gradient(135deg, #745147 0%, #3e2823 100%); border-radius: 28px; position: relative; overflow: hidden; box-shadow: var(--shadow-md); margin-bottom: 24px; color: #fff; }
+                .lms-command-header { padding: 30px 48px; background: linear-gradient(135deg, var(--color-primary) 0%, rgba(0, 0, 0, 0.75) 100%); border-radius: 28px; position: relative; overflow: hidden; box-shadow: var(--shadow-md); margin-bottom: 24px; color: #fff; }
                 .elite-greeting { font-size: 36px; font-weight: 900; letter-spacing: -1.5px; margin: 10px 0; color: #fff; }
                 .elite-greeting .highlight { opacity: 0.8; }
                 .elite-subtitle { font-size: 15px; color: rgba(255,255,255,0.7); max-width: 600px; line-height: 1.5; margin-bottom: 24px; }
